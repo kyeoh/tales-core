@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -54,7 +55,9 @@ public class Download {
 		try {
 
 
-			url = URIUtil.encodeQuery(url);
+			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
+				url = URIUtil.encodeQuery(url);
+			}
 
 
 			if(url.contains("https://")){
@@ -121,7 +124,9 @@ public class Download {
 		try {
 
 
-			url = URIUtil.encodeQuery(url);
+			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
+				url = URIUtil.encodeQuery(url);
+			}
 
 
 			if(url.contains("https://")){
