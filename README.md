@@ -7,7 +7,7 @@ Tales (http://en.wikipedia.org/wiki/Thales) is a block tolerant (IP Blocking) we
 
 Tales is made in java, javascript/html and uses mysql, redis, and git.
 
-Tales is simple, light, reliable, and has been tested on production environments scraping more than 200 million urls. 
+Tales is simple, light, reliable, easy to install, and has been tested on production environments scraping more than 200 million urls. 
 
 With Tales you can do web monitoring, research, aggregators, etc.
 
@@ -20,6 +20,35 @@ Tales is design to scrape the web continuously, even when the domain being scrap
 ### Develop, deploy and build
 
 Its very easy to code the scraper instructions, also called Templates. Once the templates are ready, all you need to do is push the code into git (git push origin), and the nodes alive will grab the code and recompile themselves.
+
+Tales uses JSoup as the html parsing library. JSoup gives a nice way to extract content from html, similar to what you are used when navigating the dom using Jquery, e.g.
+
+<pre>
+public TwitterUser parse(Document doc){
+        
+  TwitterUser obj = new TwitterUser();
+  obj.username = doc.select(".screen-name").text();
+  obj.fullname = doc.select(".fullname").text();
+  obj.bio = doc.select(".bio").text();
+        
+  return obj;
+
+}
+
+// local testing and debugging
+public static void main(String[] args) throws DownloadException {
+
+  String url = "https://twitter.com/Werner";
+
+  Download download = new Download();
+  String html = download.getURLContent(url);
+  Document doc = Jsoup.parse(html);
+
+  TwitterParser parser = new TwitterParser();
+  parser.parse(doc);
+
+}
+</pre>
 
 You can also have several branches (git) with different configurations and templates -- environments. This gives you the ability of running tests in a separate set of servers.
 
@@ -46,9 +75,7 @@ Tales is design to keep updates of the data that you scrape. For instance, if a 
 
 This is very useful if you want to do regressions, some math, or see how data evolves.
 
-### [Deploying to the Cloud](https://github.com/calufa/tales-core/wiki/Deploying-to-the-Cloud)
-
-### [How to install Tales](https://github.com/calufa/tales-core/wiki/Installing-Tales-on-Ubuntu-10.04-Lucid)
+### [Deploying Tales into the Cloud](https://github.com/calufa/tales-core/wiki/Deploying-Tales-into-to-the-Cloud)
 
 ### [Tales workflow sample](https://github.com/calufa/tales-core/wiki/Tales-workflow-sample)
 
