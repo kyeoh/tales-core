@@ -46,7 +46,7 @@ public class Solr {
 			if(!cachedIndex.contains(indexName)){
 
 				Download downloader = new Download();
-				if(downloader.getResponseCode(baseURL + indexName + "/select?q=*:*&rows=0") != 200){
+				if(!downloader.urlExists(baseURL + indexName + "/select?q=*:*&rows=0")){
 
 					String url = baseURL + "admin/cores?action=CREATE&name=" + indexName + "&instanceDir=" + Globals.SOLR_INSTANCE_DIR + "&dataDir=" + Globals.SOLR_INDEXES_DIR + "/" + indexName;
 					downloader.getURLContent(url);

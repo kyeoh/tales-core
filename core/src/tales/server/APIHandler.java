@@ -275,22 +275,17 @@ public class APIHandler extends AbstractHandler{
 
 				try{
 
-
 					String url = "http://" + publicDNS + ":" + Config.getDashbaordPort();
 					Download download = new Download();
-
-					// makes sure the server is up
-					if(download.getResponseCode(url) == 200){
+					if(download.urlExists(url)){
 						break;
-
-					}else{
-						Thread.sleep(100);
 					}
-
 
 				}catch(Exception e){
 					new TalesException(new Throwable(), e);
 				}
+				
+				Thread.sleep(100);
 
 			}
 
@@ -433,13 +428,14 @@ public class APIHandler extends AbstractHandler{
 			String data = null;
 			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getSolrPort() + "/solr/admin/cores?wt=json";
 
-			while(data == null){
+			while(true){
 
 				try{
 					
 					Download download = new Download();
-					if(download.getResponseCode(url) == 200){
+					if(download.urlExists(url)){
 						data = download.getURLContent(url);
+						break;
 					}
 					
 				}catch(Exception e){}
