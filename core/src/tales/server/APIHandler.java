@@ -56,11 +56,11 @@ public class APIHandler extends AbstractHandler{
 
 
 		baseRequest.setHandled(true);
-		
-		
+
+
 		// cross domain
 		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		
+
 
 		if(target.equals("/reboot")){
 			reboot();
@@ -280,7 +280,7 @@ public class APIHandler extends AbstractHandler{
 					Download download = new Download();
 
 					// makes sure the server is up
-					if(download.getURLHeader(url, "content-type", true) != null){
+					if(download.getResponseCode(url) == 200){
 						break;
 
 					}else{
@@ -428,19 +428,26 @@ public class APIHandler extends AbstractHandler{
 	private void solr(HttpServletResponse response) {
 
 		try{
-			
+
 			// waits for solr to be ready
 			String data = null;
-			
+			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getSolrPort() + "/solr/admin/cores?wt=json";
+
 			while(data == null){
+
 				try{
+					
 					Download download = new Download();
-					data = download.getURLContent("http://" + TalesSystem.getPublicDNSName() + ":" + Config.getSolrPort() + "/solr/admin/cores?wt=json");
-				}catch(Exception e){
-					Thread.sleep(100);
-				}
+					if(download.getResponseCode(url) == 200){
+						data = download.getURLContent(url);
+					}
+					
+				}catch(Exception e){}
+
+				Thread.sleep(100);
+
 			}
-			
+
 			JSONObject json = (JSONObject) JSONSerializer.toJSON(data);
 
 			JSONArray array = new JSONArray();

@@ -46,68 +46,6 @@ public class Download {
 
 
 
-	public boolean urlExists(String url) throws DownloadException {
-
-
-		HttpURLConnection conn = null;
-
-
-		try {
-
-
-			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
-				url = URIUtil.encodeQuery(url);
-			}
-
-
-			if(url.contains("https://")){
-				disableSSLValidation();
-				conn = (HttpsURLConnection) new URL(url).openConnection();
-			}else{
-				conn = (HttpURLConnection) new URL(url).openConnection();
-			}
-
-
-			conn.setFollowRedirects(true);
-			conn.setRequestProperty("User-Agent", userAgent);
-			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
-			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
-			conn.setRequestMethod("HEAD");
-
-
-			boolean result = (conn.getResponseCode() == HttpURLConnection.HTTP_OK);
-
-
-			conn.disconnect();
-
-
-			return result;
-
-
-		} catch (SocketTimeoutException e) {
-
-			if (conn != null) {
-				conn.disconnect();
-			}
-
-			String[] args = {url};
-			throw new DownloadException(new Throwable(), e, args);
-
-
-		} catch (Exception e) {
-
-			if (conn != null) {
-				conn.disconnect();
-			}
-
-			return false;
-		}
-
-	}
-
-
-
-
 	public String getURLContent(String url) throws DownloadException {
 		return getURLContentWithCookie(url, "");
 	}
@@ -272,21 +210,21 @@ public class Download {
 		}
 
 	}
-
-
-
-
-	public String getURLHeader(String url, String key, boolean followRedirections) throws IOException {
-
+	
+	
+	
+	
+	public int getResponseCode(String url) throws IOException {
 
 		URL urlObj = new URL(url);
 		HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
-		conn.setFollowRedirects(followRedirections);
+		conn.setFollowRedirects(true);
 		conn.setRequestProperty("User-Agent", userAgent);
 		conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
 		conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
+		conn.disconnect();
 
-		return conn.getHeaderField(key);
+		return conn.getResponseCode();
 
 	}
 
