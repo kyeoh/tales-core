@@ -19,6 +19,9 @@ public class Globals {
 	public static String DB_RESTORE_TEMP_DIR             = System.getProperty("user.home") + "/tales-tmp/db-restores";
 	
 	public static String MONGO_DATABASE_NAME             = "tales";
+	public static String BACKUP_S3_BUCKET_NAME           = "tales-backups";
+	public static String SCALE_TEMP_S3_BUCKET_NAME       = "tales-temp";
+	public static String HTML_S3_BUCKET_NAME              = "tales-htmls";
 	
 	public static int GIT_SYNC_REFESH_INTERVAL           = 5000;
 	public static int DOWNLOADER_MAX_TIMEOUT_INTERVAL    = 10000;
@@ -27,6 +30,8 @@ public class Globals {
 	public static int SOLR_COMMIT_WITHIN_INTERNAL        = 5000;	
 	public static int RELOAD_CONFIG_INTERNAL             = 1000;
 	public static int DASHBOARD_MAX_ERRORS               = 30;
+	public static int DOCUMENT_NAME_MAX_LENGTH           = 2000;
+	public static int DOCUMENT_ATTRIBUTE_DATA_MAX_LENGTH = 20000;
 	
 	public static String WEB_DIR                         = System.getProperty("user.home") + "/tales-core/core/web";
 	public static String WEB_DASHBOARD                   = "dashboard.html";

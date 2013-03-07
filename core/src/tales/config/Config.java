@@ -190,7 +190,7 @@ public class Config{
 	
 	
 	private static String getTemplateKeyValue(String dbName, String key) throws TalesException{
-
+		
 		if(!key.equals("") && templateKeyExists(dbName, key)){
 			return json.getJSONObject("templates")
 					.getJSONObject(dbName)

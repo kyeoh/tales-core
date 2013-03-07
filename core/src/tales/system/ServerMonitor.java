@@ -106,15 +106,17 @@ public class ServerMonitor{
 				Logger.log(new Throwable(), json.toString());
 
 				
-				// loop
 				Thread.sleep(1000);
-				Thread t = new Thread(this);
-				t.start();
-
-
+				
+				
 			}catch(Exception e){
 				new TalesException(new Throwable(), e);
 			}
+		
+			
+			// loop
+			Thread t = new Thread(this);
+			t.start();
 
 		}
 

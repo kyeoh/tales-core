@@ -71,7 +71,7 @@ public class S3DBBackup {
 
 				String dbName = rs.getString("TABLE_CAT");
 
-				if(!excludeDBNames.contains(dbName)){
+				if(excludeDBNames == null || !excludeDBNames.contains(dbName)){
 
 					String command = "mysqldump --default-character-set=utf8"
 							+ " -u " + Config.getDBUsername()
@@ -153,9 +153,14 @@ public class S3DBBackup {
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
-			String s3Bucket = cmd.getOptionValue("bucket");
+			String s3Bucket = null;
+			if(cmd.hasOption("bucket")){
+				s3Bucket = cmd.getOptionValue("bucket");
+			}else{
+				s3Bucket = Globals.BACKUP_S3_BUCKET_NAME;
+			}
+			
 			ArrayList<String> excludeDBs = new ArrayList<String>();
-
 			if(cmd.hasOption("exclude_db_names")){
 				excludeDBs = new ArrayList<String>(Arrays.asList(cmd.getOptionValue("exclude_db_names").split(",")));
 			}

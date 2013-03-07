@@ -26,11 +26,13 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import tales.config.Config;
 import tales.config.Globals;
+import tales.s3.S3DBBackup;
 import tales.services.Download;
 import tales.services.Log;
 import tales.services.Logger;
 import tales.services.LogsDB;
 import tales.services.TalesException;
+import tales.system.AppMonitor;
 import tales.system.TalesSystem;
 import tales.utils.DBUtils;
 
@@ -82,6 +84,10 @@ public class APIHandler extends AbstractHandler{
 			delete(response);
 
 
+		}else if(target.equals("/force-delete")){
+			forceDelete(response);
+
+
 		}else if(target.equals("/kill")){
 			kill(request);
 
@@ -93,6 +99,9 @@ public class APIHandler extends AbstractHandler{
 		}else if(target.equals("/errors")){
 			errors(response);
 
+
+		}else if(target.equals("/scale")){
+			scale(request, response);
 		}
 
 	}
@@ -171,11 +180,14 @@ public class APIHandler extends AbstractHandler{
 
 
 
-	private void newServer(HttpServletRequest request, HttpServletResponse response){
+	private String newServer(HttpServletRequest request, HttpServletResponse response){
 
 		try {
 
+			
+			AppMonitor.init();
 
+			
 			String publicDNS = null;
 			Logger.log(new Throwable(), "NEW: creating new server");
 
@@ -184,13 +196,20 @@ public class APIHandler extends AbstractHandler{
 			if(request.getParameter("cloud") == null && TalesSystem.getAWSInstanceMetadata() != null){
 
 
+				// instance type
+				String instanceType = request.getParameter("instanceType");
+				if(instanceType == null){
+					instanceType = Config.getAWSInstanceType();
+				}
+
+
 				// ec2
 				AmazonEC2 ec2 = new AmazonEC2Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
 				ec2.setEndpoint(Config.getAWSEndpoint());
 
 				RunInstancesRequest ec2Request = new RunInstancesRequest();
 				ec2Request.withImageId(Config.getAWSAMI());
-				ec2Request.withInstanceType(Config.getAWSInstanceType());
+				ec2Request.withInstanceType(instanceType);
 				ec2Request.withMinCount(1);
 				ec2Request.withMaxCount(1);
 				ec2Request.withSecurityGroupIds(Config.getAWSSecurityGroup());
@@ -284,15 +303,18 @@ public class APIHandler extends AbstractHandler{
 				}catch(Exception e){
 					new TalesException(new Throwable(), e);
 				}
-				
-				Thread.sleep(100);
+
+				Thread.sleep(500);
 
 			}
 
 
 			Logger.log(new Throwable(), "NEW: finished");
-
-
+			
+			
+			AppMonitor.stop();
+			
+			
 			// http response
 			JSONObject json = new JSONObject();
 			json.put("dns", publicDNS);
@@ -300,11 +322,14 @@ public class APIHandler extends AbstractHandler{
 			response.setContentType("application/json");
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().println(json);
-
+			
+			
+			return publicDNS;
 
 
 		} catch (Exception e) {
 			new TalesException(new Throwable(), e);
+			return null;
 		}
 
 	}
@@ -321,72 +346,86 @@ public class APIHandler extends AbstractHandler{
 			if(DBUtils.getTalesDBs().size() == 0 || 
 					(DBUtils.getTalesDBs().size() == 1 && DBUtils.getTalesDBs().get(0).contains(LogsDB.getDBName()))){
 
-
-				// aws server
-				if(TalesSystem.getAWSInstanceMetadata() != null){
-
-					AmazonEC2 ec2 = new AmazonEC2Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
-					TerminateInstancesRequest terminate = new TerminateInstancesRequest();
-					terminate.getInstanceIds().add(TalesSystem.getAWSInstanceMetadata().getInstanceId());
-					ec2.terminateInstances(terminate);
-
-
-					// rackspace server
-				}else{
-
-
-					// gets auth token
-					URL url = new URL("https://auth.api.rackspacecloud.com/v1.0");
-					HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-					conn.setRequestProperty("X-Auth-Key", Config.getRackspaceKey());
-					conn.setRequestProperty("X-Auth-User", Config.getRackspaceUsername());
-					String token = conn.getHeaderField("X-Auth-Token");
-					conn.disconnect();
-
-
-					// lists all servers available
-					url = new URL("https://servers.api.rackspacecloud.com/v1.0/" + Config.getRackspaceAccount() + "/servers/detail");
-					conn = (HttpsURLConnection) url.openConnection();
-					conn.setRequestProperty("X-Auth-Token", token);
-					conn.setRequestProperty("Content-type", "application/json");
-					conn.setDoOutput(true);
-
-					String content = IOUtils.toString(conn.getInputStream());
-					JSONObject result = (JSONObject) JSONSerializer.toJSON(content);
-					JSONArray servers = result.getJSONArray("servers");
-
-
-					for(int i = 0; i < servers.size(); i++){
-
-
-						String publicDNS = servers.getJSONObject(i).getJSONObject("addresses").getJSONArray("public").getString(0);
-						int serverId = servers.getJSONObject(i).getInt("id");
-
-
-						if(publicDNS.equals(TalesSystem.getPublicDNSName())){
-
-							// delete server
-							url = new URL("https://servers.api.rackspacecloud.com/v1.0/" + Config.getRackspaceAccount() + "/servers/" + serverId);
-							conn = (HttpsURLConnection) url.openConnection();
-							conn.setRequestMethod("DELETE");
-							conn.setRequestProperty("X-Auth-Token", token);
-							conn.setRequestProperty("Content-type", "application/json");
-							conn.getInputStream();
-
-						}
-					}
-
-					conn.disconnect();
-
-				}
-
-
-				Logger.log(new Throwable(), "DELETE: server deleted");
-
+				forceDelete(response);
 
 			}else{
 				Logger.log(new Throwable(), "DELETE: cant delete server, it contains tales databases. Delete all the tales databases before trying to delete the server.");
 			}
+
+
+		} catch (Exception e) {
+			new TalesException(new Throwable(), e);
+		}
+
+	}
+
+
+
+
+	private void forceDelete(HttpServletResponse response){
+
+		try {
+
+			// aws server
+			if(TalesSystem.getAWSInstanceMetadata() != null){
+
+				AmazonEC2 ec2 = new AmazonEC2Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
+				TerminateInstancesRequest terminate = new TerminateInstancesRequest();
+				terminate.getInstanceIds().add(TalesSystem.getAWSInstanceMetadata().getInstanceId());
+				ec2.terminateInstances(terminate);
+
+
+				// rackspace server
+			}else{
+
+
+				// gets auth token
+				URL url = new URL("https://auth.api.rackspacecloud.com/v1.0");
+				HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+				conn.setRequestProperty("X-Auth-Key", Config.getRackspaceKey());
+				conn.setRequestProperty("X-Auth-User", Config.getRackspaceUsername());
+				String token = conn.getHeaderField("X-Auth-Token");
+				conn.disconnect();
+
+
+				// lists all servers available
+				url = new URL("https://servers.api.rackspacecloud.com/v1.0/" + Config.getRackspaceAccount() + "/servers/detail");
+				conn = (HttpsURLConnection) url.openConnection();
+				conn.setRequestProperty("X-Auth-Token", token);
+				conn.setRequestProperty("Content-type", "application/json");
+				conn.setDoOutput(true);
+
+				String content = IOUtils.toString(conn.getInputStream());
+				JSONObject result = (JSONObject) JSONSerializer.toJSON(content);
+				JSONArray servers = result.getJSONArray("servers");
+
+
+				for(int i = 0; i < servers.size(); i++){
+
+
+					String publicDNS = servers.getJSONObject(i).getJSONObject("addresses").getJSONArray("public").getString(0);
+					int serverId = servers.getJSONObject(i).getInt("id");
+
+
+					if(publicDNS.equals(TalesSystem.getPublicDNSName())){
+
+						// delete server
+						url = new URL("https://servers.api.rackspacecloud.com/v1.0/" + Config.getRackspaceAccount() + "/servers/" + serverId);
+						conn = (HttpsURLConnection) url.openConnection();
+						conn.setRequestMethod("DELETE");
+						conn.setRequestProperty("X-Auth-Token", token);
+						conn.setRequestProperty("Content-type", "application/json");
+						conn.getInputStream();
+
+					}
+				}
+
+				conn.disconnect();
+
+			}
+
+
+			Logger.log(new Throwable(), "DELETE: server deleted");
 
 
 		} catch (Exception e) {
@@ -431,13 +470,13 @@ public class APIHandler extends AbstractHandler{
 			while(true){
 
 				try{
-					
+
 					Download download = new Download();
 					if(download.urlExists(url)){
 						data = download.getURLContent(url);
 						break;
 					}
-					
+
 				}catch(Exception e){}
 
 				Thread.sleep(100);
@@ -508,6 +547,44 @@ public class APIHandler extends AbstractHandler{
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().println(array);
 
+
+		} catch (Exception e) {
+			new TalesException(new Throwable(), e);
+		}
+
+	}
+
+
+
+
+	public void scale(HttpServletRequest request, HttpServletResponse response){
+
+		try{
+
+			
+			AppMonitor.init();
+			
+			// backsups the databases
+			Logger.log(new Throwable(), "SCALE: backing up databases into s3 bucket: " + Globals.SCALE_TEMP_S3_BUCKET_NAME);
+			S3DBBackup.backupAllExcept(Globals.SCALE_TEMP_S3_BUCKET_NAME, null);
+			
+			// creates a new server
+			String publicDNS = newServer(request, response);
+			
+			// moves the backups to the new server
+			Logger.log(new Throwable(), "SCALE: restoring databases into new server");
+			String dbNames = DBUtils.getTalesDBs().toString().replace(" ", "");
+			dbNames = dbNames.substring(1, dbNames.length() - 1);
+			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start/tales.s3.S3DBRestore -bucket " + Globals.SCALE_TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
+			Download download = new Download();
+			download.getURLContent(url);
+			
+			Logger.log(new Throwable(), "SCALE: remember to edit the config file so it matches the new host url.");
+			
+			AppMonitor.stop();
+			
+			forceDelete(response);
+			
 
 		} catch (Exception e) {
 			new TalesException(new Throwable(), e);

@@ -5,9 +5,7 @@ package tales.workers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import tales.config.Config;
 import tales.scrapers.ScraperConfig;
 import tales.services.TalesException;
 import tales.services.Logger;
@@ -31,15 +29,7 @@ public class TaskWorker{
 
 
 
-	public TaskWorker(ScraperConfig config) throws TalesException{
-		this.config = config;
-		this.failover = new DefaultFailover(Config.getFailover(config.getTemplate().getMetadata().getDatabaseName()));
-	}
-
-
-
-
-	public TaskWorker(ScraperConfig config, FailoverInterface failover){
+	public TaskWorker(ScraperConfig config, FailoverInterface failover) throws TalesException{
 		this.config = config;
 		this.failover = failover;
 	}
@@ -165,7 +155,7 @@ public class TaskWorker{
 
 								// template
 								TemplateInterface template = (TemplateInterface) config.getTemplate().getClass().newInstance();
-								template.init(config.getConnection(), task);
+								template.init(config.getConnection(), taskDB, task);
 
 								if(template.isTaskValid()){
 
@@ -266,9 +256,8 @@ public class TaskWorker{
 				Logger.log(new Throwable(), "waiting for the tasks to finish...");
 
 				finished = true;
-				List<TemplateInterface> threadList = threads;
-
-				for(Iterator<TemplateInterface> it = threadList.iterator(); it.hasNext();){
+				
+				for(Iterator<TemplateInterface> it = threads.iterator(); it.hasNext();){
 
 					TemplateInterface template = it.next();
 
@@ -294,8 +283,10 @@ public class TaskWorker{
 		public ArrayList<Task> getTasksRunning(){
 
 			ArrayList<Task> tasks = new ArrayList<Task>();
+			
+			for(Iterator<TemplateInterface> it = threads.iterator(); it.hasNext();){
 
-			for(TemplateInterface template : threads){
+				TemplateInterface template = it.next();
 
 				if(template.isTemplateActive()){
 					tasks.add(template.getTask());

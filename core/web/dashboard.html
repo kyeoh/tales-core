@@ -89,6 +89,7 @@
 		var errorsInterval = 1000;
 		var startInterval = 1000;
 		var appsInterval = {};
+		var serversInterval = {};
 		var colors = ["B0D1A6", "D0D1A5", "FFE1A9", "FFFBA4", "EFFAB4", "FF9F80", "A8CABA"]
 		var colorIndex = 0;
 		
@@ -130,6 +131,7 @@
 							// checks if server div exists
 							if(!$("#" + serverDivName).exists()){
 
+								
 								$("#analytics").prepend("<div id='" + serverDivName +"' class='serverContainer'></div>");
 								$("#" + serverDivName).css("background-color", "#" + colors[colorIndex++]);
 								
@@ -155,7 +157,13 @@
 								// apps
 								$("#" + serverDivName).append("<div id=\"apps\"></div>");
 
+
+							}else{
+								clearTimeout(serversInterval[serverDivName]);
 							}
+							
+							
+							setServerRemoveTimeout(serverDivName);
 
 							
 							if(classe == "ServerMonitor"){
@@ -193,7 +201,7 @@
 								}
 
 
-								setDivTimeout(appDivName);
+								setAppRemoveTimeout(appDivName);
 					
 
 								// inits the log acumm
@@ -249,18 +257,9 @@
 									$("#" + appDivName + " #custom #taskWorker").html(json.data);
 
 
-								} else if (classe.indexOf("Scraper") > -1){
-
-									if(!$("#" + appDivName + " #custom #scraper").exists()){
-										$("#" + appDivName + " #custom").append("<h4>" + classe + "</h4>");	
-										$("#" + appDivName + " #custom").append("<div id=\"scraper\"></div>");
-									}
-
-									$("#" + appDivName + " #custom #scraper").html(json.data);
-
 								}
 							
-						}
+							}
 						}
 
 					}
@@ -351,16 +350,23 @@
 		function removeDeadApp(appDivName){
 			
 			if(!paused){
-						
-				// removes the server contains
-				if($("#" + appDivName).parent().children("div").length == 1){
-					$("#" + appDivName).parent().parent().remove();
-				}else{
-					$("#" + appDivName).remove();
-				}
-				
+				$("#" + appDivName).remove();
 			}else{
-				setDivTimeout(appDivName)
+				setAppRemoveTimeout(appDivName)
+			}
+			
+		}
+		
+		
+		
+		
+		// removes the div of a dead server
+		function removeDeadServer(serverDivName){
+			
+			if(!paused){
+				$("#" + serverDivName).remove();
+			}else{
+				setServerRemoveTimeout(serverDivName)
 			}
 			
 		}
@@ -378,9 +384,17 @@
 		
 		
 		
-		// div timeout
-		function setDivTimeout(appDivName){
+		// app timeout
+		function setAppRemoveTimeout(appDivName){
 			appsInterval[appDivName] = setTimeout(removeDeadApp, deadInterval, appDivName);
+		}
+		
+		
+		
+		
+		// server timeout
+		function setServerRemoveTimeout(serverDivName){
+			serversInterval[serverDivName] = setTimeout(removeDeadServer, deadInterval, serverDivName);
 		}
 		
 		

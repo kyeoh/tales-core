@@ -25,6 +25,7 @@ public class DefaultFailover implements FailoverInterface{
 
 
 	private ArrayList<FailoverAttempt> attempts;
+	private long loopReferenceTime;
 	private int index;
 	private int fails;
 	private Date date;
@@ -34,8 +35,9 @@ public class DefaultFailover implements FailoverInterface{
 
 
 
-	public DefaultFailover(ArrayList<FailoverAttempt> attempts){
+	public DefaultFailover(ArrayList<FailoverAttempt> attempts, long loopReferenceTime){
 		this.attempts = attempts;
+		this.loopReferenceTime = loopReferenceTime;
 	}
 
 
@@ -103,13 +105,14 @@ public class DefaultFailover implements FailoverInterface{
 					// moving process
 					String newServerURL = "http://" + json.get("dns") + ":" + Config.getDashbaordPort();
 					Logger.log(new Throwable(), "moving process...");
-					download.getURLContent(newServerURL + "/start/" + TalesSystem.getProcess());
-
-
-					// delete this server
-					Logger.log(new Throwable(), "deleting \"this\" server...");
-					download.getURLContent(thisServerURL + "/delete");
-
+					
+					String process = TalesSystem.getProcess();
+					if(process.contains("loopReferenceTime")){
+						process = process.substring(0, process.indexOf("-loopReferenceTime "));
+								
+					}
+					
+					download.getURLContent(newServerURL + "/start/" + process + " -loopReferenceTime " + loopReferenceTime);
 
 					failedOver = true;
 

@@ -34,7 +34,7 @@ public class Server{
 
 			
 			// wait for mysql to be ready
-			DBUtils.waitUntilMysqlIsReady();
+			DBUtils.waitUntilLocalMysqlIsReady();
 			
 			
 			// compiles

@@ -76,9 +76,10 @@ public class S3DBRestore{
 
 
 		try{
-
-
-			Logger.log(new Throwable(), "restoring latest version of \"" + dbName + "\"");
+			
+			
+			String fullDbName = Globals.DATABASE_NAMESPACE + dbName;
+			Logger.log(new Throwable(), "restoring latest version of \"" + fullDbName + "\"");
 
 
 			// checks if the temp folder exists
@@ -96,10 +97,8 @@ public class S3DBRestore{
 
 
 			if(s3.doesBucketExist(s3BucketName)){
-
-
-				ArrayList<RestoreObj> s3Objs = getS3FilenamesOrderByAdded(s3BucketName, dbName);
-
+				
+				ArrayList<RestoreObj> s3Objs = getS3FilenamesOrderByAdded(s3BucketName, fullDbName);
 
 				if(s3Objs.size() > 0){
 
@@ -149,7 +148,7 @@ public class S3DBRestore{
 
 					// checks if database exists, if exists then delete
 					Statement statement = (Statement) conn.createStatement();
-					ResultSet rs  = statement.executeQuery("SHOW DATABASES LIKE '" + dbName + "'");
+					ResultSet rs  = statement.executeQuery("SHOW DATABASES LIKE '" + fullDbName + "'");
 
 					try{
 
@@ -158,10 +157,10 @@ public class S3DBRestore{
 						statement.close();
 
 						// deletes the current db
-						Logger.log(new Throwable(), "droppping mysql database \"" + dbName + "\"");
+						Logger.log(new Throwable(), "droppping mysql database \"" + fullDbName + "\"");
 
 						statement = (Statement) conn.createStatement();
-						statement.executeUpdate( "DROP DATABASE " + dbName);
+						statement.executeUpdate( "DROP DATABASE " + fullDbName);
 						statement.close();
 
 
@@ -172,17 +171,17 @@ public class S3DBRestore{
 
 
 					// creates new database
-					Logger.log(new Throwable(), "creating mysql database \"" + dbName + "\"");
+					Logger.log(new Throwable(), "creating mysql database \"" + fullDbName + "\"");
 
 					statement = (Statement) conn.createStatement();
-					statement.executeUpdate("CREATE DATABASE " + dbName);
+					statement.executeUpdate("CREATE DATABASE " + fullDbName);
 					statement.close();
 
 
 					// restores the dump to mysql
-					Logger.log(new Throwable(), "restoring file \"" + restoreObj.getName() + "\" to \"" + dbName + "\"");
+					Logger.log(new Throwable(), "restoring file \"" + restoreObj.getName() + "\" to \"" + fullDbName + "\"");
 
-					String command = "gunzip < " + filePath + " | mysql -u " + Config.getDBUsername() + " -p" + Config.getDBPassword() + " " + dbName + " --default-character-set=utf8";
+					String command = "gunzip < " + filePath + " | mysql -u " + Config.getDBUsername() + " -p" + Config.getDBPassword() + " " + fullDbName + " --default-character-set=utf8";
 					ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", command);
 					Process p = builder.start();
 					p.waitFor();
@@ -238,11 +237,10 @@ public class S3DBRestore{
 		for(S3ObjectSummary objSummary: objSummaries){
 
 			String s3Filename     = objSummary.getKey();
-			String[] pieces       = objSummary.getKey().split("-");
+			String[] pieces       = s3Filename.split("-");
 			Date added            = new Date(Long.parseLong(pieces[0]));
-			//String ip             = pieces[1];
-			String filename       = pieces[2];
-
+			String filename       = Globals.DATABASE_NAMESPACE + pieces[pieces.length -1].substring(0, pieces[pieces.length -1].indexOf("."));
+			
 			if(filename.contains(originalFilename)){
 
 				RestoreObj restoreObj = new RestoreObj();
@@ -277,7 +275,13 @@ public class S3DBRestore{
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
-			String s3Bucket = cmd.getOptionValue("bucket");
+			String s3Bucket = null;
+			if(cmd.hasOption("bucket")){
+				s3Bucket = cmd.getOptionValue("bucket");
+			}else{
+				s3Bucket = Globals.BACKUP_S3_BUCKET_NAME;
+			}
+			
 			String[] dbNames = cmd.getOptionValue("db_names").split(",");
 
 

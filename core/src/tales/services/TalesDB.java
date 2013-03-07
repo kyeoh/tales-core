@@ -70,6 +70,10 @@ public class TalesDB {
 				conns.put(dbName, new ArrayList<Connection>());
 				cachedTables.put(dbName, new ArrayList<String>());
 
+				
+				// checks the remote database
+				DBUtils.waitUntilMysqlIsReady(Config.getDataDBHost(dbName), Config.getDBPort(dbName));
+				
 
 				// checks if the database exists, if not create it
 				DBUtils.checkDatabase(dbName);
@@ -82,6 +86,20 @@ public class TalesDB {
 
 				jedisPool = new JedisPool(config, Config.getRedisHost(dbName), Config.getRedisPort(dbName), Globals.REDIS_TIMEOUT);
 				jedisPools.put(dbName, jedisPool);
+				
+				
+				// wait for redis to be up and running
+				Jedis redis  = jedisPool.getResource();
+				while(true){
+					try{
+						redis.exists("test");
+						break;
+					}catch(Exception e){
+						Logger.log(new Throwable(), "waiting for to be ready...");
+						Thread.sleep(1000);
+					}
+				}
+				jedisPool.returnResource(redis);
 
 
 				// creates the conns
@@ -104,12 +122,14 @@ public class TalesDB {
 
 
 				// checks if the doc table exists
+				Logger.log(new Throwable(), "checking documents table...");
 				if(!documentsTableExists()){
 					createDocumentsTable();
 				}
 
 
 				// adds the first document if none
+				Logger.log(new Throwable(), "checking first documents...");
 				if(getDocumentsCount() == 0){
 					for(final String document : metadata.getFirstDocuments()){
 						if(!documentExists(document)){
@@ -120,13 +140,15 @@ public class TalesDB {
 
 
 				// checks if the ignored document table exists
+				Logger.log(new Throwable(), "checking ignored documents table...");
 				if(!ignoredDocumentsTableExists()){
 					createIgnoredDocumentsTable();
 				}
 
 
 				// load documents in memory
-				this.loadDocumentsIntoMem();
+				Logger.log(new Throwable(), "checking redis...");
+				loadDocumentsIntoMem();
 
 
 			}else{
@@ -524,7 +546,7 @@ public class TalesDB {
 
 			// checks if the db row xists
 			if(!attributeTableExists(attribute.getName())){
-				createStringAttributeTable(attribute.getName());
+				createAttributeTable(attribute.getName());
 			}
 
 
@@ -570,7 +592,7 @@ public class TalesDB {
 
 			// checks if the db row xists
 			if(!attributeTableExists(attribute.getName())){
-				createStringAttributeTable(attribute.getName());
+				createAttributeTable(attribute.getName());
 
 			}
 
@@ -860,7 +882,7 @@ public class TalesDB {
 
 
 
-	private synchronized final void createStringAttributeTable(final String attributeName) throws TalesException{
+	private synchronized final void createAttributeTable(final String attributeName) throws TalesException{
 
 
 		try {
@@ -870,7 +892,7 @@ public class TalesDB {
 			tbName              = tbName.replace(".", "_");
 
 			final Statement statement = (Statement) conn.createStatement();
-			statement.executeUpdate("CREATE TABLE " + tbName + " (id INT NOT NULL AUTO_INCREMENT, documentId INT NOT NULL, data VARCHAR(2000) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL, added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id), KEY documentId (documentId)) ENGINE = MYISAM DEFAULT CHARSET=utf8");
+			statement.executeUpdate("CREATE TABLE " + tbName + " (id INT NOT NULL AUTO_INCREMENT, documentId INT NOT NULL, data VARCHAR(" + Globals.DOCUMENT_ATTRIBUTE_DATA_MAX_LENGTH + ") CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL, added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id), KEY documentId (documentId)) ENGINE = MYISAM DEFAULT CHARSET=utf8");
 			statement.executeUpdate("OPTIMIZE TABLE " + tbName);
 			statement.close();
 
@@ -924,18 +946,6 @@ public class TalesDB {
 
 			int lastId         = 1;
 			final Jedis redis  = jedisPool.getResource();
-
-
-			// wait for redis to be up and running
-			while(true){
-				try{
-					redis.exists("test");
-					break;
-				}catch(Exception e){
-					Logger.log(new Throwable(), "waiting for redis to be up...");
-					Thread.sleep(1000);
-				}
-			}
 
 
 			// looks for all the documents
@@ -1051,7 +1061,7 @@ public class TalesDB {
 
 
 			final String sql = "CREATE TABLE documents (id int(11) NOT NULL AUTO_INCREMENT,"
-					+ "name varchar(1000) NOT NULL,"
+					+ "name varchar(" + Globals.DOCUMENT_NAME_MAX_LENGTH + ") NOT NULL,"
 					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "lastUpdate timestamp NOT NULL DEFAULT '1999-12-31 17:00:00',"
 					+ "active int(2) NOT NULL DEFAULT '1',"

@@ -85,13 +85,20 @@ public class Download {
 
 
 		} catch (SocketTimeoutException e) {
+			
+			String[] args = {url};
+			int responseCode = 0;
 
 			if (conn != null) {
+				try {
+					responseCode = conn.getResponseCode();
+				} catch (IOException e1) {
+					throw new DownloadException(new Throwable(), e1, responseCode, args);
+				}
 				conn.disconnect();
 			}
 
-			String[] args = {url};
-			throw new DownloadException(new Throwable(), e, args);
+			throw new DownloadException(new Throwable(), e, responseCode, args);
 
 
 		} catch (Exception e) {
@@ -196,7 +203,8 @@ public class Download {
 					}
 
 				} catch (Exception e) {
-					throw new TalesException(new Throwable(), e);
+					String[] args = new String[]{url, new String(baos.toByteArray(), "UTF8")};
+					throw new TalesException(new Throwable(), e, args);
 				}
 
 			}
@@ -213,14 +221,21 @@ public class Download {
 			return content;
 
 
-		} catch (Exception e) {
+		}catch (Exception e) {
+			
+			String[] args = {url};
+			int responseCode = 0;
 
 			if (conn != null) {
+				try {
+					responseCode = conn.getResponseCode();
+				} catch (IOException e1) {
+					throw new DownloadException(new Throwable(), e1, responseCode, args);
+				}
 				conn.disconnect();
 			}
 
-			String[] args = {url};
-			throw new DownloadException(new Throwable(), e, args);
+			throw new DownloadException(new Throwable(), e, responseCode, args);
 		}
 
 	}

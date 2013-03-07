@@ -122,7 +122,7 @@ public class DBUtils {
 
 
 
-	public static void waitUntilMysqlIsReady(){
+	public static void waitUntilMysqlIsReady(String host, int port){
 
 		while(true){
 
@@ -130,7 +130,7 @@ public class DBUtils {
 
 				Class.forName("com.mysql.jdbc.Driver");
 				conn = DriverManager.getConnection("jdbc:mysql://"+
-						"localhost:"+Config.getDBPort()+"/"+
+						host + ":" +port+"/"+
 						"mysql" +
 						"?user="+Config.getDBUsername() +
 						"&password="+Config.getDBPassword() +
@@ -142,7 +142,7 @@ public class DBUtils {
 
 			}catch(final Exception e){	
 				try {
-					Logger.log(new Throwable(), "waiting for mysql to be up...");
+					Logger.log(new Throwable(), "waiting for mysql to be ready...");
 					Thread.sleep(1000);
 				} catch (Exception e1) {}
 			}
@@ -154,6 +154,13 @@ public class DBUtils {
 
 
 
+	public static void waitUntilLocalMysqlIsReady() throws TalesException{
+		waitUntilMysqlIsReady("localhost", Config.getDBPort());
+	}
+	
+	
+	
+	
 	public static ArrayList<String> getTalesDBs() throws TalesException{
 
 		try{
@@ -179,7 +186,7 @@ public class DBUtils {
 				String dbName = rs.getString("TABLE_CAT");
 
 				if(dbName.contains(Globals.DATABASE_NAMESPACE)){
-					dbNames.add(dbName);
+					dbNames.add(dbName.replace(Globals.DATABASE_NAMESPACE, ""));
 				}
 
 			}

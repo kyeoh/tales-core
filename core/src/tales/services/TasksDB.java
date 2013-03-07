@@ -85,7 +85,7 @@ public class TasksDB {
 
 
 			// ignore because we want to guarantee that the other tasks will be added
-			PreparedStatement statement = conn.prepareStatement("INSERT IGNORE INTO " + taskName + " (id, name) values (?,?)");
+			PreparedStatement statement = conn.prepareStatement("INSERT IGNORE INTO " + taskName + " (documentId, name) values (?,?)");
 
 
 			// stores the data into a batch
@@ -119,7 +119,7 @@ public class TasksDB {
 
 			// conn
 			ArrayList<Task> list         = new ArrayList<Task>();
-			PreparedStatement statement  = conn.prepareStatement("SELECT * FROM " + taskName + " LIMIT 0,?");
+			PreparedStatement statement  = conn.prepareStatement("SELECT * FROM " + taskName + " ORDER BY id ASC LIMIT 0,?");
 			statement.setInt(1, amount);
 
 			statement.executeQuery();
@@ -128,7 +128,7 @@ public class TasksDB {
 			while(rs.next()){
 
 				Task task = new Task();
-				task.setDocumentId(rs.getInt("id"));
+				task.setDocumentId(rs.getInt("documentId"));
 				task.setDocumentName(rs.getString("name"));
 
 				list.add(task);
@@ -155,7 +155,7 @@ public class TasksDB {
 
 		try{
 
-			PreparedStatement statement = conn.prepareStatement("DELETE FROM " + taskName + " WHERE id=?");
+			PreparedStatement statement = conn.prepareStatement("DELETE FROM " + taskName + " WHERE documentId=?");
 			statement.setInt(1, documentId);
 			statement.executeUpdate();
 			statement.close();
@@ -206,8 +206,16 @@ public class TasksDB {
 		try {
 
 			Statement statement = (Statement) conn.createStatement();
-			statement.executeUpdate("CREATE TABLE " +  taskName + " (id INT NOT NULL, name VARCHAR( 500 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL) ENGINE = MYISAM CHARSET=utf8");
-
+			final String sql = "CREATE TABLE " +  taskName + " ("
+					+ "id INT NOT NULL AUTO_INCREMENT, "
+					+ "documentId INT NOT NULL, "
+					+ "name VARCHAR(" + Globals.DOCUMENT_NAME_MAX_LENGTH + ") NOT NULL, "
+					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+					+ "PRIMARY KEY (id)" 
+					+ ") ENGINE = MYISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
+			statement.executeUpdate(sql);
+			
+			
 			// clone
 			statement.close();
 

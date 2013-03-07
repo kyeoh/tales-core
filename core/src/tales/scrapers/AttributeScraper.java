@@ -4,7 +4,6 @@ package tales.scrapers;
 
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -14,13 +13,17 @@ import org.apache.commons.cli.PosixParser;
 import tales.config.Config;
 import tales.services.Connection;
 import tales.services.Document;
+import tales.services.Download;
 import tales.services.Logger;
 import tales.services.TalesDB;
 import tales.services.TalesException;
 import tales.services.Task;
 import tales.services.TasksDB;
 import tales.system.AppMonitor;
+import tales.system.TalesSystem;
 import tales.templates.TemplateInterface;
+import tales.workers.DefaultFailover;
+import tales.workers.FailoverInterface;
 import tales.workers.TaskWorker;
 
 
@@ -33,28 +36,35 @@ public class AttributeScraper{
 
 	private static TalesDB talesDB;
 	private static TasksDB tasksDB;
-	private static Date loopReferenceTime;
+	private static long loopReferenceTime;
 	private static TaskWorker taskWorker;
 
 
 
 	
-	public static void init(ScraperConfig scraperConfig, String attributeName) throws TalesException{
+	public static void init(ScraperConfig scraperConfig, String attributeName, long loopReferenceTime) throws TalesException{
 
 
 		try{
+			
+			
+			AttributeScraper.loopReferenceTime = loopReferenceTime;
 
+			
 			// inits the services
 			talesDB = new TalesDB(scraperConfig.getConnection(), scraperConfig.getTemplate().getMetadata());
 			tasksDB = new TasksDB(scraperConfig);
+			
+			
+			if(AttributeScraper.loopReferenceTime == 0){
+				AttributeScraper.loopReferenceTime = talesDB.getMostRecentCrawledDocuments(1).get(0).getLastUpdate().getTime();
+			}
 
 
 			// starts the task machine with the template
-			taskWorker = new TaskWorker(scraperConfig);
+			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getDatabaseName()), AttributeScraper.loopReferenceTime);
+			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
-
-			
-			loopReferenceTime = talesDB.getMostRecentCrawledDocuments(1).get(0).getLastUpdate();
 
 
 			while(!taskWorker.hasFailover()){
@@ -71,7 +81,7 @@ public class AttributeScraper{
 						tasksDB.add(tasks);
 
 						if(!taskWorker.isWorkerActive() && !taskWorker.hasFailover()){
-							taskWorker = new TaskWorker(scraperConfig);
+							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
 					}
@@ -83,12 +93,15 @@ public class AttributeScraper{
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) == 0){
 					break;
 				}
-
-
-				try{Thread.sleep(1000);
-				}catch(Exception e){new TalesException(new Throwable(), e);}
-
+				
+				
+				Thread.sleep(1000);
 			}
+			
+			
+			// deletes the server
+			new Download().getURLContent("http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete");
+
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -107,7 +120,7 @@ public class AttributeScraper{
 
 			// checks if the most recently crawled user is older than this new user, 
 			// this means that the "most recent user" is now old and we have looped
-			if(loopReferenceTime.getTime() >= document.getLastUpdate().getTime()){
+			if(loopReferenceTime >= document.getLastUpdate().getTime()){
 
 				Task task = new Task();
 				task.setDocumentId(document.getId());
@@ -134,12 +147,18 @@ public class AttributeScraper{
 			options.addOption("template", true, "template class path");
 			options.addOption("attribute", true, "user attribute name");
 			options.addOption("threads", true, "number of templates");
+			options.addOption("loopReferenceTime", true, "loopReferenceTime");
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
 			String templatePath = cmd.getOptionValue("template");
 			String attributeName = cmd.getOptionValue("attribute");
 			int threads = Integer.parseInt(cmd.getOptionValue("threads"));
+			
+			long loopReferenceTime = 0;
+			if(cmd.hasOption("loopReferenceTime")){
+				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
+			}
 
 
 			// when app is killed
@@ -178,7 +197,7 @@ public class AttributeScraper{
 
 			
 			// scraper
-			AttributeScraper.init(scraperConfig, attributeName);
+			AttributeScraper.init(scraperConfig, attributeName, loopReferenceTime);
 
 
 			// stop
