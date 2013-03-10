@@ -21,7 +21,7 @@ public class Globals {
 	public static String MONGO_DATABASE_NAME             = "tales";
 	public static String BACKUP_S3_BUCKET_NAME           = "tales-backups";
 	public static String SCALE_TEMP_S3_BUCKET_NAME       = "tales-temp";
-	public static String HTML_S3_BUCKET_NAME              = "tales-htmls";
+	public static String FILES_S3_BUCKET_NAME            = "tales-files-";
 	
 	public static int GIT_SYNC_REFESH_INTERVAL           = 5000;
 	public static int DOWNLOADER_MAX_TIMEOUT_INTERVAL    = 10000;

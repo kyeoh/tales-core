@@ -33,11 +33,8 @@ public class TemplateDataRemover {
 		
 		// DB
 		try{
-
 			TalesDB talesDB = new TalesDB(new Connection(), metadata);
 			talesDB.deleteAll();
-			TalesDB.closeDBConnections(talesDB.getDBName());
-
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}

@@ -49,6 +49,9 @@ public class TalesDB {
 
 	// jedis pool
 	private final static HashMap<String, JedisPool> jedisPools = new HashMap<String, JedisPool>();
+	
+	// ready
+	private final static ArrayList<String> ready = new ArrayList<String>();
 
 
 
@@ -130,7 +133,7 @@ public class TalesDB {
 
 				// adds the first document if none
 				Logger.log(new Throwable(), "checking first documents...");
-				if(getDocumentsCount() == 0){
+				if(getDocumentsCount() == 0 && metadata.getFirstDocuments() != null){
 					for(final String document : metadata.getFirstDocuments()){
 						if(!documentExists(document)){
 							addDocument(document);
@@ -149,11 +152,21 @@ public class TalesDB {
 				// load documents in memory
 				Logger.log(new Throwable(), "checking redis...");
 				loadDocumentsIntoMem();
+				
+				
+				// ready
+				ready.add(dbName);
 
 
 			}else{
 
+				
+				// waits for the connections to be finished
+				while(!ready.contains(dbName)){
+					Thread.sleep(100);
+				}
 
+				
 				// index
 				if(!index.containsKey(dbName)){
 					index.put(dbName, 0);

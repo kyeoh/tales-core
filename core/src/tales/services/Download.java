@@ -3,14 +3,15 @@ package tales.services;
 
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -21,10 +22,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.io.IOUtils;
@@ -85,7 +82,8 @@ public class Download {
 
 
 		} catch (SocketTimeoutException e) {
-			
+
+
 			String[] args = {url};
 			int responseCode = 0;
 
@@ -123,6 +121,30 @@ public class Download {
 
 
 	public String getURLContentWithCookie(String url, String cookie) throws DownloadException {
+
+		try{
+
+			DownloadByteResult result = getURLBytesWithCookie(url, cookie);
+			return IOUtils.toString(result.getBytes(), result.getCharset());
+
+		}catch(Exception e){
+			String[] args = {url, cookie};
+			throw new DownloadException(new Throwable(), e, 0, args);
+		}
+
+	}
+
+
+
+
+	public DownloadByteResult getURLBytes(String url) throws DownloadException{
+		return getURLBytesWithCookie(url, "");
+	}
+
+
+
+
+	public DownloadByteResult getURLBytesWithCookie(String url, String cookie) throws DownloadException{
 
 
 		HttpURLConnection conn = null;
@@ -166,10 +188,13 @@ public class Download {
 			}
 
 
+			byte[] bytes = IOUtils.toByteArray(is);
+
+
 			// encoding
 			String contentType = conn.getHeaderField("Content-Type");
 			String charset = null;
-			
+
 			if(contentType != null){
 				for (String param : contentType.replace(" ", "").split(";")) {
 					if (param.startsWith("charset=")) {
@@ -183,46 +208,49 @@ public class Download {
 			// stores the content
 			if (charset == null) {
 
-				// trying to obtain the real encoding using meta tag                           
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				IOUtils.copy(is, baos);
-				IOUtils.closeQuietly(is);
-				is = new ByteArrayInputStream(baos.toByteArray());
-
 				try {
 
-					String utf8Content = new String(baos.toByteArray(), "UTF8");
+					String utf8Content = new String(bytes, "UTF-8");
 					int posCharset = utf8Content.indexOf("charset");
 
 					if (posCharset > 0) {
+
 						utf8Content = utf8Content.substring(posCharset);
 						int posEnd = utf8Content.indexOf("\"");
+						if(posEnd == -1){
+							posEnd = utf8Content.indexOf(";");
+						}
+						if(posEnd == -1){
+							posEnd = utf8Content.indexOf("\\");
+						}
 						utf8Content = utf8Content.substring(0, posEnd);
 						utf8Content = StringUtils.remove(utf8Content, " ");
 						charset = utf8Content.substring(8);
+
 					}
 
 				} catch (Exception e) {
-					String[] args = new String[]{url, new String(baos.toByteArray(), "UTF8")};
-					throw new TalesException(new Throwable(), e, args);
+					String[] args = {url};
+					new TalesException(new Throwable(), e, args);
 				}
 
 			}
 
 
-			String content = IOUtils.toString(is, charset);
-
-
-			// close input stream conn
+			// close input stream conns
 			is.close();
+			conn.disconnect();
 
 
 			// return
-			return content;
+			DownloadByteResult result = new DownloadByteResult();
+			result.setCharset(charset);
+			result.setBytes(bytes);
+			return result;
 
 
 		}catch (Exception e) {
-			
+
 			String[] args = {url};
 			int responseCode = 0;
 

@@ -65,6 +65,13 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
+	public Connection getConnection(){
+		return connection;
+	}
+	
+	
+	
+	
 	@Override
 	public Task getTask() {
 		return task;
@@ -102,9 +109,14 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 		try {
 
-
-			String url = this.getMetadata().getBaseURL() + task.getDocumentName();
-			Logger.log(new Throwable(), url);
+			
+			String baseURL = this.getMetadata().getBaseURL();
+			if(baseURL == null){
+				baseURL = "";
+			}
+			
+			String url = baseURL + task.getDocumentName();
+			Logger.log(new Throwable(), task.getDocumentId() + " - " + url);
 
 			// db connect
 			talesDB = new TalesDB(connection, templateMetadata);
