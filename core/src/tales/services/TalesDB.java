@@ -49,18 +49,53 @@ public class TalesDB {
 
 	// jedis pool
 	private final static HashMap<String, JedisPool> jedisPools = new HashMap<String, JedisPool>();
-	
-	// ready
-	private final static ArrayList<String> ready = new ArrayList<String>();
 
 
 
 
-	public TalesDB(tales.services.Connection talesConn, TemplateMetadataInterface metadata) throws TalesException{
-
-
+	public TalesDB(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+		
 		this.dbName = metadata.getDatabaseName();
 
+		try{
+
+
+			// connections
+			TalesDB.connect(talesConn, metadata);
+
+
+			// index
+			if(!index.containsKey(dbName)){
+				index.put(dbName, 0);
+			}
+
+			index.put(dbName, index.get(dbName) + 1);
+
+			if(index.get(dbName) >= conns.get(dbName).size()){
+				index.put(dbName, 0);
+			}
+
+
+			// db conn
+			conn = conns.get(dbName).get(index.get(dbName));
+
+
+			// jedis
+			jedisPool = jedisPools.get(dbName);
+
+
+		}catch(final Exception e){
+			final String[] args = {dbName};
+			throw new TalesException(new Throwable(), e, args);
+		}
+	}
+
+
+
+
+	private synchronized static void connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+
+		String dbName = metadata.getDatabaseName();
 
 		try{
 
@@ -73,10 +108,10 @@ public class TalesDB {
 				conns.put(dbName, new ArrayList<Connection>());
 				cachedTables.put(dbName, new ArrayList<String>());
 
-				
+
 				// checks the remote database
 				DBUtils.waitUntilMysqlIsReady(Config.getDataDBHost(dbName), Config.getDBPort(dbName));
-				
+
 
 				// checks if the database exists, if not create it
 				DBUtils.checkDatabase(dbName);
@@ -87,18 +122,18 @@ public class TalesDB {
 				config.setMaxActive(talesConn.getConnectionsNumber());
 				config.setTestWhileIdle(true);
 
-				jedisPool = new JedisPool(config, Config.getRedisHost(dbName), Config.getRedisPort(dbName), Globals.REDIS_TIMEOUT);
+				final JedisPool jedisPool = new JedisPool(config, Config.getRedisHost(dbName), Config.getRedisPort(dbName), Globals.REDIS_TIMEOUT);
 				jedisPools.put(dbName, jedisPool);
-				
-				
+
+
 				// wait for redis to be up and running
-				Jedis redis  = jedisPool.getResource();
+				final Jedis redis  = jedisPool.getResource();
 				while(true){
 					try{
 						redis.exists("test");
 						break;
 					}catch(Exception e){
-						Logger.log(new Throwable(), "waiting for to be ready...");
+						Logger.log(new Throwable(), "[" + dbName + "] waiting for to be ready...");
 						Thread.sleep(1000);
 					}
 				}
@@ -106,8 +141,9 @@ public class TalesDB {
 
 
 				// creates the conns
-				Logger.log(new Throwable(), "openning " + talesConn.getConnectionsNumber() + " connections to host \"" + Config.getDataDBHost(dbName) + "\" database \"" + dbName + "\"");
+				Logger.log(new Throwable(), "[" + dbName + "] openning " + talesConn.getConnectionsNumber() + " connections to host \"" + Config.getDataDBHost(dbName) + "\" database \"" + dbName + "\"");
 
+				Connection conn = null;
 				for(int i = 0; i < talesConn.getConnectionsNumber(); i++){
 
 					Class.forName("com.mysql.jdbc.Driver");
@@ -125,66 +161,33 @@ public class TalesDB {
 
 
 				// checks if the doc table exists
-				Logger.log(new Throwable(), "checking documents table...");
-				if(!documentsTableExists()){
-					createDocumentsTable();
+				Logger.log(new Throwable(), "[" + dbName + "] checking documents table...");
+				if(!TalesDB.documentsTableExists(conn)){
+					TalesDB.createDocumentsTable(conn);
 				}
 
 
 				// adds the first document if none
-				Logger.log(new Throwable(), "checking first documents...");
-				if(getDocumentsCount() == 0 && metadata.getFirstDocuments() != null){
+				Logger.log(new Throwable(), "[" + dbName + "] checking first documents...");
+				if(TalesDB.getDocumentsCount(conn) == 0 && metadata.getFirstDocuments() != null){
 					for(final String document : metadata.getFirstDocuments()){
-						if(!documentExists(document)){
-							addDocument(document);
+						if(!new TalesDB(talesConn, metadata).documentExists(document)){
+							new TalesDB(talesConn, metadata).addDocument(document);
 						}
 					}
 				}
 
 
 				// checks if the ignored document table exists
-				Logger.log(new Throwable(), "checking ignored documents table...");
-				if(!ignoredDocumentsTableExists()){
-					createIgnoredDocumentsTable();
+				Logger.log(new Throwable(), "[" + dbName + "] checking ignored documents table...");
+				if(!TalesDB.ignoredDocumentsTableExists(conn)){
+					TalesDB.createIgnoredDocumentsTable(conn);
 				}
 
 
 				// load documents in memory
-				Logger.log(new Throwable(), "checking redis...");
-				loadDocumentsIntoMem();
-				
-				
-				// ready
-				ready.add(dbName);
-
-
-			}else{
-
-				
-				// waits for the connections to be finished
-				while(!ready.contains(dbName)){
-					Thread.sleep(100);
-				}
-
-				
-				// index
-				if(!index.containsKey(dbName)){
-					index.put(dbName, 0);
-				}
-
-				index.put(dbName, index.get(dbName) + 1);
-
-				if(index.get(dbName) >= conns.get(dbName).size()){
-					index.put(dbName, 0);
-				}
-
-
-				// db conn
-				conn = conns.get(dbName).get(index.get(dbName));
-
-
-				// jedis
-				jedisPool = jedisPools.get(dbName);
+				Logger.log(new Throwable(), "[" + dbName + "] checking redis...");
+				TalesDB.loadDocumentsIntoMem(conn, dbName, jedisPool);
 
 			}
 
@@ -207,11 +210,11 @@ public class TalesDB {
 
 
 	public synchronized final int addDocument(final String name) throws TalesException{
-		
+
 		Jedis redis = null;
 
 		try{
-
+			
 
 			// memcache	
 			redis = jedisPool.getResource();
@@ -244,16 +247,16 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			
+
 			final String[] args = {name};
 			throw new TalesException(new Throwable(), e, args);
-			
+
 		}finally{
-			
+
 			if(redis != null){
 				jedisPool.returnResource(redis);
 			}
-			
+
 		}
 
 	}
@@ -262,7 +265,7 @@ public class TalesDB {
 
 
 	public synchronized final boolean documentExists(final String name) throws TalesException{
-		
+
 		Jedis redis = null;
 
 		try {
@@ -273,16 +276,16 @@ public class TalesDB {
 			return result;
 
 		}catch(final Exception e){
-			
+
 			final String[] args = {name};
 			throw new TalesException(new Throwable(), e, args);
-			
+
 		}finally{
-			
+
 			if(redis != null){
 				jedisPool.returnResource(redis);
 			}
-			
+
 		}
 
 	}
@@ -293,7 +296,7 @@ public class TalesDB {
 	public synchronized final boolean documentIdExists(final int documentId) throws TalesException{
 
 		try {
-
+			
 
 			boolean exists = false;
 
@@ -340,18 +343,18 @@ public class TalesDB {
 			return result;
 
 		}catch(final Exception e){
-			
+
 			final String[] args = {name};
 			throw new TalesException(new Throwable(), e, args);
-			
+
 		}finally{
-			
+
 			if(redis != null){
 				jedisPool.returnResource(redis);
 			}
-			
+
 		}
-		
+
 	}
 
 
@@ -359,10 +362,8 @@ public class TalesDB {
 
 	public final Document getAndUpdateLastCrawledDocument() throws TalesException{
 
-
 		try {
 			return getAndUpdateLastCrawledDocuments(1).get(0);
-
 
 		}catch(final Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -378,8 +379,7 @@ public class TalesDB {
 
 		try {
 
-
-			// db query
+			
 			final ArrayList<Document> list      = new ArrayList<Document>();
 			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate ASC LIMIT 0,?");
 			statement.setInt(1, number);
@@ -426,7 +426,7 @@ public class TalesDB {
 
 
 		try {
-
+			
 
 			final ArrayList<Document> list      = new ArrayList<Document>();
 			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate DESC LIMIT 0,?");
@@ -551,11 +551,11 @@ public class TalesDB {
 
 
 
-	public final synchronized int addAttribute(final Attribute attribute) throws TalesException{
+	public synchronized final int addAttribute(final Attribute attribute) throws TalesException{
 
 
 		try {
-
+			
 
 			// checks if the db row xists
 			if(!attributeTableExists(attribute.getName())){
@@ -597,7 +597,7 @@ public class TalesDB {
 
 
 
-	public final synchronized void updateAttribute(final Attribute attribute) throws TalesException{
+	public synchronized final void updateAttribute(final Attribute attribute) throws TalesException{
 
 
 		try {
@@ -642,7 +642,7 @@ public class TalesDB {
 
 
 
-	public final synchronized boolean attributeExist(final String attributeName, final int documentId) throws TalesException{
+	public synchronized final boolean attributeExist(final String attributeName, final int documentId) throws TalesException{;
 
 
 		if(!attributeTableExists(attributeName)){
@@ -695,7 +695,7 @@ public class TalesDB {
 
 		try {
 
-
+			
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
 
@@ -813,7 +813,7 @@ public class TalesDB {
 
 
 		try {
-
+			
 
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
@@ -854,7 +854,7 @@ public class TalesDB {
 
 
 
-	private final synchronized boolean attributeTableExists(final String attributeName) throws TalesException{
+	private synchronized final boolean attributeTableExists(final String attributeName) throws TalesException{
 
 
 		boolean exists = false;
@@ -899,7 +899,7 @@ public class TalesDB {
 
 
 		try {
-
+			
 
 			String tbName       = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName              = tbName.replace(".", "_");
@@ -919,7 +919,7 @@ public class TalesDB {
 
 
 
-	public final int getDocumentsCount() throws TalesException{
+	public final static int getDocumentsCount(Connection conn) throws TalesException{
 
 
 		try {
@@ -951,7 +951,7 @@ public class TalesDB {
 
 
 
-	private final synchronized void loadDocumentsIntoMem() throws TalesException{
+	private synchronized final static void loadDocumentsIntoMem(Connection conn, String dbName, JedisPool jedisPool) throws TalesException{
 
 
 		try{
@@ -971,7 +971,7 @@ public class TalesDB {
 				}
 
 
-				Logger.log(new Throwable(), "checking last documentId cached " + lastId);
+				Logger.log(new Throwable(), "[" + dbName + "] checking last documentId cached " + lastId);
 
 
 				// db query
@@ -1067,7 +1067,7 @@ public class TalesDB {
 
 
 
-	private final synchronized void createDocumentsTable() throws TalesException{
+	private synchronized final static void createDocumentsTable(Connection conn) throws TalesException{
 
 
 		try {
@@ -1098,7 +1098,7 @@ public class TalesDB {
 
 
 
-	private final synchronized boolean documentsTableExists() throws TalesException{
+	private synchronized final static boolean documentsTableExists(Connection conn) throws TalesException{
 
 
 		boolean exists          = false;
@@ -1125,7 +1125,7 @@ public class TalesDB {
 
 
 
-	private final synchronized void createIgnoredDocumentsTable() throws TalesException{
+	private synchronized final static void createIgnoredDocumentsTable(Connection conn) throws TalesException{
 
 
 		try {
@@ -1153,7 +1153,7 @@ public class TalesDB {
 
 
 
-	private final synchronized boolean ignoredDocumentsTableExists() throws TalesException{
+	private synchronized final static boolean ignoredDocumentsTableExists(Connection conn) throws TalesException{
 
 
 		boolean exists          = false;
@@ -1206,7 +1206,7 @@ public class TalesDB {
 
 
 		try{
-
+			
 
 			final PreparedStatement statement  = conn.prepareStatement("SELECT count(*) FROM ignoredDocuments WHERE name=? LIMIT 1");
 			statement.setString(1, name);
@@ -1246,7 +1246,7 @@ public class TalesDB {
 
 
 			// db
-			Logger.log(new Throwable(), "dropping database");
+			Logger.log(new Throwable(), "[" + dbName + "] dropping database");
 
 			final Statement statement = (Statement) conn.createStatement();
 			statement.executeUpdate("drop database " + Globals.DATABASE_NAMESPACE + dbName);
@@ -1257,7 +1257,7 @@ public class TalesDB {
 			final Jedis redis = jedisPool.getResource();
 			final Set<String> keys = redis.keys(dbName + "*");
 
-			Logger.log(new Throwable(), "deleting " + keys.size() + " redis keys");
+			Logger.log(new Throwable(), "[" + dbName + "] deleting " + keys.size() + " redis keys");
 
 			for(final String key : keys){
 				redis.del(key);
@@ -1274,7 +1274,8 @@ public class TalesDB {
 
 
 
-	public final static synchronized void closeDBConnections(final String dbName) throws TalesException{
+
+	public synchronized final static void closeDBConnections(final String dbName) throws TalesException{
 
 
 		try {
@@ -1291,7 +1292,7 @@ public class TalesDB {
 
 				conns.remove(dbName);
 
-				Logger.log(new Throwable(), "connections closed " + i);
+				Logger.log(new Throwable(), "[" + dbName + "] connections closed " + i);
 
 			}
 
@@ -1356,7 +1357,7 @@ public class TalesDB {
 
 		try {
 
-
+			
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
 

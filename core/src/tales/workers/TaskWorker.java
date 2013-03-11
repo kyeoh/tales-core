@@ -170,6 +170,9 @@ public class TaskWorker{
 
 								// deletes the task from the queue
 								taskDB.deleteTaskWithDocumentId(task.getDocumentId());
+								
+								// sleep
+								Thread.sleep(50);
 
 							}
 
