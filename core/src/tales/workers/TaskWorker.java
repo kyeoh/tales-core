@@ -5,6 +5,7 @@ package tales.workers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import tales.scrapers.ScraperConfig;
 import tales.services.TalesException;
@@ -85,7 +86,7 @@ public class TaskWorker{
 
 
 
-		private ArrayList<TemplateInterface> threads;
+		private CopyOnWriteArrayList<TemplateInterface> threads;
 		private TasksDB taskDB;
 		private ScraperConfig config;
 		private Average processAverage;
@@ -104,7 +105,7 @@ public class TaskWorker{
 			this.config                = config;
 			this.failover              = failover;
 			stop                       = false;
-			threads                    = new ArrayList<TemplateInterface>();
+			threads                    = new CopyOnWriteArrayList<TemplateInterface>();
 			processAverage             = new Average(20);
 			taskDB                     = new TasksDB(config);
 
@@ -128,7 +129,7 @@ public class TaskWorker{
 
 
 						// checks the threads
-						ArrayList<TemplateInterface> tempThreads = new ArrayList<TemplateInterface>();
+						CopyOnWriteArrayList<TemplateInterface> tempThreads = new CopyOnWriteArrayList<TemplateInterface>();
 						for(TemplateInterface thread : threads){
 
 							if(thread.isTemplateActive()){
