@@ -168,7 +168,7 @@ public class TalesDB {
 
 
 				// adds the first document if none
-				Logger.log(new Throwable(), "[" + dbName + "] checking first documents...");
+				Logger.log(new Throwable(), "[" + dbName + "] checking required documents...");
 				if(TalesDB.getDocumentsCount(conn) == 0 && metadata.getRequiredDocuments() != null){
 					for(final String document : metadata.getRequiredDocuments()){
 						if(!new TalesDB(talesConn, metadata).documentExists(document)){

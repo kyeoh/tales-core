@@ -253,31 +253,19 @@ public class TaskWorker{
 		public void stop(){
 
 			stop = true;
-			boolean finished = false;
 
-			while(!finished){
+			while(getTasksRunning().size() != 0){
 
 				Logger.log(new Throwable(), "waiting for the tasks to finish...");
-
-				finished = true;
-				
-				for(Iterator<TemplateInterface> it = threads.iterator(); it.hasNext();){
-
-					TemplateInterface template = it.next();
-
-					if(template.isTemplateActive()){
-						finished = false;
-						break;
-					}
-
-				}
 
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				
 			}
+			
 		}
 
 
