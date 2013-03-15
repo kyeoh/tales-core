@@ -74,7 +74,6 @@ public class AppMonitor{
 
 		public void run(){
 
-
 			try{
 
 				// total time

@@ -74,7 +74,6 @@ public class S3DBRestore{
 
 	public static void restoreLastestDB(String s3BucketName, String dbName) throws TalesException{
 
-
 		try{
 			
 			

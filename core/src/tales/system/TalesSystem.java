@@ -156,7 +156,6 @@ public class TalesSystem {
 
 	public static String getTemplatesGitBranchName() throws TalesException{
 
-
 		try{
 
 			if(branchName == null){

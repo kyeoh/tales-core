@@ -44,7 +44,6 @@ public class LoopScraper {
 
 	public static void init(ScraperConfig scraperConfig, long loopReferenceTime) throws TalesException{
 
-
 		try{
 			
 			
@@ -84,6 +83,7 @@ public class LoopScraper {
 							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
+						
 					}
 
 				}

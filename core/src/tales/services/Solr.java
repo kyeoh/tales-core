@@ -70,7 +70,6 @@ public class Solr {
 
 	public void updateAttributes(ArrayList<Attribute> attributes) throws TalesException {
 
-
 		try{
 
 			

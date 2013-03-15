@@ -28,6 +28,7 @@ import tales.config.Config;
 import tales.config.Globals;
 import tales.s3.S3DBBackup;
 import tales.services.Download;
+import tales.services.DownloadException;
 import tales.services.Log;
 import tales.services.Logger;
 import tales.services.LogsDB;
@@ -102,6 +103,10 @@ public class APIHandler extends AbstractHandler{
 
 		}else if(target.equals("/scale")){
 			scale(request, response);
+
+
+		}else if(target.equals("/databases")){
+			databases(response);
 		}
 
 	}
@@ -184,10 +189,10 @@ public class APIHandler extends AbstractHandler{
 
 		try {
 
-			
+
 			AppMonitor.init();
 
-			
+
 			String publicDNS = null;
 			Logger.log(new Throwable(), "NEW: creating new server");
 
@@ -300,6 +305,8 @@ public class APIHandler extends AbstractHandler{
 						break;
 					}
 
+				}catch(DownloadException e){
+					new DownloadException(new Throwable(), e, e.getResponseCode());
 				}catch(Exception e){
 					new TalesException(new Throwable(), e);
 				}
@@ -310,11 +317,11 @@ public class APIHandler extends AbstractHandler{
 
 
 			Logger.log(new Throwable(), "NEW: finished");
-			
-			
+
+
 			AppMonitor.stop();
-			
-			
+
+
 			// http response
 			JSONObject json = new JSONObject();
 			json.put("dns", publicDNS);
@@ -322,8 +329,8 @@ public class APIHandler extends AbstractHandler{
 			response.setContentType("application/json");
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().println(json);
-			
-			
+
+
 			return publicDNS;
 
 
@@ -343,8 +350,8 @@ public class APIHandler extends AbstractHandler{
 
 
 			// makes sure that we dont delete a server with dbs -- we ignore tales logs
-			if(DBUtils.getTalesDBs().size() == 0 || 
-					(DBUtils.getTalesDBs().size() == 1 && DBUtils.getTalesDBs().get(0).contains(LogsDB.getDBName()))){
+			if(DBUtils.getLocalTalesDBs().size() == 0 || 
+					(DBUtils.getLocalTalesDBs().size() == 1 && DBUtils.getLocalTalesDBs().get(0).contains(LogsDB.getDBName()))){
 
 				forceDelete(response);
 
@@ -561,29 +568,70 @@ public class APIHandler extends AbstractHandler{
 
 		try{
 
-			
+
 			AppMonitor.init();
-			
+
 			// backsups the databases
 			Logger.log(new Throwable(), "SCALE: backing up databases into s3 bucket: " + Globals.SCALE_TEMP_S3_BUCKET_NAME);
 			S3DBBackup.backupAllExcept(Globals.SCALE_TEMP_S3_BUCKET_NAME, null);
-			
+
 			// creates a new server
 			String publicDNS = newServer(request, response);
-			
+
 			// moves the backups to the new server
 			Logger.log(new Throwable(), "SCALE: restoring databases into new server");
-			String dbNames = DBUtils.getTalesDBs().toString().replace(" ", "");
+			String dbNames = DBUtils.getLocalTalesDBs().toString().replace(" ", "");
 			dbNames = dbNames.substring(1, dbNames.length() - 1);
 			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start/tales.s3.S3DBRestore -bucket " + Globals.SCALE_TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
 			Download download = new Download();
 			download.getURLContent(url);
-			
+
 			Logger.log(new Throwable(), "SCALE: remember to edit the config file so it matches the new host url.");
-			
+
 			AppMonitor.stop();
-			
+
 			forceDelete(response);
+
+
+		} catch (Exception e) {
+			new TalesException(new Throwable(), e);
+		}
+
+	}
+
+
+
+
+	private void databases(HttpServletResponse response) {
+
+		try{
+
+
+			JSONArray json = new JSONArray();
+
+			for(String dbName : DBUtils.getLocalTalesDBs()){
+
+				JSONArray tables = new JSONArray();
+				for(String tableName : DBUtils.getTableNames(dbName)){
+
+					JSONObject table = new JSONObject();
+					table.put("table", tableName);
+					table.put("size", DBUtils.getTableCount(dbName, tableName));
+					tables.add(table);
+
+				}
+
+				JSONObject database = new JSONObject();
+				database.put("name", dbName);
+				database.put("tables", tables);
+				json.add(database);
+
+			}
+
+			
+			response.setContentType("application/json");
+			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().println(json);
 			
 
 		} catch (Exception e) {

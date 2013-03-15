@@ -80,7 +80,6 @@ public class SocketServlet extends WebSocketHandler {
 		@Override
 		public void run() {
 
-
 			try{
 
 				if(messages.size() > 0){

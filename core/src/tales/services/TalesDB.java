@@ -1029,44 +1029,6 @@ public class TalesDB {
 
 
 
-	public final ArrayList<String> getAttributesNames() throws TalesException{
-
-
-		try{
-
-
-			final PreparedStatement statement = conn.prepareStatement("SHOW TABLES");
-			final ResultSet rs                = statement.executeQuery();
-			final ArrayList<String> tables    = new ArrayList<String>();
-
-
-			while(rs.next()){
-
-				final String attr = rs.getString(1);
-
-				if(attr.contains(Globals.ATTRIBUTE_TABLE_NAMESPACE)){
-					tables.add(attr.replace(Globals.ATTRIBUTE_TABLE_NAMESPACE, ""));
-				}
-
-			}
-
-
-			rs.close();
-			statement.close();
-
-
-			return tables;
-
-
-		}catch(final Exception e){
-			throw new TalesException(new Throwable(), e);
-		}
-
-	}
-
-
-
-
 	private synchronized final static void createDocumentsTable(Connection conn) throws TalesException{
 
 

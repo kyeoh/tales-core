@@ -28,7 +28,6 @@ public class Logger {
 
 	private static void emit(StackTraceElement[] e, String logType, String data){
 
-
 		try{
 
 			

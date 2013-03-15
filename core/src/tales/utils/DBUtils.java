@@ -5,6 +5,7 @@ package tales.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
@@ -23,37 +24,25 @@ public class DBUtils {
 
 
 
-	private static Connection conn;
-	private static ArrayList<String> cachedDatabases = new ArrayList<String>();
-
-
-
-
 	public static void checkDatabase(String dbName) throws TalesException{
 
 		try {
 
 
-			if(!cachedDatabases.contains(dbName)){
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
+					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					"mysql" +
+					"?user="+Config.getDBUsername() +
+					"&password="+Config.getDBPassword() +
+					"&useUnicode=true&characterEncoding=UTF-8"
+					);
 
-
-				// starts a local connection
-				Class.forName("com.mysql.jdbc.Driver");
-				conn = DriverManager.getConnection("jdbc:mysql://"+
-						Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
-						"mysql" +
-						"?user="+Config.getDBUsername() +
-						"&password="+Config.getDBPassword() +
-						"&useUnicode=true&characterEncoding=UTF-8"
-						);
-
-				if(!databaseExists(dbName)){
-					createDatabase(dbName);
-				}
-
-				cachedDatabases.add(dbName);
-
+			if(!databaseExists(conn, dbName)){
+				createDatabase(conn, dbName);
 			}
+
+			conn.close();
 
 
 		}catch(final Exception e){
@@ -66,7 +55,7 @@ public class DBUtils {
 
 
 
-	private static boolean databaseExists(String dbName) throws TalesException{
+	private static boolean databaseExists(Connection conn, String dbName) throws TalesException{
 
 
 		boolean exists          = false;
@@ -99,8 +88,7 @@ public class DBUtils {
 
 
 
-	private static void createDatabase(String dbName) throws TalesException{
-
+	private static void createDatabase(Connection conn, String dbName) throws TalesException{
 
 		try {
 
@@ -121,15 +109,15 @@ public class DBUtils {
 
 
 
-
 	public static void waitUntilMysqlIsReady(String host, int port){
 
 		while(true){
 
 			try {
 
+
 				Class.forName("com.mysql.jdbc.Driver");
-				conn = DriverManager.getConnection("jdbc:mysql://"+
+				Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 						host + ":" +port+"/"+
 						"mysql" +
 						"?user="+Config.getDBUsername() +
@@ -139,6 +127,7 @@ public class DBUtils {
 
 				conn.close();
 				break;
+
 
 			}catch(final Exception e){	
 				try {
@@ -157,17 +146,18 @@ public class DBUtils {
 	public static void waitUntilLocalMysqlIsReady() throws TalesException{
 		waitUntilMysqlIsReady("localhost", Config.getDBPort());
 	}
-	
-	
-	
-	
-	public static ArrayList<String> getTalesDBs() throws TalesException{
+
+
+
+
+	public static ArrayList<String> getLocalTalesDBs() throws TalesException{
 
 		try{
 
+
 			ArrayList<String> dbNames = new ArrayList<String>();
 
-			// connects to mysql
+
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					"localhost:"+Config.getDBPort()+"/"+
@@ -193,7 +183,89 @@ public class DBUtils {
 
 			conn.close();
 
+
 			return dbNames;
+
+
+		}catch(final Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
+
+
+
+
+	public static final ArrayList<String> getTableNames(String dbName) throws TalesException{
+
+		try{
+
+
+			Class.forName("com.mysql.jdbc.Driver");
+			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
+					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					Globals.DATABASE_NAMESPACE + dbName +
+					"?user="+Config.getDBUsername() +
+					"&password="+Config.getDBPassword() +
+					"&useUnicode=true&characterEncoding=UTF-8"
+					);
+
+
+			final PreparedStatement statement = conn.prepareStatement("SHOW TABLES");
+			final ResultSet rs                = statement.executeQuery();
+			final ArrayList<String> tables    = new ArrayList<String>();
+
+
+			while(rs.next()){
+				tables.add(rs.getString(1));
+			}
+
+			rs.close();
+			statement.close();
+			conn.close();
+
+
+			return tables;
+
+
+		}catch(final Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
+
+
+
+
+
+	public static int getTableCount(String dbName, String tableName) throws TalesException{
+
+		try{
+
+
+			Class.forName("com.mysql.jdbc.Driver");
+			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
+					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					Globals.DATABASE_NAMESPACE + dbName +
+					"?user="+Config.getDBUsername() +
+					"&password="+Config.getDBPassword() +
+					"&useUnicode=true&characterEncoding=UTF-8"
+					);
+
+			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM " + tableName);
+			statement.executeQuery();
+
+			final ResultSet rs = statement.executeQuery();
+			rs.next();
+			
+			final int count = rs.getInt(1);
+			
+			rs.close();
+			statement.close();   
+			conn.close();
+
+			
+			return count;
 
 
 		}catch(final Exception e){

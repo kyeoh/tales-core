@@ -44,7 +44,6 @@ public class AttributeScraper{
 	
 	public static void init(ScraperConfig scraperConfig, String attributeName, long loopReferenceTime) throws TalesException{
 
-
 		try{
 			
 			
@@ -84,6 +83,7 @@ public class AttributeScraper{
 							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
+						
 					}
 
 				}

@@ -43,7 +43,6 @@ public class S3DBBackup {
 
 	public static void backupAllExcept(String s3BucketName, ArrayList<String> excludeDBNames) throws TalesException{
 
-
 		try{
 
 			// checks if the temp folder exists

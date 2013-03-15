@@ -3,6 +3,7 @@ package tales.system;
 
 
 
+import java.text.DecimalFormat;
 import java.util.Date;
 
 import net.sf.json.JSONObject;
@@ -42,6 +43,8 @@ public class ServerMonitor{
 
 
 		private long start;
+		private final double BASE = 1024, KB = BASE, MB = KB*BASE, GB = MB*BASE;
+	    private final DecimalFormat df = new DecimalFormat("#.##");
 
 
 
@@ -55,7 +58,6 @@ public class ServerMonitor{
 
 		public void run(){
 
-
 			try{
 				
 				
@@ -66,23 +68,22 @@ public class ServerMonitor{
 				json.put("uptime", ((new Date().getTime() - start) / 1000));
 				
 				// mem
-				json.put("freeMemory", sigar.getMem().getFree());
-				json.put("usedMemory", sigar.getMem().getUsed());
-				json.put("totalMemory", sigar.getMem().getTotal());
-				json.put("freeMemoryPorcent", sigar.getMem().getFreePercent());
+				json.put("freeMemory", formatSize(sigar.getMem().getActualFree()));
+				json.put("usedMemory", formatSize(sigar.getMem().getActualUsed()));
+				json.put("totalMemory", formatSize(sigar.getMem().getTotal()));
+				json.put("freeMemoryPorcent", df.format(sigar.getMem().getFreePercent()) + "%");
 				
 				// cpu
-				json.put("cpu", sigar.getCpuPerc().getCombined());
+				json.put("cpu", df.format(sigar.getCpuPerc().getUser() * 100) + "%");
 				
 				// disk
-				json.put("freeDisk", sigar.getFileSystemUsage("/").getFree());
-				json.put("usedDisk", sigar.getFileSystemUsage("/").getUsed());
-				json.put("totalDisk", sigar.getFileSystemUsage("/").getTotal());
-				json.put("freeDiskPorcent", 1 - sigar.getFileSystemUsage("/").getUsePercent());
+				json.put("freeDisk", formatSize(sigar.getFileSystemUsage("/").getAvail() * BASE));
+				json.put("usedDisk", formatSize(sigar.getFileSystemUsage("/").getUsed() * BASE));
+				json.put("totalDisk", formatSize(sigar.getFileSystemUsage("/").getTotal() * BASE));
+				json.put("freeDiskPorcent", (1 - sigar.getFileSystemUsage("/").getUsePercent()) * 100 + "%");
 
 				// print
 				Logger.log(new Throwable(), json.toString());
-
 				
 				Thread.sleep(1000);
 				
@@ -97,6 +98,22 @@ public class ServerMonitor{
 			t.start();
 
 		}
+		
+		
+		
+		
+		private String formatSize(double size) {
+	        if(size >= GB) {
+	            return df.format(size/GB) + " GB";
+	        }
+	        if(size >= MB) {
+	            return df.format(size/MB) + " MB";
+	        }
+	        if(size >= KB) {
+	            return df.format(size/KB) + " KB";
+	        }
+	        return "" + (int)size + " bytes";
+	    }
 
 	}
 	
