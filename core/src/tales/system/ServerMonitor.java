@@ -6,8 +6,7 @@ package tales.system;
 import java.util.Date;
 
 import net.sf.json.JSONObject;
-
-import org.apache.commons.io.IOUtils;
+import org.hyperic.sigar.Sigar;
 
 import tales.services.Logger;
 import tales.services.TalesException;
@@ -60,49 +59,28 @@ public class ServerMonitor{
 			try{
 				
 				
-				// uptime / secs
-				long uptime = ((new Date().getTime() - start) / 1000);
-
+				Sigar sigar = new Sigar();
+				JSONObject json = new JSONObject();
+				
+				// uptime
+				json.put("uptime", ((new Date().getTime() - start) / 1000));
 				
 				// mem
-				ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", "/usr/bin/free -m");
-				Process process = builder.start();
-				process.waitFor();
-
-				String memory = IOUtils.toString(process.getInputStream(), "utf-8");
-				memory = memory.substring(0, memory.indexOf("Swap:"));
-
-				process.destroy();
-
+				json.put("freeMemory", sigar.getMem().getFree());
+				json.put("usedMemory", sigar.getMem().getUsed());
+				json.put("totalMemory", sigar.getMem().getTotal());
+				json.put("freeMemoryPorcent", sigar.getMem().getFreePercent());
 				
 				// cpu
-				builder = new ProcessBuilder("/bin/sh", "-c", "/usr/bin/top -b -d1 -n1|grep -i \"Cpu(s)\"");
-				process = builder.start();
-				process.waitFor();
-
-				String cpu = IOUtils.toString(process.getInputStream(), "utf-8");
-				cpu = cpu.substring(cpu.indexOf(":") + 1, cpu.length());
-
-				process.destroy();
+				json.put("cpu", sigar.getCpuPerc().getCombined());
 				
-				
-				// hard drive
-				builder = new ProcessBuilder("/bin/sh", "-c", "/bin/df -h");
-				process = builder.start();
-				process.waitFor();
-
-				String disk = IOUtils.toString(process.getInputStream(), "utf-8");
-				disk = disk.substring(0, disk.indexOf("none"));
-
-				process.destroy();
-				
+				// disk
+				json.put("freeDisk", sigar.getFileSystemUsage("/").getFree());
+				json.put("usedDisk", sigar.getFileSystemUsage("/").getUsed());
+				json.put("totalDisk", sigar.getFileSystemUsage("/").getTotal());
+				json.put("freeDiskPorcent", 1 - sigar.getFileSystemUsage("/").getUsePercent());
 
 				// print
-				JSONObject json = new JSONObject();
-				json.put("uptime", uptime);
-				json.put("memory", memory);
-				json.put("cpu", cpu);
-				json.put("disk", disk);
 				Logger.log(new Throwable(), json.toString());
 
 				

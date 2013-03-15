@@ -441,10 +441,17 @@
 		
 			div.html("");
 			div.append("<ul>");
-			div.append("<li>Uptime: " + json.uptime + "</li>");
-			div.append("<li>Memory:<br><textarea rows=\"3\" style=\"width: 400px\">" + json.memory + "</textarea></li>");
-			div.append("<li>Cpu: " + json.cpu + "</li>");
-			div.append("<li>Disk:<br><textarea rows=\"2\" style=\"width: 400px\">" + json.disk + "</textarea></li>");
+			div.append("<li>uptime: " +              json.uptime + " secs</li>");
+			div.append("<li>freeMemory: " +          json.freeMemory + "</li>");
+			div.append("<li>usedMemory: " +          json.usedMemory + "</li>");
+			div.append("<li>totalMemory: " +         json.totalMemory + "</li>");
+			div.append("<li>freeMemoryPorcent: " +   json.freeMemoryPorcent + "</li>");
+			div.append("<li>cpu: " +                 json.cpu + "</li>");
+			div.append("<li>freeDisk: " +            json.freeDisk + "</li>");
+			div.append("<li>usedDisk: " +            json.usedDisk + "</li>");
+			div.append("<li>totalDisk: " +           json.totalDisk + "</li>");
+			div.append("<li>freeDiskPorcent: " +     json.freeDiskPorcent + "</li>");
+			div.append("</ul>");
 			
 		}
 		
