@@ -11,8 +11,6 @@ Tales is simple, light, reliable, easy to install, and has been tested on produc
 
 With Tales you can do web monitoring, research, aggregators, etc.
 
-Tales currently only runs on Ubuntu 10.04 Lucid -- Tales is calling shell scripts inside the app, this needs to be replaced by a "apache licensed version of sigar".
-
 ### Block tolerant
 
 Tales is design to scrape the web continuously, even when the domain being scraped blocks the scraper server ip; it goes around this problem by fail-overing to a new node (server).
