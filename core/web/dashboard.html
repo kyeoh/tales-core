@@ -11,12 +11,17 @@
 			font-size: 12px;
 		}
 		
+		.nav {
+			clear: both;
+		}
+		
 		.analytics {
 			width: 50000px;
 			clear: both;
 		}
 		
 		.serverContainer {
+			width: auto;
 			float: left;
 			padding-left: 10px;
 			padding-right: 10px;
@@ -31,11 +36,6 @@
 			padding-right: 20px;
 		}
 		
-		.errorTextfield {
-			width: 100%;
-			height: 250px;
-		}
-		
 		.logTextfield {
 			width: 100%;
 			height: 400px;
@@ -43,7 +43,12 @@
 		}
 		
 		.errors {
-			clear:left;
+			width: 100%;
+		}
+		
+		.errorTextfield {
+			width: 100%;
+			height: 250px;
 		}
 		
 		.databases {
@@ -52,11 +57,12 @@
 		}
 		
 		.databaseContainer {
-			clear:left;
-			width: 700px;
+			width: 500px;
 			float: left;
-			padding-left: 20px;
-			padding-right: 20px;
+			padding-left: 10px;
+			padding-right: 10px;
+			margin-left: 10px;
+			margin-left: 10px;
 		}
 		
 	</style>
@@ -72,22 +78,26 @@
 		<div id="pauseBtn">
 			<h2><a href=javascript:pause()>Pause Stream</a><h2>
 		</div>
-		<hr>
-		<br>
-		<h2>Databases</h2>
-		<div id="databases" class="databases"></div>
-		<hr>
-		<br>
-		<h2>Nodes</h2>
-		<div id="analytics" class="analytics"></div>
-		<hr>
-		<br>
-		<h2>Errors</h2>
-		<div id="errors" class="errors">
-			<textarea id="errorLog" wrap='off' class='errorTextfield'></textarea>
+		
+		<div class="nav">
+			<h2>Nodes</h2>
+			<div id="analytics" class="analytics"></div>
+		</div>
+		
+		<div class="nav">
+			<br>
+			<h2>Errors</h2>
+			<div id="errors" class="errors">
+				<textarea id="errorLog" wrap='off' class='errorTextfield'></textarea>
+			</div>
+			<br>
+		</div>
+		
+		<div class="nav">
+			<h2>Databases</h2>
+			<div id="databases" class="databases"></div>
 		</div>
 	
-
 	</body>
 
 
@@ -105,6 +115,7 @@
 		var solrInterval = 5000;
 		var errorsInterval = 1000;
 		var startInterval = 1000;
+		var checkDatabaseInterval = 1000;
 		var appsInterval = {};
 		var serversInterval = {};
 		var colors = ["B0D1A6", "D0D1A5", "FFE1A9", "FFFBA4", "EFFAB4", "FF9F80", "A8CABA"]
@@ -147,14 +158,13 @@
 					
 							// checks if server div exists
 							if(!$("#" + serverDivName).exists()){
-
+								
+								if(colorIndex >= colors.length){
+									colorIndex = 0;
+								}
 								
 								$("#analytics").prepend("<div id='" + serverDivName +"' class='serverContainer'></div>");
 								$("#" + serverDivName).css("background-color", "#" + colors[colorIndex++]);
-								
-								if(colorIndex == colors.length){
-									colorIndex = 0;
-								}
 
 								// server title
 								$("#" + serverDivName).append("<hr><h2><a href=\"http://" + publicDNS + ":" + port + "\" target=\"_blank\">" + publicDNS + ":" + port + "</a> | <a href=\"#\" onclick=\"deleteServer('" + publicDNS + "')\">delete</a></h2>");	
@@ -163,21 +173,15 @@
 								$("#" + serverDivName).append("<div id=\"stats\"></div>");
 								
 								// server status
-								$("#" + serverDivName).find("#stats").append("<div id=\"server\"><h3>Server Info</h3></div>");
+								$("#" + serverDivName).find("#stats").append("<div id=\"server\"><h2>Server Info</h2></div>");
 								$("#" + serverDivName).find("#stats").find("#server").append("<div id=\"stats\"></div>");
-								
-								// solr indexes
-								$("#" + serverDivName).find("#stats").append("<div id=\"solr\"><h3>Solr Indexes</h3></div>");
-								$("#" + serverDivName).find("#stats").find("#solr").append("<div id=\"indexes\"></div><br><br>");
-								getSolrIndexes($("#" + serverDivName).find("#stats").find("#solr").find("#indexes"), publicDNS);
 						
 								// apps
 								$("#" + serverDivName).append("<div id=\"apps\"></div>");
 								
 								// database div
 								$("#databases").prepend("<div id='databases_" + serverDivName +"' class='databaseContainer'></div>");
-								
-								// check databases info
+								$("#databases_" + serverDivName).css("background-color", "#" + colors[colorIndex++]);
 								checkDatabasesInfo(publicDNS, $("#databases_" + serverDivName));
 
 
@@ -465,17 +469,17 @@
 		
 			div.html("");
 			div.append("<ul>");
-			div.append("<li>uptime: " +               json.uptime + " secs</li>");
-			div.append("<li>freeMemory: " +           json.freeMemory + "</li>");
-			div.append("<li>usedMemory: " +           json.usedMemory + "</li>");
-			div.append("<li>totalMemory: " +          json.totalMemory + "</li>");
-			div.append("<li><b>freeMemoryPorcent: " + json.freeMemoryPorcent + "</b></li>");
-			div.append("<li>cpu: " +                  json.cpu + "</li>");
-			div.append("<li>freeDisk: " +             json.freeDisk + "</li>");
-			div.append("<li>usedDisk: " +             json.usedDisk + "</li>");
-			div.append("<li>totalDisk: " +            json.totalDisk + "</li>");
-			div.append("<li><b>freeDiskPorcent: " +   json.freeDiskPorcent + "</b></li>");
+			div.append("<li><h3>freeDiskPorcent: " + json.freeDiskPorcent + " | freeMemoryPorcent: " +   json.freeMemoryPorcent + "</h3></li>");
+			div.append("<li>uptime: " +                   json.uptime + " secs</li>");
+			div.append("<li>freeMemory: " +               json.freeMemory + "</li>");
+			div.append("<li>usedMemory: " +               json.usedMemory + "</li>");
+			div.append("<li>totalMemory: " +              json.totalMemory + "</li>");
+			div.append("<li>cpu: " +                      json.cpu + "</li>");
+			div.append("<li>freeDisk: " +                 json.freeDisk + "</li>");
+			div.append("<li>usedDisk: " +                 json.usedDisk + "</li>");
+			div.append("<li>totalDisk: " +                json.totalDisk + "</li>");
 			div.append("</ul>");
+			div.append("<br>");
 			
 		}
 		
@@ -490,6 +494,7 @@
 				if(databases.length > 1 || (databases.length == 1 && databases[0].name != "logs")){
 					
 					div.html("");
+					div.append("<h2>" + publicDNS + "</h2>");
 				
 					// databases
 					for(var i = 0; i < databases.length; i++){
@@ -505,10 +510,12 @@
 						
 						div.append("</ul>");
 					}
+					
+					div.append("<br>");
 
 				}
 				
-				setTimeout(checkDatabasesInfo, 1000, publicDNS, div);
+				setTimeout(checkDatabasesInfo, checkDatabaseInterval, publicDNS, div);
 				
 			});
 			

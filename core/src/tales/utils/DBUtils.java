@@ -253,8 +253,6 @@ public class DBUtils {
 					);
 
 			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM " + tableName);
-			statement.executeQuery();
-
 			final ResultSet rs = statement.executeQuery();
 			rs.next();
 			

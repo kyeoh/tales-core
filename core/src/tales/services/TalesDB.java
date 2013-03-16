@@ -133,7 +133,7 @@ public class TalesDB {
 						redis.exists("test");
 						break;
 					}catch(Exception e){
-						Logger.log(new Throwable(), "[" + dbName + "] waiting for to be ready...");
+						Logger.log(new Throwable(), "[" + dbName + "] waiting for redis to be ready...");
 						Thread.sleep(1000);
 					}
 				}
