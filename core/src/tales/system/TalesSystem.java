@@ -106,7 +106,7 @@ public class TalesSystem {
 			// checks if its a aws server
 			try{
 				if(Config.getAWSAccessKeyId() != null
-						&& Config.getAWSAccessKeyId().equals("")
+						&& !Config.getAWSAccessKeyId().equals("")
 						&& !Config.getAWSSecretAccessKey().equals("")
 						&& TalesSystem.getAWSInstanceMetadata() != null){
 					return TalesSystem.getAWSInstanceMetadata().getPublicDnsName();
