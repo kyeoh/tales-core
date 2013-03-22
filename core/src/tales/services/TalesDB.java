@@ -55,7 +55,7 @@ public class TalesDB {
 
 	public TalesDB(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
 		
-		this.dbName = metadata.getDatabaseName();
+		this.dbName = metadata.getNamespace();
 
 		try{
 
@@ -95,7 +95,7 @@ public class TalesDB {
 
 	private synchronized static void connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
 
-		String dbName = metadata.getDatabaseName();
+		String dbName = metadata.getNamespace();
 
 		try{
 
@@ -150,8 +150,8 @@ public class TalesDB {
 					conn = DriverManager.getConnection("jdbc:mysql://"+
 							Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
 							Globals.DATABASE_NAMESPACE + dbName +
-							"?user="+Config.getDBUsername(metadata.getDatabaseName()) +
-							"&password="+Config.getDBPassword(metadata.getDatabaseName()) +
+							"?user="+Config.getDBUsername(metadata.getNamespace()) +
+							"&password="+Config.getDBPassword(metadata.getNamespace()) +
 							"&useUnicode=true&characterEncoding=UTF-8" +
 							"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 							);
@@ -401,7 +401,6 @@ public class TalesDB {
 				// update
 				updateDocumentLastUpdate(document.getId());
 
-
 			}
 
 
@@ -606,7 +605,6 @@ public class TalesDB {
 			// checks if the db row xists
 			if(!attributeTableExists(attribute.getName())){
 				createAttributeTable(attribute.getName());
-
 			}
 
 
@@ -1360,5 +1358,51 @@ public class TalesDB {
 		}
 
 	}
+	
+	
+	
+	
+	public final ArrayList<Document> getMostRecentCrawledDocumentsWithAttribute(final String attributeName, int number) throws TalesException{
 
+
+		try {
+
+			
+			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
+			tbName                             = tbName.replace(".", "_");
+
+
+			final PreparedStatement statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate DESC LIMIT ?;");
+			statement.setInt(1, number);
+
+			final ResultSet rs                 = statement.executeQuery();
+
+			final ArrayList<Document> documents   = new ArrayList<Document>();
+			while(rs.next()){
+
+				final Document document = new Document();
+				document.setId(rs.getInt("id"));
+				document.setName(rs.getString("name"));
+				document.setAdded(rs.getTimestamp("added"));
+				document.setLastUpdate(rs.getTimestamp("lastUpdate"));
+				document.setActive(rs.getBoolean("active"));
+
+				documents.add(document);
+
+			}
+
+
+			rs.close();
+			statement.close();
+
+
+			return documents;
+
+
+		}catch(final Exception e){
+			final String[] args = {attributeName};
+			throw new TalesException(new Throwable(), e, args);
+		}
+
+	}
 }

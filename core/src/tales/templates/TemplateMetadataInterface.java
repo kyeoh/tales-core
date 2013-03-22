@@ -14,7 +14,7 @@ public interface TemplateMetadataInterface {
 	
 	public String getBaseURL();
 	public ArrayList<String> getRequiredDocuments();
-	public String getDatabaseName();
+	public String getNamespace();
 	
 	
 }

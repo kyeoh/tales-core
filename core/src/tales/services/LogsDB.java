@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 import com.mysql.jdbc.Statement;
-import com.mysql.jdbc.exceptions.MySQLNonTransientConnectionException;
 
 import tales.config.Config;
 import tales.config.Globals;
@@ -47,7 +46,8 @@ public class LogsDB {
 						Globals.DATABASE_NAMESPACE + dbName +
 						"?user="+Config.getDBUsername() +
 						"&password="+Config.getDBPassword() +
-						"&useUnicode=true&characterEncoding=UTF-8"
+						"&useUnicode=true&characterEncoding=UTF-8" +
+						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
 
 				if(!tableExists()){
@@ -156,10 +156,6 @@ public class LogsDB {
 			}
 			
 
-		}catch(MySQLNonTransientConnectionException e){
-			reset();
-			throw new TalesException(new Throwable(), e);
-			
 		}catch(Exception e){
 			e.printStackTrace();
 			//throw new TalesException(e); no logs or stackoverflow
@@ -205,22 +201,10 @@ public class LogsDB {
 			return list;
 			
 
-		}catch(MySQLNonTransientConnectionException e){
-			reset();
-			throw new TalesException(new Throwable(), e);
-			
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
 		}
 
-	}
-
-
-
-
-	private static void reset() throws TalesException {
-		conn = null;
-		init();
 	}
 
 }

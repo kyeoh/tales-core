@@ -17,8 +17,8 @@ public interface TemplateInterface {
 	public Task getTask();
 	public TemplateMetadataInterface getMetadata();
 	public void run();
+	public boolean isTaskValid(Task task);
 	public boolean isTemplateActive();
-	public boolean isTaskValid();
 	public boolean hasFailed();
 	
 	

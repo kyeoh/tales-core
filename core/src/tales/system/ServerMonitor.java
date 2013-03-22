@@ -7,6 +7,9 @@ import java.text.DecimalFormat;
 import java.util.Date;
 
 import net.sf.json.JSONObject;
+
+import org.hyperic.sigar.FileSystemUsage;
+import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.Sigar;
 
 import tales.services.Logger;
@@ -68,19 +71,21 @@ public class ServerMonitor{
 				json.put("uptime", ((new Date().getTime() - start) / 1000));
 				
 				// mem
-				json.put("freeMemory", formatSize(sigar.getMem().getActualFree()));
-				json.put("usedMemory", formatSize(sigar.getMem().getActualUsed()));
-				json.put("totalMemory", formatSize(sigar.getMem().getTotal()));
-				json.put("freeMemoryPorcent", df.format(sigar.getMem().getFreePercent()) + "%");
+				Mem memory = sigar.getMem();
+				json.put("freeMemory", formatSize(memory.getActualFree()));
+				json.put("usedMemory", formatSize(memory.getActualUsed()));
+				json.put("totalMemory", formatSize(memory.getTotal()));
+				json.put("freeMemoryPorcent", df.format(memory.getFreePercent()) + "%");
 				
 				// cpu
 				json.put("cpu", df.format(sigar.getCpuPerc().getUser() * 100) + "%");
 				
 				// disk
-				json.put("freeDisk", formatSize(sigar.getFileSystemUsage("/").getAvail() * BASE));
-				json.put("usedDisk", formatSize(sigar.getFileSystemUsage("/").getUsed() * BASE));
-				json.put("totalDisk", formatSize(sigar.getFileSystemUsage("/").getTotal() * BASE));
-				json.put("freeDiskPorcent", (1 - sigar.getFileSystemUsage("/").getUsePercent()) * 100 + "%");
+				FileSystemUsage fileSystem = sigar.getFileSystemUsage("/");
+				json.put("freeDisk", formatSize(fileSystem.getAvail() * BASE));
+				json.put("usedDisk", formatSize(fileSystem.getUsed() * BASE));
+				json.put("totalDisk", formatSize(fileSystem.getTotal() * BASE));
+				json.put("freeDiskPorcent", (1 - fileSystem.getUsePercent()) * 100 + "%");
 
 				// print
 				Logger.log(new Throwable(), json.toString());

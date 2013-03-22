@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import tales.scrapers.ScraperConfig;
-import tales.services.TalesException;
 import tales.services.Logger;
+import tales.services.TalesException;
 import tales.services.Task;
 import tales.services.TasksDB;
 import tales.templates.TemplateInterface;
@@ -41,11 +41,9 @@ public class TaskWorker{
 	public void init() throws TalesException{
 
 		if(worker == null){
-
 			worker = new Worker(config, failover);
 			Thread t = new Thread(worker);
 			t.start();
-
 		}
 
 	}
@@ -81,21 +79,27 @@ public class TaskWorker{
 
 
 
+	public boolean isFailingOver() {
+		return failover.isFallingOver();
+	}
+
+
+
+
 	private class Worker implements Runnable{
 
 
 
 
-		private CopyOnWriteArrayList<TemplateInterface> threads;
-		private TasksDB taskDB;
 		private ScraperConfig config;
+		private FailoverInterface failover;
+		private boolean stop;
+		private CopyOnWriteArrayList<TemplateInterface> threads;
 		private Average processAverage;
+		private TasksDB taskDB;
 		private int processed;
 		private int processedOld;
 		private int loops;
-		private int averageLoop;
-		private boolean stop;
-		private FailoverInterface failover;
 
 
 
@@ -119,7 +123,7 @@ public class TaskWorker{
 			try {
 
 
-				if(!stop && !failover.isFallingOver()){
+				if(!stop && !failover.isFallingOver() && !failover.hasFailover()){
 
 
 					int tasksPending = taskDB.count();
@@ -137,7 +141,6 @@ public class TaskWorker{
 
 							}else if(thread.hasFailed()){
 								failover.fail();
-
 							}
 
 						}
@@ -146,20 +149,17 @@ public class TaskWorker{
 
 						// calcs the thread number
 						int maxThreads = config.getConnection().getConnectionsNumber() - threads.size();
-						if(maxThreads < 0){maxThreads = 0;}
-
-
-						if(maxThreads > 0){
+						if(maxThreads > 0 && !failover.hasFailover()){
 
 
 							for(Task task : taskDB.getList(maxThreads)){
 
 								// template
 								TemplateInterface template = (TemplateInterface) config.getTemplate().getClass().newInstance();
-								template.init(config.getConnection(), taskDB, task);
 
-								if(template.isTaskValid()){
+								if(template.isTaskValid(task)){
 
+									template.init(config.getConnection(), taskDB, task);
 									threads.add(template);
 
 									Thread t = new Thread((Runnable)template);
@@ -171,47 +171,12 @@ public class TaskWorker{
 
 								// deletes the task from the queue
 								taskDB.deleteTaskWithDocumentId(task.getDocumentId());
-								
-								// sleep
-								Thread.sleep(50);
 
 							}
 
 						}
 
 
-						//-----------------------------------------
-						// LOOP -----------------------------------
-						//-----------------------------------------
-
-						// process per second
-						if(loops == 20){ // num = secs
-
-							processAverage.add((processed - processedOld));
-							processedOld = processed;
-							loops = 0;
-							averageLoop++;
-
-
-							Logger.log(new Throwable(), "-taskName: " + config.getTaskName() 
-									+ " -processPerSecond: " + processAverage.getAverage() 
-									+ " -processed: " + processed 
-									+ " -tasksPending: " + tasksPending 
-									+ " -maxThreads: " + config.getConnection().getConnectionsNumber());
-
-						}
-
-						loops++;
-
-
-						// average loop reset
-						if(averageLoop == 2000){
-							averageLoop = 0;
-							processAverage = new Average(20);
-						}
-
-
-						// loop
 						Thread.sleep(50);
 						Thread t = new Thread(this);
 						t.start();
@@ -229,6 +194,24 @@ public class TaskWorker{
 						}
 
 					}
+
+
+					// process per second
+					if(loops == 20){ // num = secs
+
+						processAverage.add((processed - processedOld));
+						processedOld = processed;
+						loops = 0;
+
+						Logger.log(new Throwable(), "-taskName: " + config.getTaskName() 
+								+ " -processPerSecond: " + processAverage.getAverage() 
+								+ " -processed: " + processed 
+								+ " -tasksPending: " + tasksPending 
+								+ " -maxThreads: " + config.getConnection().getConnectionsNumber());
+
+					}
+
+					loops++;
 
 				}
 
@@ -263,9 +246,9 @@ public class TaskWorker{
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
-			
+
 		}
 
 
@@ -275,7 +258,7 @@ public class TaskWorker{
 		public ArrayList<Task> getTasksRunning(){
 
 			ArrayList<Task> tasks = new ArrayList<Task>();
-			
+
 			for(Iterator<TemplateInterface> it = threads.iterator(); it.hasNext();){
 
 				TemplateInterface template = it.next();

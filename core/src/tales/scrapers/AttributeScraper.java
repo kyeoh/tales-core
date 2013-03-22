@@ -41,33 +41,33 @@ public class AttributeScraper{
 
 
 
-	
+
 	public static void init(ScraperConfig scraperConfig, String attributeName, long loopReferenceTime) throws TalesException{
 
 		try{
-			
-			
+
+
 			AttributeScraper.loopReferenceTime = loopReferenceTime;
 
-			
+
 			// inits the services
 			talesDB = new TalesDB(scraperConfig.getConnection(), scraperConfig.getTemplate().getMetadata());
 			tasksDB = new TasksDB(scraperConfig);
-			
-			
+
+
 			if(AttributeScraper.loopReferenceTime == 0){
-				AttributeScraper.loopReferenceTime = talesDB.getMostRecentCrawledDocuments(1).get(0).getLastUpdate().getTime();
+				AttributeScraper.loopReferenceTime = talesDB.getMostRecentCrawledDocumentsWithAttribute(attributeName, 1).get(0).getLastUpdate().getTime();
 			}
 
 
 			// starts the task machine with the template
-			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getDatabaseName()), AttributeScraper.loopReferenceTime);
+			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getNamespace()), AttributeScraper.loopReferenceTime);
 			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
 
 
 			while(!taskWorker.hasFailover()){
-				
+
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Config.getMinTasks()){
 
@@ -79,28 +79,41 @@ public class AttributeScraper{
 
 						tasksDB.add(tasks);
 
-						if(!taskWorker.isWorkerActive() && !taskWorker.hasFailover()){
+						if(!taskWorker.isWorkerActive() && !taskWorker.isFailingOver() && !taskWorker.hasFailover()){
 							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
-						
+
 					}
 
 				}
-				
+
 
 				// if no tasks means we are finished
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) == 0){
 					break;
 				}
-				
-				
+
+
 				Thread.sleep(1000);
 			}
-			
-			
+
+
+			// stops the failover
+			if(!failover.hasFailover()){
+				failover.stop();
+			}
+
+
 			// deletes the server
-			new Download().getURLContent("http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete");
+			String serverURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete";
+			
+			Download download = new Download();
+			while(!download.urlExists(serverURL)){
+				Thread.sleep(100);
+			}
+
+			download.getURLContent(serverURL + "/delete");
 
 
 		}catch(Exception e){
@@ -139,7 +152,7 @@ public class AttributeScraper{
 
 
 
-	public static void main(String[] args) throws TalesException {
+	public static void main(String[] args){
 
 		try{
 
@@ -154,7 +167,7 @@ public class AttributeScraper{
 			String templatePath = cmd.getOptionValue("template");
 			String attributeName = cmd.getOptionValue("attribute");
 			int threads = Integer.parseInt(cmd.getOptionValue("threads"));
-			
+
 			long loopReferenceTime = 0;
 			if(cmd.hasOption("loopReferenceTime")){
 				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
@@ -187,15 +200,15 @@ public class AttributeScraper{
 			// connection
 			Connection connection = new Connection();
 			connection.setConnectionsNumber(threads);
-			
-			
+
+
 			// scraper config
 			ScraperConfig scraperConfig = new ScraperConfig();
 			scraperConfig.setScraperName("AttributeScraper");
 			scraperConfig.setTemplate(template);
 			scraperConfig.setConnection(connection);
 
-			
+
 			// scraper
 			AttributeScraper.init(scraperConfig, attributeName, loopReferenceTime);
 
@@ -203,12 +216,12 @@ public class AttributeScraper{
 			// stop
 			AppMonitor.stop();
 			System.exit(0);
-			
+
 
 		}catch(Exception e){
 			AppMonitor.stop();
+			new TalesException(new Throwable(), e);	
 			System.exit(0);
-			throw new TalesException(new Throwable(), e);
 		}
 
 	}

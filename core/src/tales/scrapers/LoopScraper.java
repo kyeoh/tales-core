@@ -22,6 +22,7 @@ import tales.services.Document;
 import tales.system.AppMonitor;
 import tales.system.TalesSystem;
 import tales.templates.TemplateInterface;
+import tales.workers.AnticipateFailover;
 import tales.workers.DefaultFailover;
 import tales.workers.FailoverInterface;
 import tales.workers.TaskWorker;
@@ -45,23 +46,23 @@ public class LoopScraper {
 	public static void init(ScraperConfig scraperConfig, long loopReferenceTime) throws TalesException{
 
 		try{
-			
-			
+
+
 			LoopScraper.loopReferenceTime = loopReferenceTime;
 
-			
+
 			// inits the services
 			talesDB = new TalesDB(scraperConfig.getConnection(), scraperConfig.getTemplate().getMetadata());
 			tasksDB = new TasksDB(scraperConfig);
-			
-			
+
+
 			if(LoopScraper.loopReferenceTime == 0){
 				LoopScraper.loopReferenceTime = talesDB.getMostRecentCrawledDocuments(1).get(0).getLastUpdate().getTime();
 			}
 
 
 			// starts the task machine with the template
-			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getDatabaseName()), LoopScraper.loopReferenceTime);
+			FailoverInterface failover = new AnticipateFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getNamespace()), LoopScraper.loopReferenceTime);
 			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
 
@@ -79,11 +80,11 @@ public class LoopScraper {
 
 						tasksDB.add(tasks);
 
-						if(!taskWorker.isWorkerActive() && !taskWorker.hasFailover()){
+						if(!taskWorker.isWorkerActive() && !taskWorker.isFailingOver() && !taskWorker.hasFailover()){
 							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
-						
+
 					}
 
 				}
@@ -93,20 +94,33 @@ public class LoopScraper {
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) == 0){
 					break;
 				}
-				
-				
+
+
 				Thread.sleep(1000);
 			}
-			
-			
+
+
+			// stops the failover
+			if(!failover.hasFailover()){
+				failover.stop();
+			}
+
+
 			// deletes the server
-			new Download().getURLContent("http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete");
+			String serverURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete";
+
+			Download download = new Download();
+			while(!download.urlExists(serverURL)){
+				Thread.sleep(100);
+			}
+
+			download.getURLContent(serverURL + "/delete");
 
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
 		}
-		
+
 	}
 
 
@@ -139,7 +153,7 @@ public class LoopScraper {
 
 
 
-	public static void main(String[] args) throws TalesException{
+	public static void main(String[] args){
 
 		try{
 
@@ -205,8 +219,8 @@ public class LoopScraper {
 
 		}catch(Exception e){
 			AppMonitor.stop();
+			new TalesException(new Throwable(), e);	
 			System.exit(0);
-			throw new TalesException(new Throwable(), e);
 		}
 
 	}

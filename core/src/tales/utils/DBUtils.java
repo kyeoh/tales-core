@@ -35,7 +35,8 @@ public class DBUtils {
 					"mysql" +
 					"?user="+Config.getDBUsername() +
 					"&password="+Config.getDBPassword() +
-					"&useUnicode=true&characterEncoding=UTF-8"
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
 
 			if(!databaseExists(conn, dbName)){
@@ -109,6 +110,13 @@ public class DBUtils {
 
 
 
+	public static void waitUntilLocalMysqlIsReady() throws TalesException{
+		waitUntilMysqlIsReady("localhost", Config.getDBPort());
+	}
+	
+	
+	
+	
 	public static void waitUntilMysqlIsReady(String host, int port){
 
 		while(true){
@@ -122,7 +130,8 @@ public class DBUtils {
 						"mysql" +
 						"?user="+Config.getDBUsername() +
 						"&password="+Config.getDBPassword() +
-						"&useUnicode=true&characterEncoding=UTF-8"
+						"&useUnicode=true&characterEncoding=UTF-8" +
+						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
 
 				conn.close();
@@ -143,13 +152,6 @@ public class DBUtils {
 
 
 
-	public static void waitUntilLocalMysqlIsReady() throws TalesException{
-		waitUntilMysqlIsReady("localhost", Config.getDBPort());
-	}
-
-
-
-
 	public static ArrayList<String> getLocalTalesDBs() throws TalesException{
 
 		try{
@@ -164,7 +166,8 @@ public class DBUtils {
 					"mysql" +
 					"?user="+Config.getDBUsername() +
 					"&password="+Config.getDBPassword() +
-					"&useUnicode=true&characterEncoding=UTF-8"
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
 
 			ResultSet rs = conn.getMetaData().getCatalogs();
@@ -181,6 +184,7 @@ public class DBUtils {
 
 			}
 
+			rs.close();
 			conn.close();
 
 
@@ -205,9 +209,10 @@ public class DBUtils {
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
 					Globals.DATABASE_NAMESPACE + dbName +
-					"?user="+Config.getDBUsername() +
-					"&password="+Config.getDBPassword() +
-					"&useUnicode=true&characterEncoding=UTF-8"
+					"?user="+Config.getDBUsername(dbName) +
+					"&password="+Config.getDBPassword(dbName) +
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
 
 
@@ -229,7 +234,8 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			throw new TalesException(new Throwable(), e);
+			String[] args = {dbName};
+			throw new TalesException(new Throwable(), e, args);
 		}
 
 	}
@@ -249,7 +255,8 @@ public class DBUtils {
 					Globals.DATABASE_NAMESPACE + dbName +
 					"?user="+Config.getDBUsername() +
 					"&password="+Config.getDBPassword() +
-					"&useUnicode=true&characterEncoding=UTF-8"
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
 
 			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM " + tableName);
@@ -267,7 +274,8 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			throw new TalesException(new Throwable(), e);
+			String[] args = {dbName, tableName};
+			throw new TalesException(new Throwable(), e, args);
 		}
 
 	}

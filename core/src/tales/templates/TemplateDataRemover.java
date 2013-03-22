@@ -42,7 +42,7 @@ public class TemplateDataRemover {
 
 		// tasks
 		try{
-			TasksDB.deleteTaskTablesFromDomain(metadata.getDatabaseName());
+			TasksDB.deleteTaskTablesFromDomain(metadata.getNamespace());
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}
@@ -73,7 +73,7 @@ public class TemplateDataRemover {
 
 
 
-	public static void main(String[] args) throws TalesException{
+	public static void main(String[] args) {
 
 		try{
 
@@ -105,8 +105,8 @@ public class TemplateDataRemover {
 
 		}catch(Exception e){
 			AppMonitor.stop();
+			new TalesException(new Throwable(), e);
 			System.exit(0);
-			throw new TalesException(new Throwable(), e);
 		}
 
 	}

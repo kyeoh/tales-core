@@ -45,8 +45,6 @@ public class Logger {
 			.put("methodPath", methodPath)
 			.put("data", data);
 
-			SocketStream.stream(obj);
-
 			
 			// saves logs
 			if(logType.equals(LOG)){
@@ -58,6 +56,10 @@ public class Logger {
 			}else if(logType.equals(DOWNLOAD_ERROR)){
 				LogsDB.log(publicDNS, pid, DOWNLOAD_ERROR, methodPath, lineNumber, data);
 			}
+			
+			
+			// socket stream
+			SocketStream.stream(obj);
 
 
 		}catch(Exception k){
@@ -77,7 +79,7 @@ public class Logger {
 
 
 	
-	public static void error(Throwable origin, Exception error) {
+	public static void error(Throwable origin, Throwable error) {
 		String[] args = {};
 		error(origin, error, args);
 	}
@@ -85,14 +87,14 @@ public class Logger {
 
 
 	
-	public static void error(Throwable origin, Exception error, String[] args) {
+	public static void error(Throwable origin, Throwable error, String[] args) {
 		emit(error.getStackTrace(), ERROR, printError(origin, error, args));
 	}
 
 
 
 
-	public static void error(Throwable origin, Exception error, int id) {
+	public static void error(Throwable origin, Throwable error, int id) {
 		String[] args = {Integer.toString(id)};
 		error(origin, error, args);
 	}
@@ -100,7 +102,7 @@ public class Logger {
 
 
 
-	public static void templateError(Throwable origin, Exception error, int documentId) {
+	public static void templateError(Throwable origin, Throwable error, int documentId) {
 		String[] args = {Integer.toString(documentId)};
 		emit(error.getStackTrace(), TEMPLATE_ERROR, printError(origin, error, args));
 	}
@@ -108,21 +110,21 @@ public class Logger {
 	
 	
 	
-	public static void downloadError(Throwable origin, Exception error) {
+	public static void downloadError(Throwable origin, Throwable error) {
 		downloadError(origin, error, new String[]{});
 	}
 	
 	
 	
 	
-	public static void downloadError(Throwable origin, Exception error, String[] args) {
+	public static void downloadError(Throwable origin, Throwable error, String[] args) {
 		emit(error.getStackTrace(), DOWNLOAD_ERROR, printError(origin, error, args));
 	}
 	
 	
 	
 	
-	public static String printError(Throwable origin, Exception error, String[] args){
+	public static String printError(Throwable origin, Throwable error, String[] args){
 		
 		String data = "";
 		data += "[ERROR START] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";

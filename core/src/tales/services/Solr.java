@@ -31,7 +31,7 @@ public class Solr {
 
 	public Solr(TemplateMetadataInterface metadata) throws TalesException{
 
-		String dbName = metadata.getDatabaseName();
+		String dbName = metadata.getNamespace();
 
 		try{
 

@@ -57,7 +57,7 @@ public class ScraperConfig {
 	
 	
 	public String getTaskName(){
-		return scraperName + "_" + template.getMetadata().getDatabaseName();
+		return scraperName + "_" + template.getMetadata().getNamespace();
 	}
 	
 }

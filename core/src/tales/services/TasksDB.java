@@ -36,9 +36,10 @@ public class TasksDB {
 
 		try{
 
+			
 			this.taskName = config.getTaskName();
 
-
+			
 			if(conn == null){
 				
 				
@@ -49,11 +50,12 @@ public class TasksDB {
 				// connects
 				Class.forName("com.mysql.jdbc.Driver");
 				conn = DriverManager.getConnection("jdbc:mysql://"+
-						Config.getTasksDBHost(config.getTemplate().getMetadata().getDatabaseName())+":"+Config.getDBPort(config.getTemplate().getMetadata().getDatabaseName())+"/"+
+						Config.getTasksDBHost(config.getTemplate().getMetadata().getNamespace())+":"+Config.getDBPort(config.getTemplate().getMetadata().getNamespace())+"/"+
 						Globals.DATABASE_NAMESPACE + dbName +
-						"?user=" + Config.getDBUsername(config.getTemplate().getMetadata().getDatabaseName()) +
-						"&password=" + Config.getDBPassword(config.getTemplate().getMetadata().getDatabaseName()) +
-						"&useUnicode=true&characterEncoding=UTF-8"
+						"?user=" + Config.getDBUsername(config.getTemplate().getMetadata().getNamespace()) +
+						"&password=" + Config.getDBPassword(config.getTemplate().getMetadata().getNamespace()) +
+						"&useUnicode=true&characterEncoding=UTF-8" +
+						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
 			}
 
@@ -61,6 +63,7 @@ public class TasksDB {
 			if(!this.tableExists()){
 				this.createTable();
 			}
+			
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -87,7 +90,6 @@ public class TasksDB {
 			// ignore because we want to guarantee that the other tasks will be added
 			PreparedStatement statement = conn.prepareStatement("INSERT IGNORE INTO " + taskName + " (documentId, name) values (?,?)");
 
-
 			// stores the data into a batch
 			for(Task task : tasks){
 				statement.setInt(1, task.getDocumentId());
@@ -98,8 +100,6 @@ public class TasksDB {
 			statement.executeBatch();
 			statement.clearBatch();
 
-
-			// close
 			statement.close();
 
 
@@ -117,7 +117,6 @@ public class TasksDB {
 		try{
 
 
-			// conn
 			ArrayList<Task> list         = new ArrayList<Task>();
 			PreparedStatement statement  = conn.prepareStatement("SELECT * FROM " + taskName + " ORDER BY id ASC LIMIT 0,?");
 			statement.setInt(1, amount);
@@ -133,14 +132,12 @@ public class TasksDB {
 
 				list.add(task);
 			}
-
-
-			// close
+			
 			rs.close();
 			statement.close();
 
-
 			return list;
+			
 
 		}catch(Exception e){
 			String[] args = {amount + ""};
@@ -175,20 +172,16 @@ public class TasksDB {
 		try{
 
 
-			// conn
 			PreparedStatement statement = conn.prepareStatement("SELECT COUNT(*) FROM " + taskName);
 			statement.executeQuery();
 
-			ResultSet rs            = statement.executeQuery();
+			ResultSet rs = statement.executeQuery();
 			rs.next();
 
-			// results
-			int count                     = rs.getInt(1);
+			int count = rs.getInt(1);
 
-			// clone
 			rs.close();
-			statement.close();            
-
+			statement.close();
 
 			return count;
 
@@ -205,6 +198,7 @@ public class TasksDB {
 
 		try {
 
+			
 			Statement statement = (Statement) conn.createStatement();
 			final String sql = "CREATE TABLE " +  taskName + " ("
 					+ "id INT NOT NULL AUTO_INCREMENT, "
@@ -214,9 +208,6 @@ public class TasksDB {
 					+ "PRIMARY KEY (id)" 
 					+ ") ENGINE = MYISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
 			statement.executeUpdate(sql);
-			
-			
-			// clone
 			statement.close();
 
 
@@ -252,13 +243,11 @@ public class TasksDB {
 			}
 
 
-
 		}catch(Exception e){
 			String[] args = {taskName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
-		// clone
 		try{rs.close();}catch(Exception e){}
 		try{statement.close();}catch(Exception e){}
 
@@ -304,7 +293,8 @@ public class TasksDB {
 					"tales_tasks" +
 					"?user=" + Config.getDBUsername() +
 					"&password=" + Config.getDBPassword() +
-					"&useUnicode=true&characterEncoding=UTF-8"
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
 
 

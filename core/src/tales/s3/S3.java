@@ -79,7 +79,7 @@ public class S3 {
 		try{
 
 
-			String bucketName = Globals.FILES_S3_BUCKET_NAME + metadata.getDatabaseName().replace("_", "-");
+			String bucketName = Globals.FILES_S3_BUCKET_NAME + metadata.getNamespace().replace("_", "-");
 
 			if (s3 == null){
 

@@ -16,7 +16,7 @@ public class Attribute {
 	private int id;
 	private int documentId;
 	private String name;
-	private String data;
+	private String data = "";
 	private Date added = new Date();
 	
 	

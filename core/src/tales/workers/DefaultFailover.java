@@ -24,13 +24,13 @@ public class DefaultFailover implements FailoverInterface{
 
 
 
-	private ArrayList<FailoverAttempt> attempts;
-	private long loopReferenceTime;
-	private int index;
-	private int fails;
-	private Date date;
-	private boolean isFailingOver = false;
-	private boolean failedOver = false;
+	protected ArrayList<FailoverAttempt> attempts;
+	protected long loopReferenceTime;
+	protected int index;
+	protected int fails;
+	protected Date date;
+	protected boolean isFailingOver = false;
+	protected boolean failedOver = false;
 
 
 
@@ -84,37 +84,7 @@ public class DefaultFailover implements FailoverInterface{
 						&& fails >= attempts.get(index).getMaxFails() 
 						&& (new Date().getTime() - date.getTime()) < attempts.get(index).getDuring()){
 
-
-					isFailingOver = true;
-
-
-					Thread.sleep(attempts.get(index).getSleep());
-					Logger.log(new Throwable(), "failing over");
-
-
-					// creates a new server
-					Logger.log(new Throwable(), "creating new server...");
-					Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL = 0;
-
-					String thisServerURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
-					Download download = new Download();
-					String data = download.getURLContent(thisServerURL + "/new");
-					JSONObject json = (JSONObject) JSONSerializer.toJSON(data);
-
-
-					// moving process
-					String newServerURL = "http://" + json.get("dns") + ":" + Config.getDashbaordPort();
-					Logger.log(new Throwable(), "moving process...");
-					
-					String process = TalesSystem.getProcess();
-					if(process.contains("loopReferenceTime")){
-						process = process.substring(0, process.indexOf("-loopReferenceTime "));
-								
-					}
-					
-					download.getURLContent(newServerURL + "/start/" + process + " -loopReferenceTime " + loopReferenceTime);
-
-					failedOver = true;
+					failover();
 
 				}
 
@@ -147,5 +117,70 @@ public class DefaultFailover implements FailoverInterface{
 	public boolean isFallingOver() {
 		return isFailingOver;
 	}
+
+
+
+
+	@Override
+	public void failover() {
+
+		try {
+
+			
+			isFailingOver = true;
+
+
+			Thread.sleep(attempts.get(index).getSleep());
+			Logger.log(new Throwable(), "failing over");
+
+
+			// creates a new server
+			Logger.log(new Throwable(), "creating new server...");
+			Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL = 0;
+
+			String thisServerURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
+			Download download = new Download();
+			
+			while(!download.urlExists(thisServerURL)){
+				Thread.sleep(100);
+			}
+			
+			String data = download.getURLContent(thisServerURL + "/new");
+			JSONObject json = (JSONObject) JSONSerializer.toJSON(data);
+
+
+			// moving process
+			String newServerURL = "http://" + json.get("dns") + ":" + Config.getDashbaordPort();
+			Logger.log(new Throwable(), "moving process...");
+
+			String process = TalesSystem.getProcess();
+			if(process.contains("loopReferenceTime")){
+				process = process.substring(0, process.indexOf("-loopReferenceTime "));
+
+			}
+
+			download.getURLContent(newServerURL + "/start/" + process + " -loopReferenceTime " + loopReferenceTime);
+
+			
+			failedOver = true;
+			
+
+		}catch (Exception e) {
+
+			isFailingOver = false;
+			index = 0;
+			fails = 0;
+
+			new TalesException(new Throwable(), e);
+			
+		}
+
+	}
+
+
+
+
+	@Override
+	public void stop() {}
 
 }

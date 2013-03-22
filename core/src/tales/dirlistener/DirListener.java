@@ -170,12 +170,12 @@ public class DirListener {
 
 
 
-	public static void main(String[] args) throws TalesException {
+	public static void main(String[] args){
 
 		try{
 			DirListener.init();
 		}catch(Exception e){
-			throw new TalesException(new Throwable(), e);
+			new TalesException(new Throwable(), e);
 		}
 		
 	}

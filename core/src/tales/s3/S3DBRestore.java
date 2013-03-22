@@ -141,7 +141,8 @@ public class S3DBRestore{
 							"mysql" +
 							"?user="+ Config.getDBUsername() +
 							"&password=" + Config.getDBPassword() +
-							"&useUnicode=true&characterEncoding=UTF-8"
+							"&useUnicode=true&characterEncoding=UTF-8" +
+							"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 							);
 
 
@@ -262,7 +263,7 @@ public class S3DBRestore{
 
 
 
-	public static void main(String[] args) throws TalesException {
+	public static void main(String[] args){
 
 		try{
 
@@ -299,8 +300,8 @@ public class S3DBRestore{
 
 		}catch(Exception e){
 			AppMonitor.stop();
+			new TalesException(new Throwable(), e);
 			System.exit(0);
-			throw new TalesException(new Throwable(), e);
 		}
 
 	}

@@ -244,7 +244,8 @@ public class TalesSystem {
 				process.destroy();
 
 			}catch( Exception e){
-				new TalesException(new Throwable(), e);
+				String[] args = new String[]{processName};
+				new TalesException(new Throwable(), e, args);
 			}
 
 		}

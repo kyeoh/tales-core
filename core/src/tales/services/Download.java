@@ -6,7 +6,6 @@ package tales.services;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.KeyManagementException;
@@ -37,77 +36,60 @@ public class Download {
 
 
 
-	private static String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
+	private static String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.3 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
 	private static boolean isSSLDisabled = false;
 
+	
+	
+	
+	public boolean urlExists(String url) {
 
-
-
-	public boolean urlExists(String url) throws DownloadException {
-
-
+		
 		HttpURLConnection conn = null;
 
-
+		
 		try {
-
-
+ 
+			
 			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
 				url = URIUtil.encodeQuery(url);
 			}
-
-
+			
+			
 			if(url.contains("https://")){
 				disableSSLValidation();
 				conn = (HttpsURLConnection) new URL(url).openConnection();
 			}else{
 				conn = (HttpURLConnection) new URL(url).openConnection();
 			}
-
-
-			conn.setFollowRedirects(true);
-			conn.setRequestProperty("User-Agent", userAgent);
-			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
-			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
-			conn.setRequestMethod("HEAD");
-
-
+			
+			
+			conn.setFollowRedirects(true);			
+			conn.setRequestProperty("User-Agent", userAgent);			
+			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
+			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
+			conn.setRequestMethod("HEAD");			
+			
+			
 			boolean result = (conn.getResponseCode() == HttpURLConnection.HTTP_OK);
-
-
+			
+			
 			conn.disconnect();
-
-
+			
+			
 			return result;
 
 
-		} catch (SocketTimeoutException e) {
-
-
-			String[] args = {url};
-			int responseCode = 0;
-
-			if (conn != null) {
-				try {
-					responseCode = conn.getResponseCode();
-				} catch (IOException e1) {
-					throw new DownloadException(new Throwable(), e1, responseCode, args);
-				}
-				conn.disconnect();
-			}
-
-			throw new DownloadException(new Throwable(), e, responseCode, args);
-
-
-		} catch (Exception e) {
-
+		}catch (Exception e){
+			
 			if (conn != null) {
 				conn.disconnect();
 			}
-
+			
 			return false;
+			
 		}
-
+		
 	}
 
 
@@ -191,7 +173,7 @@ public class Download {
 			byte[] bytes = IOUtils.toByteArray(is);
 
 
-			// encoding
+			// charset
 			String contentType = conn.getHeaderField("Content-Type");
 			String charset = null;
 
@@ -204,9 +186,7 @@ public class Download {
 				}
 			}
 
-
-			// stores the content
-			if (charset == null) {
+			if(charset == null){
 
 				try {
 
@@ -258,7 +238,7 @@ public class Download {
 				try {
 					responseCode = conn.getResponseCode();
 				} catch (IOException e1) {
-					throw new DownloadException(new Throwable(), e1, responseCode, args);
+					new DownloadException(new Throwable(), e1, responseCode, args);
 				}
 				conn.disconnect();
 			}
@@ -313,23 +293,6 @@ public class Download {
 			isSSLDisabled = true;
 
 		}
-
-	}
-
-
-
-
-	public String getURLHeader(String url, String key, boolean followRedirections) throws IOException {
-
-		URL urlObj = new URL(url);
-		HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
-		conn.setFollowRedirects(followRedirections);
-		conn.setRequestProperty("User-Agent", userAgent);
-		conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
-		conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
-		conn.disconnect();
-
-		return conn.getHeaderField(key);
 
 	}
 

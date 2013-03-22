@@ -28,7 +28,6 @@ import tales.config.Config;
 import tales.config.Globals;
 import tales.s3.S3DBBackup;
 import tales.services.Download;
-import tales.services.DownloadException;
 import tales.services.Log;
 import tales.services.Logger;
 import tales.services.LogsDB;
@@ -291,27 +290,17 @@ public class APIHandler extends AbstractHandler{
 
 
 			Logger.log(new Throwable(), "NEW: finished creating server (" + publicDNS + ")");
-			Logger.log(new Throwable(), "NEW: waiting for server to be up...");
+			Logger.log(new Throwable(), "NEW: waiting for server (" + publicDNS + ") to be up...");
 
 
 			// waits for tales dashboard to be up
 			while(true){
 
-				try{
-
-					String url = "http://" + publicDNS + ":" + Config.getDashbaordPort();
-					Download download = new Download();
-					if(download.urlExists(url)){
-						break;
-					}
-
-				}catch(DownloadException e){
-					new DownloadException(new Throwable(), e, e.getResponseCode());
-				}catch(Exception e){
-					new TalesException(new Throwable(), e);
+				if(new Download().urlExists("http://" + publicDNS + ":" + Config.getDashbaordPort())){
+					break;
 				}
 
-				Thread.sleep(500);
+				Thread.sleep(1000);
 
 			}
 
@@ -628,11 +617,11 @@ public class APIHandler extends AbstractHandler{
 
 			}
 
-			
+
 			response.setContentType("application/json");
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().println(json);
-			
+
 
 		} catch (Exception e) {
 			new TalesException(new Throwable(), e);

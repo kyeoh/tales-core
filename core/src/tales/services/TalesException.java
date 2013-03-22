@@ -13,7 +13,7 @@ public class TalesException extends Exception {
 
 
 
-	public TalesException(Throwable origin, Exception error){
+	public TalesException(Throwable origin, Throwable error){
 		try {
         	Logger.error(origin, error);
         } catch (Exception j) {}
@@ -22,7 +22,7 @@ public class TalesException extends Exception {
     
     
     
-    public TalesException(Throwable origin, Exception error, String args[]){
+    public TalesException(Throwable origin, Throwable error, String args[]){
     	try {
         	Logger.error(origin, error, args);
 		} catch (Exception j) {}

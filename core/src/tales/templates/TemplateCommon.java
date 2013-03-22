@@ -28,35 +28,24 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-
-	protected TemplateMetadataInterface templateMetadata;
-	protected Connection connection;
-	protected TasksDB tasksDB;
-	protected Task task;
-	protected TalesDB talesDB;
+	
+	private Connection connection;
+	private TasksDB tasksDB;
+	private Task task;
 	protected boolean active = true;
 	protected boolean failed = false;
 
 
 
 
-	public TemplateCommon(TemplateMetadataInterface templateMetadata){
-		this.templateMetadata = templateMetadata;
-	}
+	@Override
+	public abstract TemplateMetadataInterface getMetadata();
 
 
 
 
 	@Override
-	public TemplateMetadataInterface getMetadata() {
-		return templateMetadata;
-	}
-
-
-
-
-	@Override
-	public void init(Connection connection, TasksDB tasksDB, Task task) {
+	public final void init(Connection connection, TasksDB tasksDB, Task task) {
 		this.connection = connection;
 		this.tasksDB = tasksDB;
 		this.task = task;
@@ -65,23 +54,37 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-	public Connection getConnection(){
+	public final Connection getConnection(){
 		return connection;
 	}
 	
 	
 	
 	
+	public final TasksDB getTasksDB() {
+		return tasksDB;
+	}
+	
+	
+	
+	
 	@Override
-	public Task getTask() {
+	public final Task getTask() {
 		return task;
 	}
 
 
 
 
+	public final TalesDB getTalesDB() throws TalesException{
+		return new TalesDB(this.getConnection(), this.getMetadata());
+	}
+	
+	
+	
+	
 	@Override
-	public boolean hasFailed() {
+	public final boolean hasFailed() {
 		return failed;
 	}
 
@@ -89,7 +92,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	@Override
-	public boolean isTaskValid() {
+	public boolean isTaskValid(Task task) {
 		return true;
 	}
 
@@ -97,7 +100,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	@Override
-	public boolean isTemplateActive() {
+	public final boolean isTemplateActive() {
 		return active;
 	}
 
@@ -117,9 +120,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 			
 			String url = baseURL + task.getDocumentName();
 			Logger.log(new Throwable(), task.getDocumentId() + " - " + url);
-
-			// db connect
-			talesDB = new TalesDB(connection, templateMetadata);
+			
 
 			// downloads the html
 			Download download = new Download();
@@ -127,7 +128,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 			Document doc = Jsoup.parse(html);
 
 			// parses, extracts and saves the data
-			process(talesDB, url, doc);
+			process(this.getTalesDB(), task, url, doc);
 
 			// extracts links from the doc and stores them
 			storeLinks(extractLinks(doc));
@@ -160,7 +161,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-	protected abstract void process(TalesDB talesDB, String url, org.jsoup.nodes.Document document) throws Exception;
+	protected abstract void process(TalesDB talesDB, Task task, String url, org.jsoup.nodes.Document document) throws Exception;
 
 
 
@@ -194,8 +195,8 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 			try{
 
 				if(link.length() < Globals.DOCUMENT_NAME_MAX_LENGTH){
-					if(!talesDB.documentExists(link)){
-						talesDB.addDocument(link);
+					if(!this.getTalesDB().documentExists(link)){
+						this.getTalesDB().addDocument(link);
 					}
 				}else{
 					new TemplateException(new Throwable(), new Exception("Data too long: " + link), task.getDocumentId());

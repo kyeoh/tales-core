@@ -24,7 +24,7 @@ public class Server{
 
 
 
-	public static void main(String[] args) throws TalesException {
+	public static void main(String[] args){
 
 		try{
 
@@ -56,6 +56,8 @@ public class Server{
 				String processCall = "java -cp " + Config.getJarPath() + " " + TalesSystem.getProcess();
 				ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", processCall);
 				builder.start();
+				
+				System.exit(0);
 				
 
 			}else{
@@ -100,7 +102,8 @@ public class Server{
 
 
 		}catch(Exception e){
-			throw new TalesException(new Throwable(), e);
+			new TalesException(new Throwable(), e);
+		
 		}
 
 	}

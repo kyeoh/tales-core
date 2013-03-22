@@ -109,7 +109,7 @@ public class S3DeleteBucket{
 
 
 
-	public static void main(String[] args) throws TalesException {
+	public static void main(String[] args){
 
 		try{
 
@@ -138,8 +138,8 @@ public class S3DeleteBucket{
 
 		}catch(Exception e){
 			AppMonitor.stop();
+			new TalesException(new Throwable(), e);
 			System.exit(0);
-			throw new TalesException(new Throwable(), e);
 		}
 
 	}

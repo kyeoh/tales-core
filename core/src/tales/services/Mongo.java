@@ -33,7 +33,7 @@ public class Mongo {
 
 	public Mongo(TemplateMetadataInterface metadata) throws TalesException{
 		
-		String dbName = metadata.getDatabaseName();
+		String dbName = metadata.getNamespace();
 
 		try{
 			
