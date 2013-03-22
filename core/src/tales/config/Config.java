@@ -249,26 +249,6 @@ public class Config{
 
 
 
-	public static int getMaxTasks() throws TalesException{
-		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("static")
-				.getInt("maxTasks");
-	}
-
-
-
-
-	public static int getMinTasks() throws TalesException{
-		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("static")
-				.getInt("minTasks");
-	}
-
-
-
-
 	public static boolean AWSConfigExists() throws TalesException{
 		load();
 		if(json.getJSONObject("cloud").containsKey("aws")){

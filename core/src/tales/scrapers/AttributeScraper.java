@@ -11,6 +11,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
 import tales.config.Config;
+import tales.config.Globals;
 import tales.services.Connection;
 import tales.services.Document;
 import tales.services.Download;
@@ -69,7 +70,7 @@ public class AttributeScraper{
 			while(!taskWorker.hasFailover()){
 
 				// adds tasks
-				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Config.getMinTasks()){
+				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
 
 					ArrayList<Task> tasks = getTasks(attributeName);
 
@@ -129,7 +130,7 @@ public class AttributeScraper{
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
 
-		for(Document document : talesDB.getAndUpdateLastCrawledDocumentsWithAttribute(attributeName, Config.getMaxTasks())){
+		for(Document document : talesDB.getAndUpdateLastCrawledDocumentsWithAttribute(attributeName, Globals.MAX_TASKS)){
 
 			// checks if the most recently crawled user is older than this new user, 
 			// this means that the "most recent user" is now old and we have looped

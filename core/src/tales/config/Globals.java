@@ -8,6 +8,8 @@ public class Globals {
 	
 	
 	
+	public static int MIN_TASKS                          = 500;
+	public static int MAX_TASKS                          = 5000;
 	public static String ATTRIBUTE_TABLE_NAMESPACE       = "_"; // Attribute
 	public static String DATABASE_NAMESPACE              = "tales_";
 	public static String ENVIRONMENTS_CONFIG_DIR         = System.getProperty("user.home") + "/tales-templates/environments";
