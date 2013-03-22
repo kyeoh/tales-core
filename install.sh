@@ -133,7 +133,7 @@ sudo apt-get -q -y update
 echo mysql-server mysql-server/root_password select $password | debconf-set-selections # prevents mysql prompt
 echo mysql-server mysql-server/root_password_again select $password | debconf-set-selections # prevents mysql prompt
 
-sudo apt-get -q -y install mongodb-10gen mysql-server openjdk-6-jdk openjdk-6-jre-headless openjdk-6-jre-lib build-essential g++ libssl-dev git-core libxml2 libxml2-dev scons ant screen apache2 munin munin-node munin-java-plugins munin-plugins-extra curl
+sudo apt-get -q -y install mongodb-10gen mysql-server openjdk-6-jdk openjdk-6-jre-headless openjdk-6-jre-lib build-essential g++ libssl-dev git-core libxml2 libxml2-dev scons ant screen curl
 
 
 #redis
