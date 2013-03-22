@@ -269,6 +269,17 @@ public class Config{
 
 
 
+	public static boolean AWSConfigExists() throws TalesException{
+		load();
+		if(json.getJSONObject("cloud").containsKey("aws")){
+			return true;
+		}
+		return false;
+	}
+	
+	
+	
+	
 	public static String getAWSAccessKeyId() throws TalesException{
 		load();
 		return json.getJSONObject("cloud")
@@ -324,6 +335,17 @@ public class Config{
 		return json.getJSONObject("cloud")
 				.getJSONObject("aws")
 				.getString("endpoint");
+	}
+	
+	
+	
+	
+	public static boolean RackspaceConfigExists() throws TalesException{
+		load();
+		if(json.getJSONObject("rackspace").containsKey("aws")){
+			return true;
+		}
+		return false;
 	}
 	
 	
