@@ -267,7 +267,7 @@
 
 
 								// prints the log
-								header = new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds() + " # " + classe + " | " + json.data;
+								header = new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds() + " | " + json.data;
 
 								logData[appDivName]["log"] = (header + "\n" + logData[appDivName]["log"]).substring(0, maxLogSize);;
 								$("#" + appDivName + " #log").val(logData[appDivName]["log"]);
