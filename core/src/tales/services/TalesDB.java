@@ -180,9 +180,9 @@ public class TalesDB {
 			// index
 			if(!index.containsKey(dbName)){
 				index.put(dbName, 0);
+			}else{
+				index.put(dbName, index.get(dbName) + 1);
 			}
-
-			index.put(dbName, index.get(dbName) + 1);
 
 			if(index.get(dbName) >= conns.get(dbName).size()){
 				index.put(dbName, 0);
