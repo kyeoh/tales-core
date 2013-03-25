@@ -85,7 +85,9 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {dbName};
+			final String[] args = {dbName, 
+					Integer.toString(index.get(dbName)), 
+					Integer.toString(conns.get(dbName).size())};
 			throw new TalesException(new Throwable(), e, args);
 		}
 	}
