@@ -109,16 +109,19 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 	@Override
 	public void run(){
+		
+		
+		String baseURL = this.getMetadata().getBaseURL();
+		if(baseURL == null){
+			baseURL = "";
+		}
+		
+		String url = baseURL + task.getDocumentName();
+		
 
 		try {
 
 			
-			String baseURL = this.getMetadata().getBaseURL();
-			if(baseURL == null){
-				baseURL = "";
-			}
-			
-			String url = baseURL + task.getDocumentName();
 			Logger.log(new Throwable(), task.getDocumentId() + " - " + url);
 			
 
@@ -140,17 +143,17 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 				failed = true;
 			}
 			
-			new TemplateException(new Throwable(), e, task.getDocumentId());
+			new TemplateException(new Throwable(), e, task.getDocumentId(), url);
 			
 		} catch (Exception e) {
 
 			try {
 				tasksDB.add(task);
 			} catch (TalesException e1) {
-				new TemplateException(new Throwable(), e1, task.getDocumentId());
+				new TemplateException(new Throwable(), e1, task.getDocumentId(), url);
 			}
 
-			new TemplateException(new Throwable(), e, task.getDocumentId());
+			new TemplateException(new Throwable(), e, task.getDocumentId(), url);
 
 		}
 
@@ -199,11 +202,11 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 						this.getTalesDB().addDocument(link);
 					}
 				}else{
-					new TemplateException(new Throwable(), new Exception("Data too long: " + link), task.getDocumentId());
+					new TemplateException(new Throwable(), new Exception("Data too long: " + link), task.getDocumentId(), link);
 				}
 
 			} catch (Exception e) {
-				new TemplateException(new Throwable(), e, task.getDocumentId());
+				new TemplateException(new Throwable(), e, task.getDocumentId(), link);
 			}
 
 		}

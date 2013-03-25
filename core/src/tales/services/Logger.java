@@ -105,8 +105,8 @@ public class Logger {
 
 
 
-	public static void templateError(Throwable origin, Throwable error, int documentId) {
-		String[] args = {Integer.toString(documentId)};
+	public static void templateError(Throwable origin, Throwable error, int documentId, String url) {
+		String[] args = {Integer.toString(documentId), url};
 		emit(error.getStackTrace(), TEMPLATE_ERROR, printError(origin, error, args));
 	}
 	

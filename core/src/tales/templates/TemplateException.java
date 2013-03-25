@@ -18,10 +18,10 @@ public class TemplateException extends Exception{
 	
 	
 	
-	public TemplateException(Throwable origin, Exception error, int documentId){
+	public TemplateException(Throwable origin, Exception error, int documentId, String url){
 
 		try {
-			Logger.templateError(origin, error, documentId);
+			Logger.templateError(origin, error, documentId, url);
 		} catch (Exception j) {
 			j.printStackTrace();
 		}
