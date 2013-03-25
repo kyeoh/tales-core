@@ -63,7 +63,7 @@ public class LoopScraper {
 
 
 			// starts the task machine with the template
-			FailoverInterface failover = new AnticipateFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getNamespace()), LoopScraper.loopReferenceTime);
+			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getNamespace()), LoopScraper.loopReferenceTime);
 			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
 
