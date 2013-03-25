@@ -53,6 +53,9 @@ public class Logger {
 			}else if(logType.equals(ERROR)){
 				LogsDB.log(publicDNS, pid, ERROR, methodPath, lineNumber, data);
 				
+			}else if(logType.equals(TEMPLATE_ERROR)){
+				LogsDB.log(publicDNS, pid, TEMPLATE_ERROR, methodPath, lineNumber, data);
+			
 			}else if(logType.equals(DOWNLOAD_ERROR)){
 				LogsDB.log(publicDNS, pid, DOWNLOAD_ERROR, methodPath, lineNumber, data);
 			}
