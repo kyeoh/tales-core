@@ -60,10 +60,8 @@ public class TalesDB {
 		try{
 
 			
-			TalesDB.connect(talesConn, metadata);
-
 			// db conn
-			conn = conns.get(dbName).get(index.get(dbName));
+			conn = TalesDB.connect(talesConn, metadata); 
 
 			// jedis
 			jedisPool = jedisPools.get(dbName);
@@ -78,7 +76,7 @@ public class TalesDB {
 
 
 
-	private synchronized static void connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+	private synchronized static Connection connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
 
 		String dbName = metadata.getNamespace();
 
@@ -188,7 +186,9 @@ public class TalesDB {
 				index.put(dbName, 0);
 			}
 
+			return conns.get(dbName).get(index.get(dbName));
 
+			
 		}catch(final Exception e){
 			final String[] args = {dbName};
 			throw new TalesException(new Throwable(), e, args);
