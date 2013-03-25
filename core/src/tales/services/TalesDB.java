@@ -54,40 +54,23 @@ public class TalesDB {
 
 
 	public TalesDB(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
-		
+
 		this.dbName = metadata.getNamespace();
 
 		try{
 
-
-			// connections
+			
 			TalesDB.connect(talesConn, metadata);
-
-
-			// index
-			if(!index.containsKey(dbName)){
-				index.put(dbName, 0);
-			}
-
-			index.put(dbName, index.get(dbName) + 1);
-
-			if(index.get(dbName) >= conns.get(dbName).size()){
-				index.put(dbName, 0);
-			}
-
 
 			// db conn
 			conn = conns.get(dbName).get(index.get(dbName));
 
-
 			// jedis
 			jedisPool = jedisPools.get(dbName);
-
+			
 
 		}catch(final Exception e){
-			final String[] args = {dbName, 
-					Integer.toString(index.get(dbName)), 
-					Integer.toString(conns.get(dbName).size())};
+			final String[] args = {dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 	}
@@ -194,6 +177,18 @@ public class TalesDB {
 			}
 
 
+			// index
+			if(!index.containsKey(dbName)){
+				index.put(dbName, 0);
+			}
+
+			index.put(dbName, index.get(dbName) + 1);
+
+			if(index.get(dbName) >= conns.get(dbName).size()){
+				index.put(dbName, 0);
+			}
+
+
 		}catch(final Exception e){
 			final String[] args = {dbName};
 			throw new TalesException(new Throwable(), e, args);
@@ -216,7 +211,7 @@ public class TalesDB {
 		Jedis redis = null;
 
 		try{
-			
+
 
 			// memcache	
 			redis = jedisPool.getResource();
@@ -298,7 +293,7 @@ public class TalesDB {
 	public synchronized final boolean documentIdExists(final int documentId) throws TalesException{
 
 		try {
-			
+
 
 			boolean exists = false;
 
@@ -381,7 +376,7 @@ public class TalesDB {
 
 		try {
 
-			
+
 			final ArrayList<Document> list      = new ArrayList<Document>();
 			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate ASC LIMIT 0,?");
 			statement.setInt(1, number);
@@ -427,7 +422,7 @@ public class TalesDB {
 
 
 		try {
-			
+
 
 			final ArrayList<Document> list      = new ArrayList<Document>();
 			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate DESC LIMIT 0,?");
@@ -556,7 +551,7 @@ public class TalesDB {
 
 
 		try {
-			
+
 
 			// checks if the db row xists
 			if(!attributeTableExists(attribute.getName())){
@@ -645,45 +640,45 @@ public class TalesDB {
 	public synchronized final boolean attributeExist(final String attributeName, final int documentId) throws TalesException{;
 
 
-		if(!attributeTableExists(attributeName)){
-			return false;
+	if(!attributeTableExists(attributeName)){
+		return false;
+	}
+
+
+	try {
+
+
+		boolean exists                = false;
+
+
+		String tbName                 = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
+		tbName                        = tbName.replace(".", "_");
+
+
+		final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM " + tbName + " WHERE documentId = ? LIMIT 1");
+		statement.setInt(1, documentId);
+
+
+		final ResultSet rs = statement.executeQuery();
+		rs.next();
+
+
+		if(rs.getInt(1) > 0){
+			exists  = true;
 		}
 
 
-		try {
+		rs.close();
+		statement.close();
 
 
-			boolean exists                = false;
+		return exists;
 
 
-			String tbName                 = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
-			tbName                        = tbName.replace(".", "_");
-
-
-			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM " + tbName + " WHERE documentId = ? LIMIT 1");
-			statement.setInt(1, documentId);
-
-
-			final ResultSet rs = statement.executeQuery();
-			rs.next();
-
-
-			if(rs.getInt(1) > 0){
-				exists  = true;
-			}
-
-
-			rs.close();
-			statement.close();
-
-
-			return exists;
-
-
-		}catch(final Exception e){
-			final String[] args = {attributeName, documentId + ""};
-			throw new TalesException(new Throwable(), e, args);
-		}
+	}catch(final Exception e){
+		final String[] args = {attributeName, documentId + ""};
+		throw new TalesException(new Throwable(), e, args);
+	}
 
 	}
 
@@ -695,7 +690,7 @@ public class TalesDB {
 
 		try {
 
-			
+
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
 
@@ -813,7 +808,7 @@ public class TalesDB {
 
 
 		try {
-			
+
 
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
@@ -899,7 +894,7 @@ public class TalesDB {
 
 
 		try {
-			
+
 
 			String tbName       = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName              = tbName.replace(".", "_");
@@ -1168,7 +1163,7 @@ public class TalesDB {
 
 
 		try{
-			
+
 
 			final PreparedStatement statement  = conn.prepareStatement("SELECT count(*) FROM ignoredDocuments WHERE name=? LIMIT 1");
 			statement.setString(1, name);
@@ -1319,7 +1314,7 @@ public class TalesDB {
 
 		try {
 
-			
+
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
 
@@ -1360,16 +1355,16 @@ public class TalesDB {
 		}
 
 	}
-	
-	
-	
-	
+
+
+
+
 	public final ArrayList<Document> getMostRecentCrawledDocumentsWithAttribute(final String attributeName, int number) throws TalesException{
 
 
 		try {
 
-			
+
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
 
