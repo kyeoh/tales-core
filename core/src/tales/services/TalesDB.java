@@ -58,10 +58,10 @@ public class TalesDB {
 		this.dbName = metadata.getNamespace();
 
 		try{
-
+			
 			
 			// db conn
-			conn = TalesDB.connect(talesConn, metadata); 
+			conn = getConnection(talesConn, metadata); 
 
 			// jedis
 			jedisPool = jedisPools.get(dbName);
@@ -76,6 +76,13 @@ public class TalesDB {
 
 
 
+	private synchronized static Connection getConnection(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+		return TalesDB.connect(talesConn, metadata); 
+	}
+	
+	
+	
+	
 	private synchronized static Connection connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
 
 		String dbName = metadata.getNamespace();
@@ -1196,12 +1203,17 @@ public class TalesDB {
 
 
 
-	public final void deleteAll() throws TalesException {
+	public final static void deleteAll(final TemplateMetadataInterface metadata) throws TalesException {
 
 
 		try {
 
+			
+			String dbName = metadata.getNamespace();
+			tales.services.Connection talesConn = new tales.services.Connection();
+			Connection conn = getConnection(talesConn, metadata); 
 
+			
 			// db
 			Logger.log(new Throwable(), "[" + dbName + "] dropping database");
 
@@ -1211,6 +1223,11 @@ public class TalesDB {
 
 
 			// redis
+			final JedisPoolConfig config = new JedisPoolConfig();
+			config.setMaxActive(talesConn.getConnectionsNumber());
+			config.setTestWhileIdle(true);
+
+			final JedisPool jedisPool = new JedisPool(config, Config.getRedisHost(dbName), Config.getRedisPort(dbName), Globals.REDIS_TIMEOUT);
 			final Jedis redis = jedisPool.getResource();
 			final Set<String> keys = redis.keys(dbName + "*");
 

@@ -87,7 +87,7 @@ public class AppMonitor{
 
 
 				// print
-				Logger.log(new Throwable(), new Date() + " -freeMem: " + TalesSystem.getFreeMemory() + " -memUsed: " + TalesSystem.getMemoryUsage() +  " -serverCPUAvg: " +  cpuAverage.getAverage() + " -uptime(secs): " + totalTime + " -env: " + TalesSystem.getTemplatesGitBranchName());
+				Logger.log(new Throwable(), "-freeMem: " + TalesSystem.getFreeMemory() + " -memUsed: " + TalesSystem.getMemoryUsage() +  " -serverCPUAvg: " +  cpuAverage.getAverage() + " -uptime: " + totalTime + " secs -env: " + TalesSystem.getTemplatesGitBranchName());
 
 
 				// loop

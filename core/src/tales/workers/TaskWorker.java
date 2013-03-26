@@ -203,11 +203,10 @@ public class TaskWorker{
 						processedOld = processed;
 						loops = 0;
 
-						Logger.log(new Throwable(), "-taskName: " + config.getTaskName() 
-								+ " -processPerSecond: " + processAverage.getAverage() 
+						Logger.log(new Throwable(),
+								" -processPerSecond: " + processAverage.getAverage() 
 								+ " -processed: " + processed 
-								+ " -tasksPending: " + tasksPending 
-								+ " -maxThreads: " + config.getConnection().getConnectionsNumber());
+								+ " -tasksPending: " + tasksPending);
 
 					}
 
