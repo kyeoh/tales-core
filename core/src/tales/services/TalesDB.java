@@ -1223,6 +1223,8 @@ public class TalesDB {
 			final Statement statement = (Statement) conn.createStatement();
 			statement.executeUpdate("drop database " + Globals.DATABASE_NAMESPACE + dbName);
 			statement.close();
+			
+			conn.close();
 
 
 			// redis
