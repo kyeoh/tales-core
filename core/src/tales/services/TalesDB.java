@@ -58,14 +58,14 @@ public class TalesDB {
 		this.dbName = metadata.getNamespace();
 
 		try{
-			
-			
+
+
 			// db conn
-			conn = getConnection(talesConn, metadata); 
+			conn = TalesDB.connect(talesConn, metadata);  
 
 			// jedis
 			jedisPool = jedisPools.get(dbName);
-			
+
 
 		}catch(final Exception e){
 			final String[] args = {dbName};
@@ -76,13 +76,6 @@ public class TalesDB {
 
 
 
-	private synchronized static Connection getConnection(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
-		return TalesDB.connect(talesConn, metadata); 
-	}
-	
-	
-	
-	
 	private synchronized static Connection connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
 
 		String dbName = metadata.getNamespace();
@@ -195,7 +188,7 @@ public class TalesDB {
 
 			return conns.get(dbName).get(index.get(dbName));
 
-			
+
 		}catch(final Exception e){
 			final String[] args = {dbName};
 			throw new TalesException(new Throwable(), e, args);
@@ -1208,10 +1201,22 @@ public class TalesDB {
 
 		try {
 
-			
+
 			String dbName = metadata.getNamespace();
 			tales.services.Connection talesConn = new tales.services.Connection();
-			Connection conn = getConnection(talesConn, metadata); 
+
+			
+			// conn
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
+					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					Globals.DATABASE_NAMESPACE + dbName +
+					"?user="+Config.getDBUsername(metadata.getNamespace()) +
+					"&password="+Config.getDBPassword(metadata.getNamespace()) +
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
+					);
+			conns.get(dbName).add(conn);
 
 			
 			// db
