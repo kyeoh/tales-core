@@ -1223,6 +1223,7 @@ public class TalesDB {
 
 
 			// redis
+			Logger.log(new Throwable(), "[" + dbName + "] counting redis keys");
 			final JedisPoolConfig config = new JedisPoolConfig();
 			config.setMaxActive(talesConn.getConnectionsNumber());
 			config.setTestWhileIdle(true);
