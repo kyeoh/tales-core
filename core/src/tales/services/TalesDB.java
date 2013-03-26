@@ -1216,8 +1216,6 @@ public class TalesDB {
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
-			conns.get(dbName).add(conn);
-
 			
 			// db
 			Logger.log(new Throwable(), "[" + dbName + "] dropping database");
