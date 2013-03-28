@@ -8,7 +8,7 @@ public class DownloadByteResult {
 	
 	
 	
-	private String charset;
+	private String charset = "";
 	private byte[] bytes;
 
 	

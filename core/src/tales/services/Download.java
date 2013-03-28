@@ -3,6 +3,7 @@ package tales.services;
 
 
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -39,64 +40,91 @@ public class Download {
 	private static String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.3 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
 	private static boolean isSSLDisabled = false;
 
-	
-	
-	
+
+
+
 	public boolean urlExists(String url) {
 
-		
+
 		HttpURLConnection conn = null;
 
-		
+
 		try {
- 
-			
+
+
 			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
 				url = URIUtil.encodeQuery(url);
 			}
-			
-			
+
+
 			if(url.contains("https://")){
 				disableSSLValidation();
 				conn = (HttpsURLConnection) new URL(url).openConnection();
 			}else{
 				conn = (HttpURLConnection) new URL(url).openConnection();
 			}
-			
-			
+
+
 			conn.setFollowRedirects(true);			
 			conn.setRequestProperty("User-Agent", userAgent);			
 			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
 			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
 			conn.setRequestMethod("HEAD");			
-			
-			
+
+
 			boolean result = (conn.getResponseCode() == HttpURLConnection.HTTP_OK);
-			
-			
+
+
 			conn.disconnect();
-			
-			
+
+
 			return result;
 
 
 		}catch (Exception e){
-			
+
 			if (conn != null) {
 				conn.disconnect();
 			}
-			
+
 			return false;
-			
+
 		}
-		
+
 	}
 
 
 
 
 	public String getURLContent(String url) throws DownloadException {
-		return getURLContentWithCookie(url, "");
+
+		try{
+
+			DownloadByteResult result = getURLBytesWithCookieAndPost(url, null, null);
+			return IOUtils.toString(result.getBytes(), result.getCharset());
+
+		}catch(Exception e){
+			String[] args = {url};
+			throw new DownloadException(new Throwable(), e, 0, args);
+		}
+
+	}
+
+
+
+
+	public String getURLContentWithPost(String url, String post) throws DownloadException {
+
+		try{
+
+			DownloadByteResult result = getURLBytesWithCookieAndPost(url, null, post);
+			return IOUtils.toString(result.getBytes(), result.getCharset());
+
+		}catch(Exception e){
+			String[] args = {url, post};
+			throw new DownloadException(new Throwable(), e, 0, args);
+		}
+
 	}
 
 
@@ -106,7 +134,7 @@ public class Download {
 
 		try{
 
-			DownloadByteResult result = getURLBytesWithCookie(url, cookie);
+			DownloadByteResult result = getURLBytesWithCookieAndPost(url, cookie, null);
 			return IOUtils.toString(result.getBytes(), result.getCharset());
 
 		}catch(Exception e){
@@ -120,13 +148,31 @@ public class Download {
 
 
 	public DownloadByteResult getURLBytes(String url) throws DownloadException{
-		return getURLBytesWithCookie(url, "");
+		return getURLBytesWithCookieAndPost(url, null, null);
 	}
 
 
 
 
-	public DownloadByteResult getURLBytesWithCookie(String url, String cookie) throws DownloadException{
+	public String getURLContentWithCookieAndPost(String url, String cookie, String post) throws DownloadException{
+
+		try{
+
+			DownloadByteResult result = getURLBytesWithCookieAndPost(url, cookie, post);
+			return IOUtils.toString(result.getBytes(), result.getCharset());
+
+		}catch(Exception e){
+			String[] args = {url, cookie, post};
+			throw new DownloadException(new Throwable(), e, 0, args);
+		}
+
+	}
+
+
+
+
+
+	public DownloadByteResult getURLBytesWithCookieAndPost(String url, String cookie, String post) throws DownloadException{
 
 
 		HttpURLConnection conn = null;
@@ -149,12 +195,33 @@ public class Download {
 
 
 			conn.setFollowRedirects(true);
-			conn.setRequestProperty("Cookie", cookie);
+			
+			if(cookie != null){
+				conn.setRequestProperty("Cookie", cookie);
+			}
+			
 			conn.setRequestProperty("Accept-Encoding", "deflate, gzip");
 			conn.setRequestProperty("User-Agent", userAgent);
 			conn.setRequestProperty("Accept","*/*");
 			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
 			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
+
+			
+			// post
+			if(post != null){
+
+				conn.setDoOutput(true);
+				conn.setRequestMethod("POST");
+
+				DataOutputStream wr = new DataOutputStream (conn.getOutputStream());
+				wr.writeBytes(post);
+				wr.flush();
+				wr.close();
+
+			}
+
+			
+			// downloads the content
 			InputStream is = conn.getInputStream();
 
 

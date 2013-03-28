@@ -8,7 +8,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import tales.services.Connection;
 import tales.services.Logger;
 import tales.services.Mongo;
 import tales.services.Solr;

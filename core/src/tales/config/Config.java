@@ -320,9 +320,9 @@ public class Config{
 	
 	
 	
-	public static boolean RackspaceConfigExists() throws TalesException{
+	public static boolean rackspaceConfigExists() throws TalesException{
 		load();
-		if(json.getJSONObject("rackspace").containsKey("aws")){
+		if(json.getJSONObject("cloud").containsKey("rackspace")){
 			return true;
 		}
 		return false;
