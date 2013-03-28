@@ -107,27 +107,47 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-	@Override
-	public void run(){
+	public String getDownloadCookie(){
+		return null;
+	}
+	
+	
+	
+	
+	public String getDownloadPost(){
+		return null;
+	}
+	
+	
+	
+	
+	public String getDownloadURL(TemplateMetadataInterface metadata, Task task){
 		
-		
-		String baseURL = this.getMetadata().getBaseURL();
+		String baseURL = metadata.getBaseURL();
 		if(baseURL == null){
 			baseURL = "";
 		}
 		
 		String url = baseURL + task.getDocumentName();
+		Logger.log(new Throwable(), task.getDocumentId() + " - " + url);
 		
+		return url;
+		
+	}
+	
+	
+	
+	
+	@Override
+	public void run(){	
+		
+		String url = getDownloadURL(this.getMetadata(), this.getTask());
 
-		try {
-
-			
-			Logger.log(new Throwable(), task.getDocumentId() + " - " + url);
-			
+		try {	
 
 			// downloads the html
 			Download download = new Download();
-			String html = download.getURLContent(url);
+			String html = download.getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
 			Document doc = Jsoup.parse(html);
 
 			// parses, extracts and saves the data

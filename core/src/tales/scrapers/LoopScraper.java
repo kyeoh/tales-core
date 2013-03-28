@@ -68,6 +68,7 @@ public class LoopScraper {
 			taskWorker.init();
 
 
+			boolean finished = false;
 			while(!taskWorker.hasFailover()){
 
 				// adds tasks
@@ -93,7 +94,12 @@ public class LoopScraper {
 
 				// if no tasks means we are finished
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) == 0){
-					break;
+					if(finished){
+						break;
+					}
+					finished = true;
+				}else{
+					finished = false;
 				}
 
 
