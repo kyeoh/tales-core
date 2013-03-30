@@ -69,7 +69,7 @@ public class LoopScraper {
 
 
 			boolean finished = false;
-			while(!taskWorker.hasFailover()){
+			while(!failover.hasFailover()){
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
@@ -82,7 +82,7 @@ public class LoopScraper {
 
 						tasksDB.add(tasks);
 
-						if(!taskWorker.isWorkerActive() && !taskWorker.isFailingOver() && !taskWorker.hasFailover()){
+						if(!taskWorker.isWorkerActive() && !failover.isFailingOver() && !failover.hasFailover()){
 							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
@@ -97,6 +97,7 @@ public class LoopScraper {
 					if(finished){
 						break;
 					}
+					// forces the loop to happen 1 last time
 					finished = true;
 				}else{
 					finished = false;

@@ -9,7 +9,7 @@ public interface FailoverInterface {
 	
 	public void fail();
 	public void failover();
-	public boolean isFallingOver();
+	public boolean isFailingOver();
 	public boolean hasFailover();
 	public void stop();
 	

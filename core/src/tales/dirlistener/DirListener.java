@@ -56,7 +56,6 @@ public class DirListener {
 					
 				}
 
-
 				// prevents the app of exiting
 				while(true){
 					Thread.sleep(1000);
@@ -151,7 +150,6 @@ public class DirListener {
 				process.destroy();
 
 				Logger.log(new Throwable(), "directory \"" + dirObj.getDir() + "\" finished");
-
 
 			}catch(Exception e){
 				new TalesException(new Throwable(), e);

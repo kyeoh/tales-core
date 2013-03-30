@@ -106,7 +106,7 @@ public class DefaultFailover implements FailoverInterface{
 
 
 	@Override
-	public boolean hasFailover(){
+	public final boolean hasFailover(){
 		return failedOver;
 	}
 
@@ -114,7 +114,7 @@ public class DefaultFailover implements FailoverInterface{
 
 
 	@Override
-	public boolean isFallingOver() {
+	public final boolean isFailingOver() {
 		return isFailingOver;
 	}
 

@@ -47,7 +47,7 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			String[] args = {Config.getDataDBHost(dbName), Config.getDBPort(dbName) + ""};
+			String[] args = {dbName, Config.getDataDBHost(dbName), Integer.toString(Config.getDBPort(dbName))};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -152,7 +152,7 @@ public class DBUtils {
 
 
 
-	public static ArrayList<String> getLocalTalesDBs() throws TalesException{
+	public static ArrayList<String> getLocalTalesDBNames() throws TalesException{
 
 		try{
 

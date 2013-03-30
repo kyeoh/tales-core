@@ -157,7 +157,6 @@ public class APIHandler extends AbstractHandler{
 			new TalesException(new Throwable(), e);
 		}
 
-
 	}
 
 
@@ -339,8 +338,8 @@ public class APIHandler extends AbstractHandler{
 
 
 			// makes sure that we dont delete a server with dbs -- we ignore tales logs
-			if(DBUtils.getLocalTalesDBs().size() == 0 || 
-					(DBUtils.getLocalTalesDBs().size() == 1 && DBUtils.getLocalTalesDBs().get(0).contains(LogsDB.getDBName()))){
+			if(DBUtils.getLocalTalesDBNames().size() == 0 || 
+					(DBUtils.getLocalTalesDBNames().size() == 1 && DBUtils.getLocalTalesDBNames().get(0).contains(LogsDB.getDBName()))){
 
 				forceDelete(response);
 
@@ -362,6 +361,7 @@ public class APIHandler extends AbstractHandler{
 
 		try {
 
+			
 			// aws server
 			if(TalesSystem.getAWSInstanceMetadata() != null){
 
@@ -459,6 +459,7 @@ public class APIHandler extends AbstractHandler{
 
 		try{
 
+			
 			// waits for solr to be ready
 			String data = null;
 			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getSolrPort() + "/solr/admin/cores?wt=json";
@@ -569,7 +570,7 @@ public class APIHandler extends AbstractHandler{
 
 			// moves the backups to the new server
 			Logger.log(new Throwable(), "SCALE: restoring databases into new server");
-			String dbNames = DBUtils.getLocalTalesDBs().toString().replace(" ", "");
+			String dbNames = DBUtils.getLocalTalesDBNames().toString().replace(" ", "");
 			dbNames = dbNames.substring(1, dbNames.length() - 1);
 			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start/tales.s3.S3DBRestore -bucket " + Globals.SCALE_TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
 			Download download = new Download();
@@ -598,7 +599,7 @@ public class APIHandler extends AbstractHandler{
 
 			JSONArray json = new JSONArray();
 
-			for(String dbName : DBUtils.getLocalTalesDBs()){
+			for(String dbName : DBUtils.getLocalTalesDBNames()){
 
 				JSONArray tables = new JSONArray();
 				for(String tableName : DBUtils.getTableNames(dbName)){

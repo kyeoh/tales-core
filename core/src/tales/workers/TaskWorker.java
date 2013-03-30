@@ -26,6 +26,9 @@ public class TaskWorker{
 	private ScraperConfig config;
 	private FailoverInterface failover;
 	private Worker worker;
+	private Monitor monitor;
+	private int tasksPending;
+	private int processed;
 
 
 
@@ -41,9 +44,15 @@ public class TaskWorker{
 	public void init() throws TalesException{
 
 		if(worker == null){
-			worker = new Worker(config, failover);
+
+			worker = new Worker();
 			Thread t = new Thread(worker);
 			t.start();
+
+			monitor = new Monitor();
+			t = new Thread(monitor);
+			t.start();
+
 		}
 
 	}
@@ -59,6 +68,7 @@ public class TaskWorker{
 
 
 	public void stop(){
+		monitor.stop();
 		worker.stop();
 	}
 
@@ -72,46 +82,23 @@ public class TaskWorker{
 
 
 
-	public boolean hasFailover(){
-		return failover.hasFailover();
-	}
-
-
-
-
-	public boolean isFailingOver() {
-		return failover.isFallingOver();
-	}
-
-
-
-
 	private class Worker implements Runnable{
 
 
 
 
-		private ScraperConfig config;
-		private FailoverInterface failover;
 		private boolean stop;
 		private CopyOnWriteArrayList<TemplateInterface> threads;
-		private Average processAverage;
 		private TasksDB taskDB;
-		private int processed;
-		private int processedOld;
-		private int loops;
 
 
 
 
-		public Worker(ScraperConfig config, FailoverInterface failover) throws TalesException{
+		public Worker() throws TalesException{
 
-			this.config                = config;
-			this.failover              = failover;
-			stop                       = false;
-			threads                    = new CopyOnWriteArrayList<TemplateInterface>();
-			processAverage             = new Average(20);
-			taskDB                     = new TasksDB(config);
+			stop = false;
+			threads = new CopyOnWriteArrayList<TemplateInterface>();
+			taskDB = new TasksDB(config);
 
 		}
 
@@ -123,10 +110,10 @@ public class TaskWorker{
 			try {
 
 
-				if(!stop && !failover.isFallingOver() && !failover.hasFailover()){
+				if(!stop && !failover.isFailingOver() && !failover.hasFailover()){
 
 
-					int tasksPending = taskDB.count();
+					tasksPending = taskDB.count();
 
 
 					if(tasksPending > 0){
@@ -185,6 +172,7 @@ public class TaskWorker{
 					}else{
 
 						if(threads.size() == 0){
+							monitor.stop();
 							stop = true;
 
 						}else{
@@ -194,6 +182,95 @@ public class TaskWorker{
 						}
 
 					}
+
+				}
+
+
+			} catch (Exception e) {
+				new TalesException(new Throwable(), e);
+			}
+
+		}
+
+
+
+
+		public boolean isWorkerActive(){
+			return !stop;
+		}
+
+
+
+
+		public void stop(){
+
+			stop = true;
+
+			while(getTasksRunning().size() != 0){
+
+				Logger.log(new Throwable(), "waiting for the tasks to finish...");
+
+				try {Thread.sleep(1000);}catch (Exception e){}
+
+			}
+
+		}
+
+
+
+
+		public ArrayList<Task> getTasksRunning(){
+
+			ArrayList<Task> tasks = new ArrayList<Task>();
+
+			for(Iterator<TemplateInterface> it = threads.iterator(); it.hasNext();){
+
+				TemplateInterface template = it.next();
+
+				if(template.isTemplateActive()){
+					tasks.add(template.getTask());
+				}
+
+			}
+
+			return tasks;
+
+		}
+
+	}
+
+
+
+
+	private class Monitor implements Runnable{
+
+
+
+
+		private boolean stop;
+		private Average processAverage;
+		private int processedOld;
+		private int loops;
+
+
+
+
+		public Monitor(){
+
+			stop = false;
+			processAverage = new Average(20);
+
+		}
+
+
+
+
+		public void run() {
+
+			try{
+
+				
+				if(!stop){
 
 
 					// process per second
@@ -212,64 +289,22 @@ public class TaskWorker{
 
 					loops++;
 
-				}
+					Thread.sleep(50);
 
+				}
+				
 
 			} catch (Exception e) {
 				new TalesException(new Throwable(), e);
 			}
+
 		}
 
 
 
 
-		// returns of the machine is active
-		public boolean isWorkerActive(){
-			return !stop;
-		}
-
-
-
-
-		// stops
 		public void stop(){
-
 			stop = true;
-
-			while(getTasksRunning().size() != 0){
-
-				Logger.log(new Throwable(), "waiting for the tasks to finish...");
-
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-			}
-
-		}
-
-
-
-
-		// get all active tasks
-		public ArrayList<Task> getTasksRunning(){
-
-			ArrayList<Task> tasks = new ArrayList<Task>();
-
-			for(Iterator<TemplateInterface> it = threads.iterator(); it.hasNext();){
-
-				TemplateInterface template = it.next();
-
-				if(template.isTemplateActive()){
-					tasks.add(template.getTask());
-				}
-
-			}
-
-			return tasks;
-
 		}
 
 	}
