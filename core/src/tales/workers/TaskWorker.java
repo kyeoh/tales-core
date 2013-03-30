@@ -259,7 +259,7 @@ public class TaskWorker{
 
 			stop = false;
 			processAverage = new Average(20);
-
+			
 		}
 
 
@@ -271,7 +271,6 @@ public class TaskWorker{
 
 				
 				if(!stop){
-
 
 					// process per second
 					if(loops == 20){ // num = secs
@@ -290,6 +289,8 @@ public class TaskWorker{
 					loops++;
 
 					Thread.sleep(50);
+					Thread t = new Thread(this);
+					t.start();
 
 				}
 				
