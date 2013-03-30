@@ -76,7 +76,7 @@ public class TalesDB {
 
 
 
-	private synchronized static Connection connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+	private synchronized final static Connection connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
 
 		String dbName = metadata.getNamespace();
 
@@ -199,7 +199,7 @@ public class TalesDB {
 
 
 
-	public String getDBName(){
+	public final String getDBName(){
 		return this.dbName;
 	}
 
@@ -554,9 +554,7 @@ public class TalesDB {
 
 
 			// checks if the db row xists
-			if(!attributeTableExists(attribute.getName())){
-				createAttributeTable(attribute.getName());
-			}
+			TalesDB.checkAttributeTable(conn, dbName, attribute.getName());
 
 
 			String tbName                 = Globals.ATTRIBUTE_TABLE_NAMESPACE + attribute.getName();
@@ -600,9 +598,7 @@ public class TalesDB {
 
 
 			// checks if the db row xists
-			if(!attributeTableExists(attribute.getName())){
-				createAttributeTable(attribute.getName());
-			}
+			TalesDB.checkAttributeTable(conn, dbName, attribute.getName());
 
 
 			// update
@@ -640,7 +636,7 @@ public class TalesDB {
 	public synchronized final boolean attributeExist(final String attributeName, final int documentId) throws TalesException{;
 
 
-	if(!attributeTableExists(attributeName)){
+	if(!TalesDB.attributeTableExists(conn, dbName, attributeName)){
 		return false;
 	}
 
@@ -849,7 +845,16 @@ public class TalesDB {
 
 
 
-	private synchronized final boolean attributeTableExists(final String attributeName) throws TalesException{
+	private synchronized static final void checkAttributeTable(final Connection conn, final String dbName, final String attributeName) throws TalesException{
+		if(!attributeTableExists(conn, dbName, attributeName)){
+			createAttributeTable(conn, dbName, attributeName);
+		}
+	}
+	
+	
+	
+	
+	private synchronized static final boolean attributeTableExists(final Connection conn, final String dbName, final String attributeName) throws TalesException{
 
 
 		boolean exists = false;
@@ -890,7 +895,7 @@ public class TalesDB {
 
 
 
-	private synchronized final void createAttributeTable(final String attributeName) throws TalesException{
+	private synchronized static final void createAttributeTable(final Connection conn, final String dbName, final String attributeName) throws TalesException{
 
 
 		try {
@@ -1205,6 +1210,10 @@ public class TalesDB {
 			String dbName = metadata.getNamespace();
 			tales.services.Connection talesConn = new tales.services.Connection();
 
+			
+			// checks db
+			DBUtils.checkDatabase(dbName);
+			
 			
 			// conn
 			Class.forName("com.mysql.jdbc.Driver");

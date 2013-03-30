@@ -34,8 +34,8 @@ public class AnticipateFailover extends DefaultFailover{
 
 		// creates the server from the beginning
 		serverCreator = new ServerCreator();
-		Thread thread = new Thread(serverCreator);
-		thread.start();
+		Thread t = new Thread(serverCreator);
+		t.start();
 
 	}
 

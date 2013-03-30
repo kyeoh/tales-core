@@ -103,18 +103,13 @@ public class TalesSystem {
 
 		try{
 
+			
 			// checks if its a aws server
-			try{
-				if(Config.AWSConfigExists()
-						&& !Config.getAWSAccessKeyId().equals("")
-						&& !Config.getAWSSecretAccessKey().equals("")
-						&& TalesSystem.getAWSInstanceMetadata() != null){
-					return TalesSystem.getAWSInstanceMetadata().getPublicDnsName();
-				}	
-			}catch(Exception e){
-				if(serverIP != null){
-					new TalesException(new Throwable(), e);
-				}
+			if(Config.AWSConfigExists()
+					&& !Config.getAWSAccessKeyId().equals("")
+					&& !Config.getAWSSecretAccessKey().equals("")
+					&& TalesSystem.getAWSInstanceMetadata() != null){
+				return TalesSystem.getAWSInstanceMetadata().getPublicDnsName();
 			}
 
 
@@ -159,6 +154,7 @@ public class TalesSystem {
 
 		try{
 
+			
 			if(branchName == null){
 
 				Process process = null;
@@ -252,6 +248,16 @@ public class TalesSystem {
 		}
 
 		return processName;
+	}
+
+
+
+	
+	public static boolean isThisAnAWSServer() throws Exception {
+		if(getAWSInstanceMetadata() != null){
+			return true;
+		}
+		return false;
 	}
 
 }

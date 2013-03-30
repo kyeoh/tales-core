@@ -446,7 +446,7 @@ public class Config{
 
 
 
-	private static void load() throws TalesException{
+	private synchronized static void load() throws TalesException{
 
 		if(!inited){
 

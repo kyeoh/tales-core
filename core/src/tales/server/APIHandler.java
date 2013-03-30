@@ -196,7 +196,7 @@ public class APIHandler extends AbstractHandler{
 
 
 			// aws server
-			if(request.getParameter("cloud") == null && TalesSystem.getAWSInstanceMetadata() != null){
+			if(TalesSystem.isThisAnAWSServer()){
 
 
 				// instance type
@@ -363,7 +363,7 @@ public class APIHandler extends AbstractHandler{
 
 			
 			// aws server
-			if(TalesSystem.getAWSInstanceMetadata() != null){
+			if(TalesSystem.isThisAnAWSServer()){
 
 				AmazonEC2 ec2 = new AmazonEC2Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
 				TerminateInstancesRequest terminate = new TerminateInstancesRequest();

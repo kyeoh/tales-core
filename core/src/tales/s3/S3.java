@@ -74,7 +74,7 @@ public class S3 {
 
 
 
-	public String checkBucket(TemplateMetadataInterface metadata) throws TalesException{
+	private synchronized static String checkBucket(TemplateMetadataInterface metadata) throws TalesException{
 
 		try{
 
