@@ -7,6 +7,7 @@ public interface FailoverInterface {
 
 		
 	
+	
 	public void fail();
 	public void failover();
 	public boolean isFailingOver();

@@ -104,18 +104,14 @@ public class TalesSystem {
 		try{
 
 			
-			// checks if its a aws server
-			if(Config.AWSConfigExists()
-					&& !Config.getAWSAccessKeyId().equals("")
-					&& !Config.getAWSSecretAccessKey().equals("")
-					&& TalesSystem.getAWSInstanceMetadata() != null){
-				return TalesSystem.getAWSInstanceMetadata().getPublicDnsName();
+			// sees if its amazon server
+			if(serverIP == null && Config.AWSConfigExists() && TalesSystem.getAWSInstanceMetadata() != null){
+				serverIP = TalesSystem.getAWSInstanceMetadata().getPublicDnsName();
 			}
 
 
-			if (serverIP == null) {
-
-				serverIP = InetAddress.getLocalHost().getHostAddress();
+			// checks if its has an external ip		
+			if(serverIP == null){
 
 				Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
 				while(n.hasMoreElements()){
@@ -138,9 +134,16 @@ public class TalesSystem {
 				}
 
 			}
+			
+			
+			// last try to get the ip
+			if(serverIP == null){
+				serverIP = InetAddress.getLocalHost().getHostAddress();
+			}
 
 			return serverIP;
 
+			
 		}catch( Exception e){
 			throw new TalesException(new Throwable(), e);
 		}

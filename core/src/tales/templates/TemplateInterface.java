@@ -13,6 +13,8 @@ import tales.services.Task;
 public interface TemplateInterface {
 
 	
+	
+	
 	public void init(Connection connection, TasksDB tasksDB, Task task);
 	public Task getTask();
 	public TemplateMetadataInterface getMetadata();
