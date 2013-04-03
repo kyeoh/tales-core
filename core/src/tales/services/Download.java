@@ -194,7 +194,7 @@ public class Download {
 			}
 
 
-			conn.setInstanceFollowRedirects(true);
+			//conn.setInstanceFollowRedirects(true);
 
 			if(cookie != null){
 				conn.setRequestProperty("Cookie", cookie);
