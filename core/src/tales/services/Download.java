@@ -195,18 +195,18 @@ public class Download {
 
 
 			conn.setFollowRedirects(true);
-			
+
 			if(cookie != null){
 				conn.setRequestProperty("Cookie", cookie);
 			}
-			
+
 			conn.setRequestProperty("Accept-Encoding", "deflate, gzip");
 			conn.setRequestProperty("User-Agent", userAgent);
 			conn.setRequestProperty("Accept","*/*");
 			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
 			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
 
-			
+
 			// post
 			if(post != null){
 
@@ -220,7 +220,7 @@ public class Download {
 
 			}
 
-			
+
 			// downloads the content
 			InputStream is = conn.getInputStream();
 
@@ -359,6 +359,84 @@ public class Download {
 
 			isSSLDisabled = true;
 
+		}
+
+	}
+
+
+
+
+	public String getURLHeaderWithCookieAndPost(String url, String cookie, String post, String key) throws IOException, DownloadException {
+
+
+		HttpURLConnection conn = null;
+
+
+		try {
+
+
+			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
+				url = URIUtil.encodeQuery(url);
+			}
+
+
+			if(url.contains("https://")){
+				disableSSLValidation();
+				conn = (HttpsURLConnection) new URL(url).openConnection();
+			}else{
+				conn = (HttpURLConnection) new URL(url).openConnection();
+			}
+
+
+			conn.setFollowRedirects(true);
+
+			if(cookie != null){
+				conn.setRequestProperty("Cookie", cookie);
+			}
+
+			conn.setRequestProperty("Accept-Encoding", "deflate, gzip");
+			conn.setRequestProperty("User-Agent", userAgent);
+			conn.setRequestProperty("Accept","*/*");
+			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
+			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);
+
+
+			// post
+			if(post != null){
+
+				conn.setDoOutput(true);
+				conn.setRequestMethod("POST");
+
+				DataOutputStream wr = new DataOutputStream (conn.getOutputStream());
+				wr.writeBytes(post);
+				wr.flush();
+				wr.close();
+
+			}
+
+			
+			String content = conn.getHeaderField(key);
+			conn.disconnect();
+			
+			
+			return content;
+
+
+		}catch (Exception e) {
+
+			String[] args = {url};
+			int responseCode = 0;
+
+			if (conn != null) {
+				try {
+					responseCode = conn.getResponseCode();
+				} catch (IOException e1) {
+					new DownloadException(new Throwable(), e1, responseCode, args);
+				}
+				conn.disconnect();
+			}
+
+			throw new DownloadException(new Throwable(), e, responseCode, args);
 		}
 
 	}
