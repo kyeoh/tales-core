@@ -120,9 +120,7 @@ public class AttributeScraper{
 			while(!download.urlExists(serverURL)){
 				Thread.sleep(100);
 			}
-
-			download.getURLContent(serverURL + "/delete");
-
+			
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
