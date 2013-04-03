@@ -65,7 +65,7 @@ public class Download {
 			}
 
 
-			conn.setFollowRedirects(true);			
+			conn.setInstanceFollowRedirects(true);			
 			conn.setRequestProperty("User-Agent", userAgent);			
 			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
 			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
@@ -194,7 +194,7 @@ public class Download {
 			}
 
 
-			conn.setFollowRedirects(true);
+			conn.setInstanceFollowRedirects(true);
 
 			if(cookie != null){
 				conn.setRequestProperty("Cookie", cookie);
@@ -366,7 +366,7 @@ public class Download {
 
 
 
-	public String getURLHeaderWithCookieAndPost(String url, String cookie, String post, String key) throws IOException, DownloadException {
+	public String getURLHeaderWithCookieAndPost(String url, String key, String cookie, String post, boolean followRedirects) throws IOException, DownloadException {
 
 
 		HttpURLConnection conn = null;
@@ -388,7 +388,7 @@ public class Download {
 			}
 
 
-			conn.setFollowRedirects(true);
+			conn.setInstanceFollowRedirects(followRedirects);
 
 			if(cookie != null){
 				conn.setRequestProperty("Cookie", cookie);
