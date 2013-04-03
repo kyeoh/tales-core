@@ -35,7 +35,9 @@ public class AppMonitor{
 
 
 	public static void stop(){
-		monitor.stop();
+		if(monitor != null){
+			monitor.stop();
+		}
 	}
 
 
