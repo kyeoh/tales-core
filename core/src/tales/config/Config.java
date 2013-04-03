@@ -251,7 +251,7 @@ public class Config{
 
 	public static boolean AWSConfigExists() throws TalesException{
 		load();
-		if(json.getJSONObject("cloud").containsKey("aws")){
+		if(json.containsKey("cloud") && json.getJSONObject("cloud").containsKey("aws")){
 			return true;
 		}
 		return false;
@@ -322,7 +322,7 @@ public class Config{
 	
 	public static boolean rackspaceConfigExists() throws TalesException{
 		load();
-		if(json.getJSONObject("cloud").containsKey("rackspace")){
+		if(json.containsKey("cloud") && json.getJSONObject("cloud").containsKey("rackspace")){
 			return true;
 		}
 		return false;
