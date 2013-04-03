@@ -118,7 +118,10 @@ public class AppMonitor{
 		
 		
 		public long getExecutionSeconds(){
-			return ((new Date().getTime() - start) / 1000);
+			if(start > 0){
+				return ((new Date().getTime() - start) / 1000);
+			}
+			return 0;
 		}
 
 	}
