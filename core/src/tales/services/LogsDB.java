@@ -13,6 +13,7 @@ import com.mysql.jdbc.Statement;
 
 import tales.config.Config;
 import tales.config.Globals;
+import tales.templates.TemplateConnectionCommon;
 import tales.utils.DBUtils;
 
 
@@ -36,13 +37,13 @@ public class LogsDB {
 			
 			if(conn == null){
 
-				// checks if the database exists, if not create it
-				DBUtils.checkDatabase(dbName);
+				// checks if the database exists, if not create it 
+				DBUtils.checkDatabase(new TemplateConnectionCommon(), dbName);
 
 				// connects
 				Class.forName("com.mysql.jdbc.Driver");
 				conn = DriverManager.getConnection("jdbc:mysql://"+
-						Config.getLogDBHost() +":"+ Config.getDBPort() +"/"+
+						Config.getLogDBHost() +":"+ Config.getDataDBPort() +"/"+
 						Globals.DATABASE_NAMESPACE + dbName +
 						"?user="+Config.getDBUsername() +
 						"&password="+Config.getDBPassword() +

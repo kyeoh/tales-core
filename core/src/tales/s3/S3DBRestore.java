@@ -137,7 +137,7 @@ public class S3DBRestore{
 					// starts a local connection
 					Class.forName("com.mysql.jdbc.Driver");
 					Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-							"localhost:" + Config.getDBPort()+"/"+
+							"localhost:" + Config.getDataDBPort()+"/"+
 							"mysql" +
 							"?user="+ Config.getDBUsername() +
 							"&password=" + Config.getDBPassword() +

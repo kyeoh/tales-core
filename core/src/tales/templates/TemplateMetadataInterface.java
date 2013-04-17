@@ -17,5 +17,4 @@ public interface TemplateMetadataInterface {
 	public ArrayList<String> getRequiredDocuments();
 	public String getNamespace();
 	
-	
 }

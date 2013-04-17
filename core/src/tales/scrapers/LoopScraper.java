@@ -12,7 +12,6 @@ import org.apache.commons.cli.PosixParser;
 
 import tales.config.Config;
 import tales.config.Globals;
-import tales.services.Connection;
 import tales.services.Download;
 import tales.services.TalesDB;
 import tales.services.TalesException;
@@ -53,7 +52,7 @@ public class LoopScraper {
 
 
 			// inits the services
-			talesDB = new TalesDB(scraperConfig.getConnection(), scraperConfig.getTemplate().getMetadata());
+			talesDB = new TalesDB(scraperConfig.getThreads(), scraperConfig.getTemplate().getConnectionMetadata(), scraperConfig.getTemplate().getMetadata());
 			tasksDB = new TasksDB(scraperConfig);
 
 
@@ -63,7 +62,7 @@ public class LoopScraper {
 
 
 			// starts the task machine with the template
-			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getNamespace()), LoopScraper.loopReferenceTime);
+			FailoverInterface failover = new DefaultFailover(scraperConfig.getTemplate().getConnectionMetadata().getFailoverAttemps(), LoopScraper.loopReferenceTime);
 			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
 
@@ -202,16 +201,11 @@ public class LoopScraper {
 			TemplateInterface template = (TemplateInterface) Class.forName(templatePath).newInstance();
 
 
-			// connection
-			Connection connection = new Connection();
-			connection.setConnectionsNumber(threads);
-
-
 			// scraper config
 			ScraperConfig scraperConfig = new ScraperConfig();
 			scraperConfig.setScraperName("LoopScraper");
 			scraperConfig.setTemplate(template);
-			scraperConfig.setConnection(connection);
+			scraperConfig.setThreads(threads);
 
 
 			// scraper

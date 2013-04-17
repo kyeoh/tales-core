@@ -18,6 +18,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import tales.config.Config;
 import tales.config.Globals;
+import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;
 import tales.utils.DBUtils;
 
@@ -53,7 +54,7 @@ public class TalesDB {
 
 
 
-	public TalesDB(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+	public TalesDB(final int threads, final TemplateConnectionInterface connMetadata, final TemplateMetadataInterface metadata) throws TalesException{
 
 		this.dbName = metadata.getNamespace();
 
@@ -61,7 +62,7 @@ public class TalesDB {
 
 
 			// db conn
-			conn = TalesDB.connect(talesConn, metadata);  
+			conn = TalesDB.connect(threads, connMetadata, metadata);  
 
 			// jedis
 			jedisPool = jedisPools.get(dbName);
@@ -76,7 +77,7 @@ public class TalesDB {
 
 
 
-	private synchronized final static Connection connect(final tales.services.Connection talesConn, final TemplateMetadataInterface metadata) throws TalesException{
+	private synchronized final static Connection connect(final int threads, final TemplateConnectionInterface connMetadata, final TemplateMetadataInterface metadata) throws TalesException{
 
 		String dbName = metadata.getNamespace();
 
@@ -93,19 +94,19 @@ public class TalesDB {
 
 
 				// checks the remote database
-				DBUtils.waitUntilMysqlIsReady(Config.getDataDBHost(dbName), Config.getDBPort(dbName));
+				DBUtils.waitUntilMysqlIsReady(connMetadata.getDataDBHost(), connMetadata.getDataDBPort());
 
 
 				// checks if the database exists, if not create it
-				DBUtils.checkDatabase(dbName);
+				DBUtils.checkDatabase(connMetadata, metadata.getNamespace());
 
 
 				// builds a redis pool
 				final JedisPoolConfig config = new JedisPoolConfig();
-				config.setMaxActive(talesConn.getConnectionsNumber());
+				config.setMaxActive(threads);
 				config.setTestWhileIdle(true);
 
-				final JedisPool jedisPool = new JedisPool(config, Config.getRedisHost(dbName), Config.getRedisPort(dbName), Globals.REDIS_TIMEOUT);
+				final JedisPool jedisPool = new JedisPool(config, connMetadata.getRedisHost(), connMetadata.getRedisPort(), Globals.REDIS_TIMEOUT);
 				jedisPools.put(dbName, jedisPool);
 
 
@@ -124,17 +125,17 @@ public class TalesDB {
 
 
 				// creates the conns
-				Logger.log(new Throwable(), "[" + dbName + "] openning " + talesConn.getConnectionsNumber() + " connections to host \"" + Config.getDataDBHost(dbName) + "\" database \"" + dbName + "\"");
+				Logger.log(new Throwable(), "[" + dbName + "] openning " + threads + " connections to host \"" + connMetadata.getDataDBHost() + "\" database \"" + dbName + "\"");
 
 				Connection conn = null;
-				for(int i = 0; i < talesConn.getConnectionsNumber(); i++){
+				for(int i = 0; i < threads; i++){
 
 					Class.forName("com.mysql.jdbc.Driver");
 					conn = DriverManager.getConnection("jdbc:mysql://"+
-							Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+							connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
 							Globals.DATABASE_NAMESPACE + dbName +
-							"?user="+Config.getDBUsername(metadata.getNamespace()) +
-							"&password="+Config.getDBPassword(metadata.getNamespace()) +
+							"?user="+connMetadata.getDBUsername() +
+							"&password="+connMetadata.getDBPassword() +
 							"&useUnicode=true&characterEncoding=UTF-8" +
 							"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 							);
@@ -154,8 +155,8 @@ public class TalesDB {
 				Logger.log(new Throwable(), "[" + dbName + "] checking required documents...");
 				if(metadata.getRequiredDocuments() != null){
 					for(final String document : metadata.getRequiredDocuments()){
-						if(!new TalesDB(talesConn, metadata).documentExists(document)){
-							new TalesDB(talesConn, metadata).addDocument(document);
+						if(!new TalesDB(threads, connMetadata, metadata).documentExists(document)){
+							new TalesDB(threads, connMetadata, metadata).addDocument(document);
 						}
 					}
 				}
@@ -1201,52 +1202,48 @@ public class TalesDB {
 
 
 
-	public final static void deleteAll(final TemplateMetadataInterface metadata) throws TalesException {
+	public final static void deleteAll(final TemplateConnectionInterface connMetadata, final TemplateMetadataInterface metadata) throws TalesException {
 
 
 		try {
 
-
-			String dbName = metadata.getNamespace();
-			tales.services.Connection talesConn = new tales.services.Connection();
-
 			
 			// checks db
-			DBUtils.checkDatabase(dbName);
+			DBUtils.checkDatabase(connMetadata, metadata.getNamespace());
 			
 			
 			// conn
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
-					Globals.DATABASE_NAMESPACE + dbName +
-					"?user="+Config.getDBUsername(metadata.getNamespace()) +
-					"&password="+Config.getDBPassword(metadata.getNamespace()) +
+					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
+					Globals.DATABASE_NAMESPACE + metadata.getNamespace() +
+					"?user="+connMetadata.getDBUsername() +
+					"&password="+connMetadata.getDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
 			
 			// db
-			Logger.log(new Throwable(), "[" + dbName + "] dropping database");
+			Logger.log(new Throwable(), "[" + metadata.getNamespace() + "] dropping database");
 
 			final Statement statement = (Statement) conn.createStatement();
-			statement.executeUpdate("drop database " + Globals.DATABASE_NAMESPACE + dbName);
+			statement.executeUpdate("drop database " + Globals.DATABASE_NAMESPACE + metadata.getNamespace());
 			statement.close();
 			
 			conn.close();
 
 
 			// redis
-			Logger.log(new Throwable(), "[" + dbName + "] counting redis keys");
+			Logger.log(new Throwable(), "[" + metadata.getNamespace() + "] counting redis keys");
 			final JedisPoolConfig config = new JedisPoolConfig();
-			config.setMaxActive(talesConn.getConnectionsNumber());
+			config.setMaxActive(1);
 			config.setTestWhileIdle(true);
 
-			final JedisPool jedisPool = new JedisPool(config, Config.getRedisHost(dbName), Config.getRedisPort(dbName), Globals.REDIS_TIMEOUT);
+			final JedisPool jedisPool = new JedisPool(config, connMetadata.getRedisHost(), connMetadata.getRedisPort(), Globals.REDIS_TIMEOUT);
 			final Jedis redis = jedisPool.getResource();
-			final Set<String> keys = redis.keys(dbName + "*");
+			final Set<String> keys = redis.keys(metadata.getNamespace() + "*");
 
-			Logger.log(new Throwable(), "[" + dbName + "] deleting " + keys.size() + " redis keys");
+			Logger.log(new Throwable(), "[" + metadata.getNamespace() + "] deleting " + keys.size() + " redis keys");
 
 			for(final String key : keys){
 				redis.del(key);
@@ -1356,7 +1353,7 @@ public class TalesDB {
 
 			final ResultSet rs                 = statement.executeQuery();
 
-			final ArrayList<Document> documents   = new ArrayList<Document>();
+			final ArrayList<Document> documents = new ArrayList<Document>();
 			while(rs.next()){
 
 				final Document document = new Document();
@@ -1406,7 +1403,7 @@ public class TalesDB {
 
 			final ResultSet rs                 = statement.executeQuery();
 
-			final ArrayList<Document> documents   = new ArrayList<Document>();
+			final ArrayList<Document> documents = new ArrayList<Document>();
 			while(rs.next()){
 
 				final Document document = new Document();

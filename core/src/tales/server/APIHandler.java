@@ -34,6 +34,7 @@ import tales.services.LogsDB;
 import tales.services.TalesException;
 import tales.system.AppMonitor;
 import tales.system.TalesSystem;
+import tales.templates.TemplateLocalhostConnection;
 import tales.utils.DBUtils;
 
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -602,11 +603,11 @@ public class APIHandler extends AbstractHandler{
 			for(String dbName : DBUtils.getLocalTalesDBNames()){
 
 				JSONArray tables = new JSONArray();
-				for(String tableName : DBUtils.getTableNames(dbName)){
+				for(String tableName : DBUtils.getTableNames(new TemplateLocalhostConnection(), dbName)){
 
 					JSONObject table = new JSONObject();
 					table.put("table", tableName);
-					table.put("size", DBUtils.getTableCount(dbName, tableName));
+					table.put("size", DBUtils.getTableCount(new TemplateLocalhostConnection(), dbName, tableName));
 					tables.add(table);
 
 				}

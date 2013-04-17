@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import tales.config.Globals;
-import tales.services.Connection;
 import tales.services.Download;
 import tales.services.DownloadException;
 import tales.services.Logger;
@@ -29,7 +28,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	
-	private Connection connection;
+	private int threads;
 	private TasksDB tasksDB;
 	private Task task;
 	protected boolean active = true;
@@ -45,8 +44,16 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	@Override
-	public final void init(Connection connection, TasksDB tasksDB, Task task) {
-		this.connection = connection;
+	public TemplateConnectionInterface getConnectionMetadata(){
+		return new TemplateConnectionCommon();
+	}
+	
+	
+	
+	
+	@Override
+	public final void init(int threads, TasksDB tasksDB, Task task) {
+		this.threads = threads;
 		this.tasksDB = tasksDB;
 		this.task = task;
 	}
@@ -54,8 +61,8 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-	public final Connection getConnection(){
-		return connection;
+	public final int getThreads(){
+		return threads;
 	}
 	
 	
@@ -77,7 +84,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	public final TalesDB getTalesDB() throws TalesException{
-		return new TalesDB(this.getConnection(), this.getMetadata());
+		return new TalesDB(this.getThreads(), this.getConnectionMetadata(), this.getMetadata());
 	}
 	
 	

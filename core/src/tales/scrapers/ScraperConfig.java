@@ -3,7 +3,6 @@ package tales.scrapers;
 
 
 
-import tales.services.Connection;
 import tales.templates.TemplateInterface;
 
 
@@ -16,7 +15,7 @@ public class ScraperConfig {
 	
 	private String scraperName;
 	private TemplateInterface template;
-	private Connection connection;
+	private int threads;
 	
 	
 	
@@ -42,15 +41,15 @@ public class ScraperConfig {
 	
 	
 	
-	public void setConnection(Connection connection){
-		this.connection = connection;
+	public void setThreads(int threads){
+		this.threads = threads;
 	}
 	
 	
 	
 	
-	public Connection getConnection() {
-		return connection;
+	public int getThreads() {
+		return threads;
 	}
 	
 	

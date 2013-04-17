@@ -135,7 +135,7 @@ public class TaskWorker{
 
 
 						// calcs the thread number
-						int maxThreads = config.getConnection().getConnectionsNumber() - threads.size();
+						int maxThreads = config.getThreads() - threads.size();
 						if(maxThreads > 0 && !failover.hasFailover()){
 
 
@@ -146,7 +146,7 @@ public class TaskWorker{
 
 								if(template.isTaskValid(task)){
 
-									template.init(config.getConnection(), taskDB, task);
+									template.init(config.getThreads(), taskDB, task);
 									threads.add(template);
 
 									Thread t = new Thread((Runnable)template);

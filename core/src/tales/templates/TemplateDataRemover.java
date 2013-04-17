@@ -9,7 +9,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
 import tales.services.Logger;
-import tales.services.Mongo;
 import tales.services.Solr;
 import tales.services.TalesDB;
 import tales.services.TalesException;
@@ -24,7 +23,7 @@ public class TemplateDataRemover {
 
 
 
-	public static void remove(TemplateMetadataInterface metadata){
+	public static void remove(TemplateInterface template){
 		
 		
 		Logger.log(new Throwable(), "removing data");
@@ -32,7 +31,7 @@ public class TemplateDataRemover {
 		
 		// DB
 		try{
-			TalesDB.deleteAll(metadata);
+			TalesDB.deleteAll(template.getConnectionMetadata(), template.getMetadata());
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}
@@ -40,16 +39,7 @@ public class TemplateDataRemover {
 
 		// tasks
 		try{
-			TasksDB.deleteTaskTablesFromDomain(metadata.getNamespace());
-		}catch(Exception e){
-			new TalesException(new Throwable(), e);
-		}
-		
-		
-		// mongo
-		try{
-			Mongo mongo = new Mongo(metadata);
-			mongo.delete();
+			TasksDB.deleteTaskTablesFromDomain(template.getConnectionMetadata(), template.getMetadata());
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}
@@ -57,7 +47,7 @@ public class TemplateDataRemover {
 		
 		// solr
 		try{
-			Solr solr = new Solr(metadata);
+			Solr solr = new Solr(template.getConnectionMetadata(), template.getMetadata());
 			solr.delete();
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
@@ -93,7 +83,7 @@ public class TemplateDataRemover {
 
 
 			// data remover
-			TemplateDataRemover.remove(template.getMetadata());
+			TemplateDataRemover.remove(template);
 
 
 			// stop

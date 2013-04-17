@@ -13,6 +13,7 @@ import tales.config.Config;
 import tales.config.Globals;
 import tales.services.Logger;
 import tales.services.TalesException;
+import tales.templates.TemplateConnectionInterface;
 
 import com.mysql.jdbc.Statement;
 
@@ -24,14 +25,14 @@ public class DBUtils {
 
 
 
-	public static void checkDatabase(String dbName) throws TalesException{
+	public static void checkDatabase(TemplateConnectionInterface connMetadata, String dbName) throws Exception{
 
 		try {
 
 
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
 					"mysql" +
 					"?user="+Config.getDBUsername() +
 					"&password="+Config.getDBPassword() +
@@ -47,7 +48,7 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			String[] args = {dbName, Config.getDataDBHost(dbName), Integer.toString(Config.getDBPort(dbName))};
+			String[] args = {dbName, connMetadata.getDataDBHost(), Integer.toString(Config.getDataDBPort())};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -111,7 +112,7 @@ public class DBUtils {
 
 
 	public static void waitUntilLocalMysqlIsReady() throws TalesException{
-		waitUntilMysqlIsReady("localhost", Config.getDBPort());
+		waitUntilMysqlIsReady("localhost", Config.getDataDBPort());
 	}
 	
 	
@@ -162,7 +163,7 @@ public class DBUtils {
 
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					"localhost:"+Config.getDBPort()+"/"+
+					"localhost:"+Config.getDataDBPort()+"/"+
 					"mysql" +
 					"?user="+Config.getDBUsername() +
 					"&password="+Config.getDBPassword() +
@@ -200,17 +201,17 @@ public class DBUtils {
 
 
 
-	public static final ArrayList<String> getTableNames(String dbName) throws TalesException{
+	public static final ArrayList<String> getTableNames(TemplateConnectionInterface connMetadata, String dbName) throws TalesException{
 
 		try{
 
 
 			Class.forName("com.mysql.jdbc.Driver");
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
 					Globals.DATABASE_NAMESPACE + dbName +
-					"?user="+Config.getDBUsername(dbName) +
-					"&password="+Config.getDBPassword(dbName) +
+					"?user="+connMetadata.getDBUsername() +
+					"&password="+connMetadata.getDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
@@ -244,14 +245,14 @@ public class DBUtils {
 
 
 
-	public static int getTableCount(String dbName, String tableName) throws TalesException{
+	public static int getTableCount(TemplateConnectionInterface connMetadata, String dbName, String tableName) throws TalesException{
 
 		try{
 
 
 			Class.forName("com.mysql.jdbc.Driver");
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					Config.getDataDBHost(dbName)+":"+Config.getDBPort(dbName)+"/"+
+					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
 					Globals.DATABASE_NAMESPACE + dbName +
 					"?user="+Config.getDBUsername() +
 					"&password="+Config.getDBPassword() +

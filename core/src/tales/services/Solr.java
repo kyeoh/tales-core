@@ -13,6 +13,7 @@ import org.apache.solr.common.SolrInputDocument;
 
 import tales.config.Config;
 import tales.config.Globals;
+import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;
 
 
@@ -29,7 +30,7 @@ public class Solr {
 
 
 
-	public Solr(TemplateMetadataInterface metadata) throws TalesException{
+	public Solr(TemplateConnectionInterface connMetadata, TemplateMetadataInterface metadata) throws TalesException{
 
 		String dbName = metadata.getNamespace();
 
@@ -37,7 +38,7 @@ public class Solr {
 
 			
 			String indexName = Globals.DATABASE_NAMESPACE + dbName;
-			String baseURL = "http://" + Config.getSolrHost(dbName) + ":" + Config.getSolrPort(dbName) + "/solr/";
+			String baseURL = "http://" + connMetadata.getSolrHost() + ":" + connMetadata.getSolrPort() + "/solr/";
 			
 			server = new CommonsHttpSolrServer(baseURL + indexName);
 

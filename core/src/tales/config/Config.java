@@ -72,149 +72,112 @@ public class Config{
 
 
 	public static String getDBUsername() throws TalesException{
-		return getDBUsername("");
-	}
-
-
-
-
-	public static String getDBUsername(String dbName) throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "dbUsername");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getString("dbUsername");
 	}
-
-
-
-
+	
+	
+	
+	
 	public static String getDBPassword() throws TalesException{
-		return getDBPassword("");
-	}
-
-
-
-
-	public static String getDBPassword(String dbName) throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "dbPassword");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getString("dbPassword");
 	}
-
-
-
-
-	public static String getDataDBHost(String dbName) throws TalesException{
+	
+	
+	
+	
+	public static String getDataDBHost() throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "dataDB");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getString("dataDB");
 	}
-
-
-
-
-	public static String getTasksDBHost(String dbName) throws TalesException{
+	
+	
+	
+	
+	public static int getDataDBPort() throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "tasksDB");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getInt("dataDBPort");
 	}
-
-
-
-
-	public static int getDBPort() throws TalesException{
+	
+	
+	
+	
+	public static String getTasksDBHost() throws TalesException{
 		load();
-		return getDBPort("");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getString("tasksDB");
 	}
-
-
-
-
-	public static int getDBPort(String dbName) throws TalesException{
+	
+	
+	
+	
+	public static int getTasksDBPort() throws TalesException{
 		load();
-		return Integer.parseInt(getTemplateKeyValue(dbName, "dbPort"));
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getInt("tasksDBPort");
 	}
-
-
-
-
-	public static String getRedisHost(String dbName) throws TalesException{
+	
+	
+	
+	
+	public static String getRedisHost() throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "redisHost");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getString("redisHost");
 	}
-
-
-
-
-	public static int getRedisPort(String dbName) throws TalesException{
+	
+	
+	
+	
+	public static int getRedisPort() throws TalesException{
 		load();
-		return Integer.parseInt(getTemplateKeyValue(dbName, "redisPort"));
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getInt("redisPort");
 	}
-
-
-
-
-	public static String getSolrHost(String dbName) throws TalesException{
+	
+	
+	
+	
+	public static String getSolrHost() throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "solrHost");
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getString("solrHost");
 	}
-
-
-
-
-	public static int getSolrPort(String dbName) throws TalesException{
-		load();
-		return Integer.parseInt(getTemplateKeyValue(dbName, "solrPort"));
-	}
-
-
-
+	
+	
+	
 	
 	public static int getSolrPort() throws TalesException{
 		load();
-		return Integer.parseInt(getTemplateKeyValue(null, "solrPort"));
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getInt("solrPort");
 	}
 	
 	
 	
 	
-	public static String getMongoHost(String dbName) throws TalesException{
+	public static ArrayList<FailoverAttempt> getFailoverAttemps() throws TalesException{
 		load();
-		return getTemplateKeyValue(dbName, "mongoHost");
-	}
 
-
-
-
-	public static int getMongoPort(String dbName) throws TalesException{
-		load();
-		return Integer.parseInt(getTemplateKeyValue(dbName, "mongoPort"));
-	}
-	
-	
-	
-	
-	private static String getTemplateKeyValue(String dbName, String key) throws TalesException{
+		JSONArray failovers = json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getJSONArray("failover");
 		
-		if(!key.equals("") && templateKeyExists(dbName, key)){
-			return json.getJSONObject("templates")
-					.getJSONObject(dbName)
-					.getString(key);
-
-		}else{
-			return json.getJSONObject("templates")
-					.getJSONObject("default")
-					.getString(key);
-
-		}
-	}
-
-
-
-
-	public static ArrayList<FailoverAttempt> getFailover(String dbName) throws TalesException{
-		load();
-
-		if(!templateKeyExists(dbName, "failover")){
-			dbName = "default";
-		}
-
-		JSONArray failovers = json.getJSONObject("templates").getJSONObject(dbName).getJSONArray("failover");
 		ArrayList<FailoverAttempt> objs = new ArrayList<FailoverAttempt>();
 
 		for(int i = 0; i < failovers.size(); i++){
@@ -229,21 +192,6 @@ public class Config{
 		}
 
 		return objs;
-	}
-
-
-
-
-	private static boolean templateKeyExists(String dbName, String key) throws TalesException{
-
-		if(json.getJSONObject("templates").containsKey(dbName)){
-			return json.getJSONObject("templates")
-					.getJSONObject(dbName)
-					.has(key);
-		}
-
-		return false;
-
 	}
 
 

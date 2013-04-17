@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import tales.config.Config;
 import tales.config.Globals;
 import tales.scrapers.ScraperConfig;
+import tales.templates.TemplateConnectionInterface;
+import tales.templates.TemplateMetadataInterface;
 import tales.utils.DBUtils;
 
 import com.mysql.jdbc.Statement;
@@ -44,16 +46,16 @@ public class TasksDB {
 				
 				
 				// checks if the database exists, if not create it
-				DBUtils.checkDatabase(dbName);
+				DBUtils.checkDatabase(config.getTemplate().getConnectionMetadata(), config.getTemplate().getMetadata().getNamespace());
 				
 
 				// connects
 				Class.forName("com.mysql.jdbc.Driver");
 				conn = DriverManager.getConnection("jdbc:mysql://"+
-						Config.getTasksDBHost(config.getTemplate().getMetadata().getNamespace())+":"+Config.getDBPort(config.getTemplate().getMetadata().getNamespace())+"/"+
+						config.getTemplate().getConnectionMetadata().getTasksDBHost()+":"+config.getTemplate().getConnectionMetadata().getTasksDBPort()+"/"+
 						Globals.DATABASE_NAMESPACE + dbName +
-						"?user=" + Config.getDBUsername(config.getTemplate().getMetadata().getNamespace()) +
-						"&password=" + Config.getDBPassword(config.getTemplate().getMetadata().getNamespace()) +
+						"?user=" + config.getTemplate().getConnectionMetadata().getDBUsername() +
+						"&password=" + config.getTemplate().getConnectionMetadata().getDBPassword() +
 						"&useUnicode=true&characterEncoding=UTF-8" +
 						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
@@ -281,7 +283,7 @@ public class TasksDB {
 
 
 
-	public static void deleteTaskTablesFromDomain(String domain) throws TalesException {
+	public static void deleteTaskTablesFromDomain(TemplateConnectionInterface connMetadata, TemplateMetadataInterface metadata) throws TalesException {
 
 		try {
 
@@ -289,7 +291,7 @@ public class TasksDB {
 			// connects
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					Config.getTasksDBHost(domain)+":"+Config.getDBPort(domain)+"/"+
+					connMetadata.getTasksDBHost()+":"+connMetadata.getTasksDBPort()+"/"+
 					"tales_tasks" +
 					"?user=" + Config.getDBUsername() +
 					"&password=" + Config.getDBPassword() +
@@ -300,7 +302,7 @@ public class TasksDB {
 
 			// gets all the tables that contains the domain name
 			Statement statement = (Statement) conn.createStatement();
-			ResultSet rs = statement.executeQuery("SHOW TABLES LIKE '%" + domain + "'");
+			ResultSet rs = statement.executeQuery("SHOW TABLES LIKE '%" + metadata.getNamespace() + "'");
 
 			while(rs.next()){
 

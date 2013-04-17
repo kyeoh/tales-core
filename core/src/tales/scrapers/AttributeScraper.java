@@ -12,7 +12,6 @@ import org.apache.commons.cli.PosixParser;
 
 import tales.config.Config;
 import tales.config.Globals;
-import tales.services.Connection;
 import tales.services.Document;
 import tales.services.Download;
 import tales.services.Logger;
@@ -52,7 +51,7 @@ public class AttributeScraper{
 
 
 			// inits the services
-			talesDB = new TalesDB(scraperConfig.getConnection(), scraperConfig.getTemplate().getMetadata());
+			talesDB = new TalesDB(scraperConfig.getThreads(), scraperConfig.getTemplate().getConnectionMetadata(), scraperConfig.getTemplate().getMetadata());
 			tasksDB = new TasksDB(scraperConfig);
 
 
@@ -62,7 +61,7 @@ public class AttributeScraper{
 
 
 			// starts the task machine with the template
-			FailoverInterface failover = new DefaultFailover(Config.getFailover(scraperConfig.getTemplate().getMetadata().getNamespace()), AttributeScraper.loopReferenceTime);
+			FailoverInterface failover = new DefaultFailover(scraperConfig.getTemplate().getConnectionMetadata().getFailoverAttemps(), AttributeScraper.loopReferenceTime);
 			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
 
@@ -203,16 +202,11 @@ public class AttributeScraper{
 			TemplateInterface template = (TemplateInterface) Class.forName(templatePath).newInstance();
 
 
-			// connection
-			Connection connection = new Connection();
-			connection.setConnectionsNumber(threads);
-
-
 			// scraper config
 			ScraperConfig scraperConfig = new ScraperConfig();
 			scraperConfig.setScraperName("AttributeScraper");
 			scraperConfig.setTemplate(template);
-			scraperConfig.setConnection(connection);
+			scraperConfig.setThreads(threads);
 
 
 			// scraper
