@@ -13,6 +13,9 @@ import tales.workers.FailoverAttempt;
 
 public class TemplateLocalhostConnection implements TemplateConnectionInterface{
 
+	
+	
+	
 	@Override
 	public String getDBUsername() throws Exception {
 		return Config.getDBUsername();

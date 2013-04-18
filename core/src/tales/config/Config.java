@@ -35,7 +35,7 @@ public class Config{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("static")
-				.getString("dashboardURL");
+				.getString("dashboardHost");
 	}
 
 
@@ -95,7 +95,7 @@ public class Config{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
-				.getString("dataDB");
+				.getString("dataDBHost");
 	}
 	
 	
@@ -115,7 +115,7 @@ public class Config{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
-				.getString("tasksDB");
+				.getString("tasksDBHost");
 	}
 	
 	

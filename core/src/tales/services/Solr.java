@@ -11,7 +11,6 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrInputDocument;
 
-import tales.config.Config;
 import tales.config.Globals;
 import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;

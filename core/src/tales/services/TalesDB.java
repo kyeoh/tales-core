@@ -16,7 +16,6 @@ import java.util.Set;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import tales.config.Config;
 import tales.config.Globals;
 import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;
