@@ -132,6 +132,8 @@ public class LoopScraper {
 
 
 	private static ArrayList<Task> getTasks() throws TalesException{
+		
+		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
 
