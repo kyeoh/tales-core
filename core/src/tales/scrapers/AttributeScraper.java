@@ -42,7 +42,7 @@ public class AttributeScraper{
 
 
 
-	public static void init(ScraperConfig scraperConfig, String attributeName, long loopReferenceTime) throws TalesException{
+	public static void init(ScraperConfig scraperConfig, String attributeName, String query, long loopReferenceTime) throws TalesException{
 
 		try{
 
@@ -72,7 +72,7 @@ public class AttributeScraper{
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
 
-					ArrayList<Task> tasks = getTasks(attributeName);
+					ArrayList<Task> tasks = getTasks(attributeName, query);
 
 					if(tasks.size() > 0){
 
@@ -130,11 +130,11 @@ public class AttributeScraper{
 
 
 
-	private static ArrayList<Task> getTasks(String attributeName) throws TalesException{
+	private static ArrayList<Task> getTasks(String attributeName, String query) throws TalesException{
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
 
-		for(Document document : talesDB.getAndUpdateLastCrawledDocumentsWithAttribute(attributeName, Globals.MAX_TASKS)){
+		for(Document document : talesDB.getAndUpdateLastCrawledDocumentsWithAttributeAndQuery(attributeName, query, Globals.MAX_TASKS)){
 
 			// checks if the most recently crawled user is older than this new user, 
 			// this means that the "most recent user" is now old and we have looped
@@ -165,6 +165,7 @@ public class AttributeScraper{
 			options.addOption("template", true, "template class path");
 			options.addOption("attribute", true, "user attribute name");
 			options.addOption("threads", true, "number of templates");
+			options.addOption("query", true, "query");
 			options.addOption("loopReferenceTime", true, "loopReferenceTime");
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
@@ -176,6 +177,11 @@ public class AttributeScraper{
 			long loopReferenceTime = 0;
 			if(cmd.hasOption("loopReferenceTime")){
 				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
+			}
+			
+			String query = null;
+			if(cmd.hasOption("bucket")){
+				query = cmd.getOptionValue("bucket");
 			}
 
 
@@ -210,7 +216,7 @@ public class AttributeScraper{
 
 
 			// scraper
-			AttributeScraper.init(scraperConfig, attributeName, loopReferenceTime);
+			AttributeScraper.init(scraperConfig, attributeName, query, loopReferenceTime);
 
 
 			// stop

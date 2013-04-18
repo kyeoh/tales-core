@@ -1337,7 +1337,7 @@ public class TalesDB {
 
 
 
-	public final ArrayList<Document> getAndUpdateLastCrawledDocumentsWithAttribute(final String attributeName, final int number) throws TalesException{
+	public final ArrayList<Document> getAndUpdateLastCrawledDocumentsWithAttributeAndQuery(final String attributeName, final String query, final int number) throws TalesException{
 
 
 		try {
@@ -1345,9 +1345,15 @@ public class TalesDB {
 
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
+			PreparedStatement statement;
 
-
-			final PreparedStatement statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate DESC LIMIT ?;");
+			if(query != null){
+				statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id WHERE data=? ORDER BY documents.lastUpdate DESC LIMIT ?;");
+				statement.setString(2, query);
+			}else{
+				statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate DESC LIMIT ?;");
+			}
+			
 			statement.setInt(1, number);
 
 			final ResultSet rs                 = statement.executeQuery();
