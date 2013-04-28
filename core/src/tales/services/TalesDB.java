@@ -1347,14 +1347,16 @@ public class TalesDB {
 			tbName                             = tbName.replace(".", "_");
 			PreparedStatement statement;
 
-			if(query != null){
-				statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id WHERE data=? ORDER BY documents.lastUpdate DESC LIMIT ?;");
-				statement.setString(2, query);
+			
+			if(query != null){	
+				statement = conn.prepareStatement("SELECT documents.id, documents.name, documents.added, documents.lastUpdate, documents.active FROM " + tbName + " INNER JOIN documents ON " + tbName + ".documentId = documents.id WHERE " + tbName + ".data LIKE \"" + query + "\" ORDER BY documents.lastUpdate ASC LIMIT 0,?;");
+
 			}else{
-				statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate DESC LIMIT ?;");
+				statement = conn.prepareStatement("SELECT documents.id, documents.name, documents.added, documents.lastUpdate, documents.active FROM " + tbName + " INNER JOIN documents ON " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate ASC LIMIT 0,?;");
 			}
 			
 			statement.setInt(1, number);
+			
 
 			final ResultSet rs                 = statement.executeQuery();
 
@@ -1393,7 +1395,7 @@ public class TalesDB {
 
 
 
-	public final ArrayList<Document> getMostRecentCrawledDocumentsWithAttribute(final String attributeName, int number) throws TalesException{
+	public final ArrayList<Document> getMostRecentCrawledDocumentsWithAttributeAndQuery(final String attributeName, final String query, int number) throws TalesException{
 
 
 		try {
@@ -1401,10 +1403,18 @@ public class TalesDB {
 
 			String tbName                      = Globals.ATTRIBUTE_TABLE_NAMESPACE + attributeName;
 			tbName                             = tbName.replace(".", "_");
+			PreparedStatement statement;
 
-
-			final PreparedStatement statement  = conn.prepareStatement("SELECT DISTINCT " + tbName + ".documentId, documents.* FROM " + tbName + ", documents WHERE " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate DESC LIMIT ?;");
+			
+			if(query != null){
+				statement = conn.prepareStatement("SELECT documents.id, documents.name, documents.added, documents.lastUpdate, documents.active FROM " + tbName + " INNER JOIN documents ON " + tbName + ".documentId = documents.id WHERE " + tbName + ".data LIKE \"" + query + "\" ORDER BY documents.lastUpdate DESC LIMIT 0,?;");
+				
+			}else{
+				statement = conn.prepareStatement("SELECT documents.id, documents.name, documents.added, documents.lastUpdate, documents.active FROM " + tbName + " INNER JOIN documents ON " + tbName + ".documentId = documents.id ORDER BY documents.lastUpdate DESC LIMIT 0,?;");
+			}
+			
 			statement.setInt(1, number);
+			
 
 			final ResultSet rs                 = statement.executeQuery();
 

@@ -57,7 +57,13 @@ public class LoopScraper {
 
 
 			if(LoopScraper.loopReferenceTime == 0){
-				LoopScraper.loopReferenceTime = talesDB.getMostRecentCrawledDocuments(1).get(0).getLastUpdate().getTime();
+				
+				ArrayList<Document> documents = talesDB.getMostRecentCrawledDocuments(1);
+			
+				if(documents.size() > 0){
+					LoopScraper.loopReferenceTime = documents.get(0).getLastUpdate().getTime();
+				}
+				
 			}
 
 

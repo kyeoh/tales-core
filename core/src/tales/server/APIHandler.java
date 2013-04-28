@@ -563,8 +563,8 @@ public class APIHandler extends AbstractHandler{
 			AppMonitor.init();
 
 			// backsups the databases
-			Logger.log(new Throwable(), "SCALE: backing up databases into s3 bucket: " + Globals.SCALE_TEMP_S3_BUCKET_NAME);
-			S3DBBackup.backupAllExcept(Globals.SCALE_TEMP_S3_BUCKET_NAME, null);
+			Logger.log(new Throwable(), "SCALE: backing up databases into s3 bucket: " + Globals.TEMP_S3_BUCKET_NAME);
+			S3DBBackup.backupAllExcept(Globals.TEMP_S3_BUCKET_NAME, null);
 
 			// creates a new server
 			String publicDNS = newServer(request, response);
@@ -573,7 +573,7 @@ public class APIHandler extends AbstractHandler{
 			Logger.log(new Throwable(), "SCALE: restoring databases into new server");
 			String dbNames = DBUtils.getLocalTalesDBNames().toString().replace(" ", "");
 			dbNames = dbNames.substring(1, dbNames.length() - 1);
-			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start/tales.s3.S3DBRestore -bucket " + Globals.SCALE_TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
+			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start/tales.s3.S3DBRestore -bucket " + Globals.TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
 			Download download = new Download();
 			download.getURLContent(url);
 

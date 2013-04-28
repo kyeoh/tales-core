@@ -56,7 +56,12 @@ public class AttributeScraper{
 
 
 			if(AttributeScraper.loopReferenceTime == 0){
-				AttributeScraper.loopReferenceTime = talesDB.getMostRecentCrawledDocumentsWithAttribute(attributeName, 1).get(0).getLastUpdate().getTime();
+				
+				ArrayList<Document> documents = talesDB.getMostRecentCrawledDocumentsWithAttributeAndQuery(attributeName, query, 1);
+				
+				if(documents.size() > 0){
+					AttributeScraper.loopReferenceTime = documents.get(0).getLastUpdate().getTime();
+				}
 			}
 
 
@@ -182,8 +187,8 @@ public class AttributeScraper{
 			}
 			
 			String query = null;
-			if(cmd.hasOption("bucket")){
-				query = cmd.getOptionValue("bucket");
+			if(cmd.hasOption("query")){
+				query = cmd.getOptionValue("query");
 			}
 
 

@@ -21,9 +21,8 @@ public class Globals {
 	public static String DB_BACKUP_TEMP_DIR              = System.getProperty("user.home") + "/tales-tmp/db-backups";
 	public static String DB_RESTORE_TEMP_DIR             = System.getProperty("user.home") + "/tales-tmp/db-restores";
 	
-	public static String MONGO_DATABASE_NAME             = "tales";
 	public static String BACKUP_S3_BUCKET_NAME           = "tales-backups";
-	public static String SCALE_TEMP_S3_BUCKET_NAME       = "tales-temp";
+	public static String TEMP_S3_BUCKET_NAME             = "tales-temp";
 	public static String FILES_S3_BUCKET_NAME            = "tales-files-";
 	
 	public static int GIT_SYNC_REFESH_INTERVAL           = 5000;

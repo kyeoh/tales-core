@@ -3,13 +3,12 @@
 	<head>
 
 
-		<title>T-A-L-E-S</title>
+		<title></title>
 		<style type="text/css">
 		
 		body {
 		    font-family: Arial, Arial, Helvetica, sans-serif;
 			font-size: 12px;
-			background-color: #ccc;
 		}
 		
 		.nav {
@@ -95,7 +94,7 @@
 	<body>
 	
 		<div id="helper" class="helper">
-			<h1>T-A-L-E-S</h1>
+			<h1></h1>
 			<div id="branch"></div> 
 			<a href=javascript:pause()>Pause Stream</a>
 			| <a href=#nodes>Nodes</a>
@@ -133,6 +132,7 @@
 		
 		
 		// globals
+		var companyName = "JobsTheWord";
 		var port = 8080;
 		var maxLogSize = 20000;
 		var logData = [];
@@ -153,13 +153,18 @@
 		
 		$(document).ready(function() {
 			
+			$("h1").text(companyName);
 			
 			function start(){
 			
 			
 				var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
 				var ws = $.WebSocket(location);
-				ws.onopen = function() {};
+				ws.onopen = function() {
+					$("title").text(companyName);
+					$("h1").text($("title").text());
+					$("body").css("background-color", "#CCC");
+				};
 	            ws.onmessage = function(data) {
                 
 
@@ -206,8 +211,11 @@
 								$("#" + serverDivName).append("<div id=\"apps\"></div>");
 								
 								// database div
-								$("#databasesStats").prepend("<div id='databases_" + serverDivName +"' class='databaseContainer'></div>");
-								$("#databases_" + serverDivName).css("background-color", "#" + colors[colorIndex++]);
+								if(!$("#databases_" + serverDivName).exists()){
+									$("#databasesStats").prepend("<div id='databases_" + serverDivName +"' class='databaseContainer'></div>");
+									$("#databases_" + serverDivName).css("background-color", "#" + colors[colorIndex++]);
+								}
+								
 								checkDatabasesInfo(publicDNS, $("#databases_" + serverDivName));
 
 
@@ -321,6 +329,9 @@
 					alert("error")
 				};
 	            ws.onclose = function() {
+					$("title").text("Rebooting...");
+					$("h1").text($("title").text());
+					$("body").css("background-color", "#FF0000");
 					setTimeout(start, startInterval);
 				};
 
