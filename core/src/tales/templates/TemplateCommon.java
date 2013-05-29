@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import tales.config.Globals;
+import tales.scrapers.ScraperConfig;
 import tales.services.Download;
 import tales.services.DownloadException;
 import tales.services.Logger;
@@ -27,8 +28,8 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-	
-	private int threads;
+
+	private ScraperConfig scraperConfig;
 	private TasksDB tasksDB;
 	private Task task;
 	protected boolean active = true;
@@ -47,13 +48,13 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 	public TemplateConnectionInterface getConnectionMetadata(){
 		return new TemplateConnectionCommon();
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
-	public final void init(int threads, TasksDB tasksDB, Task task) {
-		this.threads = threads;
+	public final void init(ScraperConfig scraperConfig, TasksDB tasksDB, Task task) {
+		this.scraperConfig = scraperConfig;
 		this.tasksDB = tasksDB;
 		this.task = task;
 	}
@@ -61,20 +62,20 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 
-	public final int getThreads(){
-		return threads;
+	public final ScraperConfig getScraperConfig(){
+		return scraperConfig;
 	}
-	
-	
-	
-	
+
+
+
+
 	public final TasksDB getTasksDB() {
 		return tasksDB;
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
 	public final Task getTask() {
 		return task;
@@ -84,12 +85,12 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	public final TalesDB getTalesDB() throws TalesException{
-		return new TalesDB(this.getThreads(), this.getConnectionMetadata(), this.getMetadata());
+		return new TalesDB(this.getScraperConfig().getThreads(), this.getConnectionMetadata(), this.getMetadata());
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
 	public final boolean hasFailed() {
 		return failed;
@@ -117,44 +118,57 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 	public String getDownloadCookie(){
 		return null;
 	}
-	
-	
-	
-	
+
+
+
+
 	public String getDownloadPost(){
 		return null;
 	}
-	
-	
-	
-	
+
+
+
+
 	public String getDownloadURL(TemplateMetadataInterface metadata, Task task){
-		
+
 		String baseURL = metadata.getBaseURL();
 		if(baseURL == null){
 			baseURL = "";
 		}
-		
+
 		String url = baseURL + task.getDocumentName();
-		Logger.log(new Throwable(), task.getDocumentId() + " - " + url);
-		
+		Logger.log(new Throwable(), "id: " + task.getDocumentId() + " - " + url);
+
 		return url;
-		
+
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
 	public void run(){	
-		
+
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
 
 		try {	
 
-			// downloads the html
-			Download download = new Download();
-			String html = download.getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
+			String html;
+
+			// checks the cache
+			if(!this.getScraperConfig().getUseCache()){
+
+				// downloads the html
+				html = new Download().getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
+
+			}else{
+
+				// gets the cache html
+				html = null;
+				//DigestUtils.shaHex("aff")
+
+			}
+
 			Document doc = Jsoup.parse(html);
 
 			// parses, extracts and saves the data
@@ -163,15 +177,25 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 			// extracts links from the doc and stores them
 			storeLinks(extractLinks(doc));
 
-			
+
 		} catch (DownloadException e) {
-			
+
 			if(e.getResponseCode() != 404){
 				failed = true;
+			}	
+
+			if(e.getResponseCode() == 503){
+				
+				try {
+					tasksDB.add(task);
+				} catch (TalesException e1) {
+					new TemplateException(new Throwable(), e1, task.getDocumentId(), url);
+				}
+
 			}
 			
 			new TemplateException(new Throwable(), e, task.getDocumentId(), url);
-			
+
 		} catch (Exception e) {
 
 			try {
@@ -219,7 +243,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 
 
 	protected void storeLinks(ArrayList<String> links){
-		
+
 		for(String link : links){
 
 			try{
@@ -237,7 +261,7 @@ public abstract class TemplateCommon implements Runnable, TemplateInterface{
 			}
 
 		}
-		
+
 	}
 
 }

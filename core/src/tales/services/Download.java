@@ -6,6 +6,7 @@ package tales.services;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -101,10 +102,15 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, null, null);
-			return IOUtils.toString(result.getBytes(), result.getCharset());
-
-		}catch(Exception e){
-			String[] args = {url};
+			
+			if(result.getCharset() != null){
+				return new String(result.getBytes(), result.getCharset());
+			}else{
+				return new String(result.getBytes());
+			}
+		
+		}catch(UnsupportedEncodingException e){
+			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
 		}
 
@@ -118,10 +124,15 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, null, post);
-			return IOUtils.toString(result.getBytes(), result.getCharset());
-
-		}catch(Exception e){
-			String[] args = {url, post};
+			
+			if(result.getCharset() != null){
+				return new String(result.getBytes(), result.getCharset());
+			}else{
+				return new String(result.getBytes());
+			}
+		
+		}catch(UnsupportedEncodingException e){
+			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
 		}
 
@@ -135,10 +146,15 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, cookie, null);
-			return IOUtils.toString(result.getBytes(), result.getCharset());
-
-		}catch(Exception e){
-			String[] args = {url, cookie};
+			
+			if(result.getCharset() != null){
+				return new String(result.getBytes(), result.getCharset());
+			}else{
+				return new String(result.getBytes());
+			}
+		
+		}catch(UnsupportedEncodingException e){
+			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
 		}
 
@@ -159,15 +175,19 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, cookie, post);
-			return IOUtils.toString(result.getBytes(), result.getCharset());
+			
+			if(result.getCharset() != null){
+				return new String(result.getBytes(), result.getCharset());
+			}else{
+				return new String(result.getBytes());
+			}
 
-		}catch(Exception e){
-			String[] args = {url, cookie, post};
+		}catch(UnsupportedEncodingException e){
+			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
 		}
 
 	}
-
 
 
 
@@ -277,7 +297,7 @@ public class Download {
 					}
 
 				} catch (Exception e) {
-					String[] args = {url};
+					String[] args = {"url: " + url};
 					new TalesException(new Throwable(), e, args);
 				}
 
@@ -298,12 +318,14 @@ public class Download {
 
 		}catch (Exception e) {
 
-			String[] args = {url};
+			String[] args = new String[2];
+			args[0] = "url: " + url;
 			int responseCode = 0;
 
 			if (conn != null) {
 				try {
 					responseCode = conn.getResponseCode();
+					args[1] = "responseCode: " + responseCode;
 				} catch (IOException e1) {
 					new DownloadException(new Throwable(), e1, responseCode, args);
 				}
@@ -424,7 +446,7 @@ public class Download {
 
 		}catch (Exception e) {
 
-			String[] args = {url};
+			String[] args = {"url: " + url};
 			int responseCode = 0;
 
 			if (conn != null) {

@@ -8,6 +8,7 @@ public class Globals {
 	
 	
 	
+	public static int DEFAULT_NUM_THREADS                = 3;
 	public static int MIN_TASKS                          = 500;
 	public static int MAX_TASKS                          = 5000;
 	
@@ -34,6 +35,7 @@ public class Globals {
 	public static int DASHBOARD_MAX_ERRORS               = 30;
 	public static int DOCUMENT_NAME_MAX_LENGTH           = 2000;
 	public static int DOCUMENT_ATTRIBUTE_DATA_MAX_LENGTH = 20000;
+	public static int SOCKET_STREAM_RECONNECT_INTERVAL   = 30000;
 	
 	public static String WEB_DIR                         = System.getProperty("user.home") + "/tales-core/core/web";
 	public static String WEB_DASHBOARD                   = "dashboard.html";

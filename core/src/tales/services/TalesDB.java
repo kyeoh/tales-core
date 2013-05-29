@@ -68,7 +68,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {dbName};
+			final String[] args = {"dbName: " + dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 	}
@@ -86,18 +86,9 @@ public class TalesDB {
 			// database and memcache connections
 			if(!conns.containsKey(dbName)){
 
-
-				// init connection holders
-				conns.put(dbName, new ArrayList<Connection>());
-				cachedTables.put(dbName, new ArrayList<String>());
-
-
-				// checks the remote database
+				
+				// checks if mysql is up
 				DBUtils.waitUntilMysqlIsReady(connMetadata.getDataDBHost(), connMetadata.getDataDBPort());
-
-
-				// checks if the database exists, if not create it
-				DBUtils.checkDatabase(connMetadata, metadata.getNamespace());
 
 
 				// builds a redis pool
@@ -108,9 +99,21 @@ public class TalesDB {
 				final JedisPool jedisPool = new JedisPool(config, connMetadata.getRedisHost(), connMetadata.getRedisPort(), Globals.REDIS_TIMEOUT);
 				jedisPools.put(dbName, jedisPool);
 
-
-				// wait for redis to be up and running
-				final Jedis redis  = jedisPool.getResource();
+				
+				// checks if redis is up
+				Jedis redis;
+				while(true){
+					try{
+						redis = jedisPool.getResource();
+						break;
+					}catch(Exception e){
+						Logger.log(new Throwable(), "[" + dbName + "] waiting for redis to be ready (maybe you havent started it)...");
+						Thread.sleep(1000);
+					}
+				}
+				
+				
+				// wait for redis to be ready
 				while(true){
 					try{
 						redis.exists("test");
@@ -121,6 +124,15 @@ public class TalesDB {
 					}
 				}
 				jedisPool.returnResource(redis);
+				
+
+				// init connection holders
+				conns.put(dbName, new ArrayList<Connection>());
+				cachedTables.put(dbName, new ArrayList<String>());
+				
+				
+				// checks if the database exists, if not create it
+				DBUtils.checkDatabase(connMetadata, metadata.getNamespace());
 
 
 				// creates the conns
@@ -190,7 +202,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {dbName};
+			final String[] args = {"dbName: " + dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -245,7 +257,7 @@ public class TalesDB {
 
 		}catch(final Exception e){
 
-			final String[] args = {name};
+			final String[] args = {"name: " + name};
 			throw new TalesException(new Throwable(), e, args);
 
 		}finally{
@@ -274,7 +286,7 @@ public class TalesDB {
 
 		}catch(final Exception e){
 
-			final String[] args = {name};
+			final String[] args = {"name: " + name};
 			throw new TalesException(new Throwable(), e, args);
 
 		}finally{
@@ -319,7 +331,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {documentId + ""};
+			final String[] args = {"documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -341,7 +353,7 @@ public class TalesDB {
 
 		}catch(final Exception e){
 
-			final String[] args = {name};
+			final String[] args = {"name: " + name};
 			throw new TalesException(new Throwable(), e, args);
 
 		}finally{
@@ -409,7 +421,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {number + ""};
+			final String[] args = {"number: " + number};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -453,7 +465,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {number + ""};
+			final String[] args = {"number: " + number};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -476,7 +488,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {documentId + ""};
+			final String[] args = {"documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}	
 
@@ -499,7 +511,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {documentId + ""};
+			final String[] args = {"documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -538,7 +550,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {documentId + ""};
+			final String[] args = {"documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -582,7 +594,10 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attribute.getId() + "", attribute.getDocumentId() + "", attribute.getData(), attribute.getName()};
+			final String[] args = {"id: " + attribute.getId(),
+					"documentId: " + attribute.getDocumentId(),
+					"data: " + attribute.getData(),
+					"attributeName: " + attribute.getName()};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -624,7 +639,10 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attribute.getId() + "", attribute.getDocumentId() + "", attribute.getData(), attribute.getName()};
+			final String[] args = {"id: " + attribute.getId(),
+					"documentId: " + attribute.getDocumentId(),
+					"data: " + attribute.getData(),
+					"attributeName: " + attribute.getName()};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -672,7 +690,7 @@ public class TalesDB {
 
 
 	}catch(final Exception e){
-		final String[] args = {attributeName, documentId + ""};
+		final String[] args = {"attributeName: " + attributeName, "documentId: " + documentId};
 		throw new TalesException(new Throwable(), e, args);
 	}
 
@@ -709,7 +727,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName, documentId + ""};
+			final String[] args = {"attributeName: " + attributeName, "documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -750,7 +768,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName, documentId + ""};
+			final String[] args = {"attributeName: " + attributeName, "documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -791,7 +809,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName, documentId + ""};
+			final String[] args = {"attributeName: " + attributeName, "documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -836,7 +854,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName, documentId + "", limit + ""};
+			final String[] args = {"attributeName: " + attributeName, "documentId: " + documentId, "limit: " + limit};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -883,7 +901,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName};
+			final String[] args = {"attributeName: " + attributeName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -911,7 +929,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName};
+			final String[] args = {"attributeName: " + attributeName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 	}
@@ -919,7 +937,7 @@ public class TalesDB {
 
 
 
-	public final static int getDocumentsCount(Connection conn) throws TalesException{
+	public final int getDocumentsCount() throws TalesException{
 
 
 		try {
@@ -947,7 +965,7 @@ public class TalesDB {
 		}
 
 	}
-
+	
 
 
 
@@ -999,7 +1017,7 @@ public class TalesDB {
 
 
 					}catch(final Exception e){
-						final String[] args = {Integer.toString(id)};
+						final String[] args = {"id: " + Integer.toString(id)};
 						new TalesException(new Throwable(), e, args);
 					}
 				}
@@ -1155,7 +1173,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {name};
+			final String[] args = {"name: " + name};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -1192,7 +1210,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {name};
+			final String[] args = {"name: " + name};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -1328,7 +1346,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName};
+			final String[] args = {"attributeName: " + attributeName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -1386,7 +1404,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName};
+			final String[] args = {"attributeName: " + attributeName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -1441,7 +1459,7 @@ public class TalesDB {
 
 
 		}catch(final Exception e){
-			final String[] args = {attributeName};
+			final String[] args = {"attributeName: " + attributeName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 

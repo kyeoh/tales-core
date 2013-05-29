@@ -43,61 +43,51 @@ public class DefaultFailover implements FailoverInterface{
 
 
 
-	public void fail(){
+	@Override
+	public void fail() throws TalesException{
 
-		try{
-
-			if(!isFailingOver){
-
-
-				fails++;
+		if(!isFailingOver){
 
 
-				if(fails == 1){
-
-					date = new Date();
+			fails++;
 
 
-				}else if((index + 1) < attempts.size()
-						&& fails >= attempts.get(index).getMaxFails() 
-						&& (new Date().getTime() - date.getTime()) < attempts.get(index).getDuring()){
+			if(fails == 1){
+
+				date = new Date();
 
 
-					Logger.log(new Throwable(), "failover attempt " + (index + 1) + " of " + attempts.size());
-					Thread.sleep(attempts.get(index).getSleep());
-
-					index++;
-					fails = 0;
+			}else if((index + 1) < attempts.size()
+					&& fails >= attempts.get(index).getMaxFails() 
+					&& (new Date().getTime() - date.getTime()) < attempts.get(index).getDuring()){
 
 
-				}else if((index + 1) <= attempts.size()
-						&& fails <= attempts.get(index).getMaxFails() 
-						&& (new Date().getTime() - date.getTime()) > attempts.get(index).getDuring()){
+				Logger.log(new Throwable(), "failover attempt " + (index + 1) + " of " + attempts.size());
+				
+				try{Thread.sleep(attempts.get(index).getSleep());}catch(Exception e){};
+
+				index++;
+				fails = 0;
 
 
-					Logger.log(new Throwable(), "reseting failover");
-					index = 0;
-					fails = 0;
+			}else if((index + 1) <= attempts.size()
+					&& fails <= attempts.get(index).getMaxFails() 
+					&& (new Date().getTime() - date.getTime()) > attempts.get(index).getDuring()){
 
 
-				}else if((index + 1) == attempts.size()
-						&& fails >= attempts.get(index).getMaxFails() 
-						&& (new Date().getTime() - date.getTime()) < attempts.get(index).getDuring()){
+				Logger.log(new Throwable(), "reseting failover");
+				index = 0;
+				fails = 0;
 
-					failover();
 
-				}
+			}else if((index + 1) == attempts.size()
+					&& fails >= attempts.get(index).getMaxFails() 
+					&& (new Date().getTime() - date.getTime()) < attempts.get(index).getDuring()){
+
+				failover();
 
 			}
 
-
-		}catch (Exception e) {
-
-			isFailingOver = false;
-			index = 0;
-			fails = 0;
-
-			new TalesException(new Throwable(), e);
 		}
 
 	}
@@ -122,11 +112,15 @@ public class DefaultFailover implements FailoverInterface{
 
 
 	@Override
-	public void failover() {
+	public void failover() throws TalesException{
+		
+		String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
+		if(!new Download().urlExists(url)){
+			throw new TalesException(new Throwable(), new Exception(), new String[]{"tales server seems to be down"});
+		}
 
 		try {
 
-			
 			isFailingOver = true;
 
 
@@ -140,11 +134,11 @@ public class DefaultFailover implements FailoverInterface{
 
 			String thisServerURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
 			Download download = new Download();
-			
+
 			while(!download.urlExists(thisServerURL)){
 				Thread.sleep(100);
 			}
-			
+
 			String data = download.getURLContent(thisServerURL + "/new");
 			JSONObject json = (JSONObject) JSONSerializer.toJSON(data);
 
@@ -159,11 +153,11 @@ public class DefaultFailover implements FailoverInterface{
 
 			}
 
-			download.getURLContent(newServerURL + "/start/" + process + " -loopReferenceTime " + loopReferenceTime);
+			download.getURLContent(newServerURL + "/start " + process + " -loopReferenceTime " + loopReferenceTime);
 
-			
+
 			failedOver = true;
-			
+
 
 		}catch (Exception e) {
 
@@ -172,7 +166,7 @@ public class DefaultFailover implements FailoverInterface{
 			fails = 0;
 
 			new TalesException(new Throwable(), e);
-			
+
 		}
 
 	}

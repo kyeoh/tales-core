@@ -36,6 +36,9 @@ public class LogsDB {
 
 			
 			if(conn == null){
+				
+				// checks if mysql is up
+				DBUtils.waitUntilMysqlIsReady(new TemplateConnectionCommon().getDataDBHost(), new TemplateConnectionCommon().getDataDBPort());
 
 				// checks if the database exists, if not create it 
 				DBUtils.checkDatabase(new TemplateConnectionCommon(), dbName);

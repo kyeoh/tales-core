@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.ServletException;
@@ -65,48 +63,52 @@ public class APIHandler extends AbstractHandler{
 		response.setHeader("Access-Control-Allow-Origin", "*"); 
 
 
-		if(target.equals("/reboot")){
+		if(target.startsWith("/reboot")){
 			reboot();
 
 
-		}else if(target.equals("/branches")){
+		}else if(target.startsWith("/branches")){
 			branches(response);
 
 
 		}else if(target.startsWith("/start")){
-			start(target, response);
+			start(target.replace("/start ", ""));
 
 
-		}else if(target.equals("/new")){
+		}else if(target.startsWith("/new")){
 			newServer(request, response);
 
 
-		}else if(target.equals("/delete")){
+		}else if(target.startsWith("/delete")){
 			delete(response);
 
 
-		}else if(target.equals("/force-delete")){
+		}else if(target.startsWith("/force-delete")){
 			forceDelete(response);
 
 
-		}else if(target.equals("/kill")){
-			kill(request);
+		}else if(target.startsWith("/kill")){
+			kill(target.replace("/kill ", ""));
 
 
-		}else if(target.equals("/solr")){
-			solr(response);
-
-
-		}else if(target.equals("/errors")){
+		}else if(target.startsWith("/errors")){
 			errors(response);
 
 
-		}else if(target.equals("/scale")){
+		}else if(target.startsWith("/scale")){
 			scale(request, response);
 
 
-		}else if(target.equals("/databases")){
+		}else if(target.startsWith("/databases")){
 			databases(response);
+		
+			
+		}else if(target.startsWith("/backup")){
+			start(tales.s3.S3DBBackup.class.getCanonicalName());
+		
+			
+		}else if(target.startsWith("/clear")){
+			start(tales.templates.TemplateDataRemover.class.getCanonicalName() +" -template " + target.replace("/clear ", ""));
 		}
 
 	}
@@ -163,12 +165,12 @@ public class APIHandler extends AbstractHandler{
 
 
 
-	private void start(String target, HttpServletResponse response){
+	private void start(String command){
 
 		try{
 
 
-			String command = "java -cp " + Config.getJarPath() + " " + target.replace("/start/", "") + " >/dev/null 2>&1";
+			command = "java -cp " + Config.getJarPath() + " " + command + " >/dev/null 2>&1";
 			Logger.log(new Throwable(), "START: launching \"" + command + "/");
 
 			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", command);
@@ -434,78 +436,14 @@ public class APIHandler extends AbstractHandler{
 
 
 
-	private void kill(HttpServletRequest request){
+	private void kill(String pid){
 
 		try {
 
-
-			String pid = request.getParameter("pid");
-
+			
 			Logger.log(new Throwable(), "KILL: killing pid: " + pid);
 			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", "kill -9 " + pid);
 			builder.start();
-
-
-		} catch (Exception e) {
-			new TalesException(new Throwable(), e);
-		}
-
-	}
-
-
-
-
-	@SuppressWarnings("unchecked")
-	private void solr(HttpServletResponse response) {
-
-		try{
-
-			
-			// waits for solr to be ready
-			String data = null;
-			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getSolrPort() + "/solr/admin/cores?wt=json";
-
-			while(true){
-
-				try{
-
-					Download download = new Download();
-					if(download.urlExists(url)){
-						data = download.getURLContent(url);
-						break;
-					}
-
-				}catch(Exception e){}
-
-				Thread.sleep(100);
-
-			}
-
-			JSONObject json = (JSONObject) JSONSerializer.toJSON(data);
-
-			JSONArray array = new JSONArray();
-			Set<String> cores = json.getJSONObject("status").keySet();
-			Iterator<String> it = cores.iterator();
-
-			while (it.hasNext()) {
-
-				String core = it.next();
-
-				if(!core.equals("")){
-
-					JSONObject obj = new JSONObject();
-					obj.put(core, "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getSolrPort() + "/solr/" + core + "/select/?q=*:*");
-
-					array.add(obj);
-
-				}
-			} 
-
-
-			// response
-			response.setContentType("application/json");
-			response.setStatus(HttpServletResponse.SC_OK);
-			response.getWriter().println(array);
 
 
 		} catch (Exception e) {
@@ -555,7 +493,7 @@ public class APIHandler extends AbstractHandler{
 
 
 
-	public void scale(HttpServletRequest request, HttpServletResponse response){
+	private void scale(HttpServletRequest request, HttpServletResponse response){
 
 		try{
 
@@ -573,7 +511,7 @@ public class APIHandler extends AbstractHandler{
 			Logger.log(new Throwable(), "SCALE: restoring databases into new server");
 			String dbNames = DBUtils.getLocalTalesDBNames().toString().replace(" ", "");
 			dbNames = dbNames.substring(1, dbNames.length() - 1);
-			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start/tales.s3.S3DBRestore -bucket " + Globals.TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
+			String url = "http://" + publicDNS + ":" + Config.getDashbaordPort() + "/start tales.s3.S3DBRestore -bucket " + Globals.TEMP_S3_BUCKET_NAME + " -db_names " + dbNames;
 			Download download = new Download();
 			download.getURLContent(url);
 

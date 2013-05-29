@@ -56,9 +56,9 @@ public class AttributeScraper{
 
 
 			if(AttributeScraper.loopReferenceTime == 0){
-				
+
 				ArrayList<Document> documents = talesDB.getMostRecentCrawledDocumentsWithAttributeAndQuery(attributeName, query, 1);
-				
+
 				if(documents.size() > 0){
 					AttributeScraper.loopReferenceTime = documents.get(0).getLastUpdate().getTime();
 				}
@@ -72,7 +72,7 @@ public class AttributeScraper{
 
 
 			boolean finished = false;
-			while(!failover.hasFailover()){
+			while(!failover.hasFailover() && !taskWorker.isBroken()){
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
@@ -118,13 +118,17 @@ public class AttributeScraper{
 
 
 			// deletes the server
-			String serverURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete";
-			
-			Download download = new Download();
-			while(!download.urlExists(serverURL)){
-				Thread.sleep(100);
+			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
+			if(new Download().urlExists(url)){
+
+				String serverURL = url + "/delete";
+
+				while(!new Download().urlExists(serverURL)){
+					Thread.sleep(100);
+				}
+
 			}
-			
+
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -136,7 +140,7 @@ public class AttributeScraper{
 
 
 	private static ArrayList<Task> getTasks(String attributeName, String query) throws TalesException{
-		
+
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
@@ -174,6 +178,9 @@ public class AttributeScraper{
 			options.addOption("threads", true, "number of templates");
 			options.addOption("query", true, "query");
 			options.addOption("loopReferenceTime", true, "loopReferenceTime");
+			options.addOption("query", true, "query");
+			options.addOption("useCache", true, "useCache");
+			options.addOption("saveCache", true, "saveCache");
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
@@ -185,10 +192,20 @@ public class AttributeScraper{
 			if(cmd.hasOption("loopReferenceTime")){
 				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
 			}
-			
+
 			String query = null;
 			if(cmd.hasOption("query")){
 				query = cmd.getOptionValue("query");
+			}
+			
+			boolean useCache = false;
+			if(cmd.hasOption("useCache")){
+				useCache = Boolean.parseBoolean(cmd.getOptionValue("useCache"));
+			}
+			
+			boolean saveCache = false;
+			if(cmd.hasOption("saveCache")){
+				useCache = Boolean.parseBoolean(cmd.getOptionValue("saveCache"));
 			}
 
 
@@ -220,6 +237,8 @@ public class AttributeScraper{
 			scraperConfig.setScraperName("AttributeScraper");
 			scraperConfig.setTemplate(template);
 			scraperConfig.setThreads(threads);
+			scraperConfig.setUseCache(useCache);
+			scraperConfig.setSaveCache(saveCache);
 
 
 			// scraper

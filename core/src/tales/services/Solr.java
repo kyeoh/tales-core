@@ -59,7 +59,7 @@ public class Solr {
 			
 
 		}catch(Exception e){
-			String[] args = {dbName};
+			String[] args = {"dbName: " + dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 

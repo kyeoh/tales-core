@@ -22,7 +22,6 @@ import tales.services.Document;
 import tales.system.AppMonitor;
 import tales.system.TalesSystem;
 import tales.templates.TemplateInterface;
-import tales.workers.AnticipateFailover;
 import tales.workers.DefaultFailover;
 import tales.workers.FailoverInterface;
 import tales.workers.TaskWorker;
@@ -57,13 +56,13 @@ public class LoopScraper {
 
 
 			if(LoopScraper.loopReferenceTime == 0){
-				
+
 				ArrayList<Document> documents = talesDB.getMostRecentCrawledDocuments(1);
-			
+
 				if(documents.size() > 0){
 					LoopScraper.loopReferenceTime = documents.get(0).getLastUpdate().getTime();
 				}
-				
+
 			}
 
 
@@ -74,7 +73,7 @@ public class LoopScraper {
 
 
 			boolean finished = false;
-			while(!failover.hasFailover()){
+			while(!failover.hasFailover() && !taskWorker.isBroken()){
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
@@ -120,13 +119,17 @@ public class LoopScraper {
 
 
 			// deletes the server
-			String serverURL = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort() + "/delete";
+			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
+			if(new Download().urlExists(url)){
 
-			Download download = new Download();
-			while(!download.urlExists(serverURL)){
-				Thread.sleep(100);
+				String serverURL = url + "/delete";
+
+				while(!new Download().urlExists(serverURL)){
+					Thread.sleep(100);
+				}
+
 			}
-			
+
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -138,7 +141,7 @@ public class LoopScraper {
 
 
 	private static ArrayList<Task> getTasks() throws TalesException{
-		
+
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
@@ -174,6 +177,8 @@ public class LoopScraper {
 			options.addOption("template", true, "template class path");
 			options.addOption("threads", true, "number of templates");
 			options.addOption("loopReferenceTime", true, "loopReferenceTime");
+			options.addOption("useCache", true, "useCache");
+			options.addOption("saveCache", true, "saveCache");
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
@@ -183,6 +188,16 @@ public class LoopScraper {
 			long loopReferenceTime = 0;
 			if(cmd.hasOption("loopReferenceTime")){
 				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
+			}
+			
+			boolean useCache = false;
+			if(cmd.hasOption("useCache")){
+				useCache = Boolean.parseBoolean(cmd.getOptionValue("useCache"));
+			}
+			
+			boolean saveCache = false;
+			if(cmd.hasOption("saveCache")){
+				useCache = Boolean.parseBoolean(cmd.getOptionValue("saveCache"));
 			}
 
 
@@ -214,6 +229,8 @@ public class LoopScraper {
 			scraperConfig.setScraperName("LoopScraper");
 			scraperConfig.setTemplate(template);
 			scraperConfig.setThreads(threads);
+			scraperConfig.setUseCache(useCache);
+			scraperConfig.setSaveCache(saveCache);
 
 
 			// scraper

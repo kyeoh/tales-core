@@ -46,7 +46,7 @@ public class TasksDB {
 				
 				
 				// checks if the database exists, if not create it
-				DBUtils.checkDatabase(config.getTemplate().getConnectionMetadata(), config.getTemplate().getMetadata().getNamespace());
+				DBUtils.checkDatabase(config.getTemplate().getConnectionMetadata(), dbName);
 				
 
 				// connects
@@ -142,7 +142,7 @@ public class TasksDB {
 			
 
 		}catch(Exception e){
-			String[] args = {amount + ""};
+			String[] args = {"amount: " + amount};
 			throw new TalesException(new Throwable(), e, args);
 		}
 	}
@@ -160,7 +160,7 @@ public class TasksDB {
 			statement.close();
 
 		}catch(Exception e){
-			String[] args = {documentId + ""};
+			String[] args = {"documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -214,7 +214,7 @@ public class TasksDB {
 
 
 		}catch(Exception e){
-			String[] args = {taskName};
+			String[] args = {"taskName: " + taskName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 	}
@@ -246,7 +246,7 @@ public class TasksDB {
 
 
 		}catch(Exception e){
-			String[] args = {taskName};
+			String[] args = {"taskName: " + taskName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 

@@ -238,8 +238,8 @@ public class TalesSystem {
 
 				String find = "jar";
 				int ini = processName.indexOf(find) + find.length() + 1;
-				int end = processName.indexOf("root", ini);
-				processName = processName.substring(ini, end - 1);
+				int end = processName.indexOf("\n", ini);
+				processName = processName.substring(ini, end);
 
 				process.destroy();
 

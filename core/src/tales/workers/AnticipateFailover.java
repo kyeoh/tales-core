@@ -43,7 +43,12 @@ public class AnticipateFailover extends DefaultFailover{
 
 
 	@Override
-	public void failover() {
+	public void failover() throws TalesException {
+		
+		String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
+		if(!new Download().urlExists(url)){
+			throw new TalesException(new Throwable(), new Exception(), new String[]{"tales server seems to be down"});
+		}
 
 		try {
 
@@ -70,7 +75,7 @@ public class AnticipateFailover extends DefaultFailover{
 
 			}
 
-			new Download().getURLContent(newServerURL + "/start/" + process + " -loopReferenceTime " + loopReferenceTime);
+			new Download().getURLContent(newServerURL + "/start " + process + " -loopReferenceTime " + loopReferenceTime);
 
 			failedOver = true;
 

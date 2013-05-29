@@ -48,7 +48,9 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			String[] args = {dbName, connMetadata.getDataDBHost(), Integer.toString(Config.getDataDBPort())};
+			String[] args = {"dbName: " + dbName, 
+					"dataDBHost: " + connMetadata.getDataDBHost(), 
+					"dataDBPort: " + Integer.toString(Config.getDataDBPort())};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -74,7 +76,7 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			final String[] args = {dbName};
+			final String[] args = {"dbName: " + dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -102,7 +104,7 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			final String[] args = {dbName};
+			final String[] args = {"dbName: " + dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -141,7 +143,7 @@ public class DBUtils {
 
 			}catch(final Exception e){	
 				try {
-					Logger.log(new Throwable(), "waiting for mysql to be ready...");
+					Logger.log(new Throwable(), "waiting for mysql to be ready (maybe you havent started it)...");
 					Thread.sleep(1000);
 				} catch (Exception e1) {}
 			}
@@ -235,7 +237,7 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			String[] args = {dbName};
+			String[] args = {"dbName: " + dbName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -275,7 +277,7 @@ public class DBUtils {
 
 
 		}catch(final Exception e){
-			String[] args = {dbName, tableName};
+			String[] args = {"dbName: " + dbName, "tableName: " + tableName};
 			throw new TalesException(new Throwable(), e, args);
 		}
 

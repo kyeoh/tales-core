@@ -83,8 +83,7 @@ public class Logger {
 
 	
 	public static void error(Throwable origin, Throwable error) {
-		String[] args = {};
-		error(origin, error, args);
+		error(origin, error, new String[]{});
 	}
 
 
@@ -97,16 +96,8 @@ public class Logger {
 
 
 
-	public static void error(Throwable origin, Throwable error, int id) {
-		String[] args = {Integer.toString(id)};
-		error(origin, error, args);
-	}
-
-
-
-
 	public static void templateError(Throwable origin, Throwable error, int documentId, String url) {
-		String[] args = {Integer.toString(documentId), url};
+		String[] args = {"documentId: " + Integer.toString(documentId), "url: " + url};
 		emit(error.getStackTrace(), TEMPLATE_ERROR, printError(origin, error, args));
 	}
 	
@@ -131,20 +122,29 @@ public class Logger {
 		
 		String data = "";
 		data += "[ERROR START] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-		data += new Formatter().format("%-15s %-2s %s %n", "class", "|", origin.getStackTrace()[0].toString()).toString();
+		data += new Formatter().format("%-15s %-2s %s %n", "  * found", "|", origin.getStackTrace()[0].toString()).toString();
+		data += new Formatter().format("%-15s %-2s %s %n", "  * error", "|", error.getStackTrace()[0].toString()).toString();
 
 		// args
 		for(int i = 0; i < args.length; i++){
-			data += new Formatter().format("%-15s %-2s %s %n", "args", "|", args[i]).toString();
+			data += new Formatter().format("%-15s %-2s %s %n", "  * args", "|", args[i]).toString();
 		}
 
 		data += "----------------------------------------------------------------------------------------------------------------------------------------------------\n";
+		data += "[FULL ERROR]\n";
 		data += ExceptionUtils.getFullStackTrace(error);
 		data += "[ERROR END] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-
+		
 		System.out.println(data);
 		
 		return data;
 		
+	}
+	
+	
+	
+	
+	protected static void cleanPrint(Throwable origin, String data){	
+		System.out.format("%-50s %-2s %s %n", origin.getStackTrace()[0].getClassName(), "|", data);
 	}
 }

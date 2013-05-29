@@ -82,6 +82,13 @@ public class TaskWorker{
 
 
 
+	public boolean isBroken(){
+		return worker.isBroken();
+	}
+	
+	
+	
+	
 	private class Worker implements Runnable{
 
 
@@ -90,7 +97,8 @@ public class TaskWorker{
 		private boolean stop;
 		private CopyOnWriteArrayList<TemplateInterface> threads;
 		private TasksDB taskDB;
-
+		private boolean broke;
+		
 
 
 
@@ -146,7 +154,7 @@ public class TaskWorker{
 
 								if(template.isTaskValid(task)){
 
-									template.init(config.getThreads(), taskDB, task);
+									template.init(config, taskDB, task);
 									threads.add(template);
 
 									Thread t = new Thread((Runnable)template);
@@ -187,6 +195,8 @@ public class TaskWorker{
 
 
 			} catch (Exception e) {
+				stop();
+				broke = true;
 				new TalesException(new Throwable(), e);
 			}
 
@@ -235,6 +245,13 @@ public class TaskWorker{
 
 			return tasks;
 
+		}
+		
+		
+		
+		
+		public boolean isBroken(){
+			return broke;
 		}
 
 	}

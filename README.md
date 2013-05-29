@@ -11,20 +11,22 @@ Tales is simple, light, reliable, and has been tested on production environments
 
 With Tales you can do web monitoring, research, aggregators, etc.
 
+Tales currently only runs on Ubuntu 10.04 Lucid -- Tales is calling shell scripts inside the app, this needs to be replaced by a "apache licensed version of sigar".
+
 ### Block tolerant
 
-Tales is design to scrape the web continuously, even when the domain being scraped blocks the scraper server ip; it goes around this problem by creating a new server, and then moving the scraper to the new server (failover).
+Tales is design to scrape the web continuously, even when the domain being scraped blocks the scraper server ip; it goes around this problem by fail-overing to a new node (server).
 
 ### Develop, deploy and build
 
-Its very easy to code the scraper instructions called Templates. Once the templates are ready, all you need to do is push the code into git (git push origin), and the nodes (servers) alive will grab the code and recompile themselves.
+Its very easy to code the scraper instructions, also called Templates. Once the templates are ready, all you need to do is push the code into git (git push origin), and the nodes alive will grab the code and recompile themselves.
 
 You can also have several branches (git) with different configurations and templates -- environments. This gives you the ability of running tests in a separate set of servers.
 
 ### Management
 Tales gives you a dashboard (javascript/html) where you can supervise the processes running on all the nodes -- Tales use websockets to stream the data from the processes to the dashboard.
 
-In the dashboard you can also kill processes, delete servers, and look at critical errors.
+In the dashboard you can also kill processes, delete servers, check solr, and look at critical errors.
 
 There is a centralized log database that keeps logs of the activity and errors that happens on the system. The logging system, saves error information, server where the error occurred, and other useful data.
 
