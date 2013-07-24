@@ -95,7 +95,6 @@
 	
 		<div id="helper" class="helper">
 			<h1></h1>
-			<div id="branch"></div> 
 			<a href=javascript:pause()>Pause Stream</a>
 			| <a href=#nodes>Nodes</a>
 			| <a href=#errors>Errors</a>
@@ -139,9 +138,9 @@
 		var paused = false;
 		var deadInterval = 30000;
 		var solrInterval = 5000;
-		var errorsInterval = 1000;
+		var errorsInterval = 10000;
 		var startInterval = 1000;
-		var checkDatabaseInterval = 1000;
+		var checkDatabaseInterval = 10000;
 		var appsInterval = {};
 		var serversInterval = {};
 		var colors = ["74A6BD", "7195A3", "EB8540", "AB988B", "628B61", "CE7898", "66CCFF", "D6A354", "0099CC", "9CB770", "A84A5C", "CC99CC", "EC633F"]
@@ -160,24 +159,24 @@
 			
 				var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
 				var ws = $.WebSocket(location);
+			
 				ws.onopen = function() {
 					$("title").text(companyName);
 					$("h1").text($("title").text());
 					$("body").css("background-color", "#CCC");
 				};
+				
 	            ws.onmessage = function(data) {
-                
 
 					if(!paused){
 					
-					
-						data = JSON.parse(data.data);
-				
+						//data = JSON.parse(data.data);
+						data = [JSON.parse(data.data)];
 				
 						for(var i = 0; i < data.length; i++){
 						
 						
-							json = data[i]
+							json = data[i];
 
 							var classe = getClassName(json.methodPath);
 							var pid = json.pid;	
@@ -328,6 +327,7 @@
 	            ws.onerror = function(e) {
 					alert("error")
 				};
+				
 	            ws.onclose = function() {
 					$("title").text("Rebooting...");
 					$("h1").text($("title").text());
@@ -361,14 +361,6 @@
 			return classe;
 			
 		}
-		
-		
-		
-		
-		// gets the working branch
-		$.get("/branches", function(data){
-			$("#branch").html("Templates branch " + data);
-		});
 		
 		
 		
@@ -501,6 +493,8 @@
 		
 		// server stats
 		function setServerStats(div, json){
+			
+			json = JSON.parse(json);
 		
 			div.html("");
 			div.append("<ul>");

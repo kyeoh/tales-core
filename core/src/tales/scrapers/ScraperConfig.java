@@ -3,8 +3,8 @@ package tales.scrapers;
 
 
 
-import tales.config.Globals;
 import tales.templates.TemplateInterface;
+import tales.templates.TemplateMetadataInterface;
 
 
 
@@ -16,9 +16,8 @@ public class ScraperConfig {
 	
 	private String scraperName;
 	private TemplateInterface template;
-	private int threads = Globals.DEFAULT_NUM_THREADS;
-	private boolean useCache = false;
-	private boolean saveCache = false;
+	private int threads;
+	private TemplateMetadataInterface templateMetadata;
 	
 	
 	
@@ -59,35 +58,21 @@ public class ScraperConfig {
 	
 	
 	public String getTaskName(){
-		return scraperName + "_" + template.getMetadata().getNamespace();
-	}
-
-
-
-	
-	public void setUseCache(boolean useCache) {
-		this.useCache = useCache;
-	}
-
-	
-	
-	
-	public boolean getUseCache() {
-		return useCache;
+		return scraperName + "_" + getTemplateMetadata().getNamespace();
 	}
 
 
 
 
-	public void setSaveCache(boolean saveCache) {
-		this.saveCache = saveCache;
+	public void setTemplateMetadata(TemplateMetadataInterface templateMetadata) {
+		this.templateMetadata = templateMetadata;
 	}
-
 	
 	
 	
-	public boolean getSaveCache() {
-		return saveCache;
+	
+	public TemplateMetadataInterface getTemplateMetadata(){
+		return templateMetadata;
 	}
 	
 }

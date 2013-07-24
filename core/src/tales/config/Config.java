@@ -13,8 +13,8 @@ import net.sf.json.JSONSerializer;
 import org.apache.commons.io.FileUtils;
 
 import tales.dirlistener.DirListenerObj;
+import tales.server.CloudProviderInterface;
 import tales.services.TalesException;
-import tales.system.TalesSystem;
 import tales.workers.FailoverAttempt;
 
 
@@ -33,9 +33,7 @@ public class Config{
 
 	public static String getDashbaordURL() throws TalesException{
 		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("static")
-				.getString("dashboardHost");
+		return json.getString("dashboardHost");
 	}
 
 
@@ -43,9 +41,7 @@ public class Config{
 
 	public static int getDashbaordPort() throws TalesException{
 		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("static")
-				.getInt("dashboardPort");
+		return json.getInt("dashboardPort");
 	}
 
 
@@ -53,131 +49,111 @@ public class Config{
 
 	public static String getLogDBHost() throws TalesException{
 		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("static")
-				.getString("logDB");
+		return json.getString("logDBHost");
 	}
 
 
 
 
-	public static String getJarPath() throws TalesException{
+	public static int getLogDBPort() throws TalesException{
 		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("static")
-				.getString("jarPath");
+		return json.getInt("logDBPort");
 	}
 
 
 
 
-	public static String getDBUsername() throws TalesException{
+	public static String getLogDBUsername() throws TalesException{
+		load();
+		return json.getString("logDBUsername");
+	}
+
+
+
+
+	public static String getLogDBPassword() throws TalesException{
+		load();
+		return json.getString("logDBPassword");
+	}
+	
+	
+	
+	
+	public static String getTemplatesJar() throws TalesException{
+		load();
+		return json.getString("templatesJar");
+	}
+
+
+
+
+	public static String getDataDBUsername() throws TalesException{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getString("dbUsername");
 	}
-	
-	
-	
-	
-	public static String getDBPassword() throws TalesException{
+
+
+
+
+	public static String getDataDBPassword() throws TalesException{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getString("dbPassword");
 	}
-	
-	
-	
-	
+
+
+
+
 	public static String getDataDBHost() throws TalesException{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getString("dataDBHost");
 	}
-	
-	
-	
-	
+
+
+
+
 	public static int getDataDBPort() throws TalesException{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getInt("dataDBPort");
 	}
-	
-	
-	
-	
+
+
+
+
 	public static String getTasksDBHost() throws TalesException{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getString("tasksDBHost");
 	}
-	
-	
-	
-	
+
+
+
+
 	public static int getTasksDBPort() throws TalesException{
 		load();
 		return json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getInt("tasksDBPort");
 	}
-	
-	
-	
-	
-	public static String getRedisHost() throws TalesException{
-		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("common")
-				.getString("redisHost");
-	}
-	
-	
-	
-	
-	public static int getRedisPort() throws TalesException{
-		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("common")
-				.getInt("redisPort");
-	}
-	
-	
-	
-	
-	public static String getSolrHost() throws TalesException{
-		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("common")
-				.getString("solrHost");
-	}
-	
-	
-	
-	
-	public static int getSolrPort() throws TalesException{
-		load();
-		return json.getJSONObject("templates")
-				.getJSONObject("common")
-				.getInt("solrPort");
-	}
-	
-	
-	
-	
+
+
+
+
 	public static ArrayList<FailoverAttempt> getFailoverAttemps() throws TalesException{
 		load();
 
 		JSONArray failovers = json.getJSONObject("templates")
 				.getJSONObject("common")
 				.getJSONArray("failover");
-		
+
 		ArrayList<FailoverAttempt> objs = new ArrayList<FailoverAttempt>();
 
 		for(int i = 0; i < failovers.size(); i++){
@@ -186,7 +162,7 @@ public class Config{
 			failover.setMaxFails(failovers.getJSONObject(i).getInt("fails"));
 			failover.setDuring(failovers.getJSONObject(i).getInt("during"));
 			failover.setSleep(failovers.getJSONObject(i).getInt("sleep"));
-			
+
 			objs.add(failover);
 
 		}
@@ -197,144 +173,43 @@ public class Config{
 
 
 
-	public static boolean AWSConfigExists() throws TalesException{
+	public static ArrayList<CloudProviderInterface> getCloudProviders() throws TalesException{
 		load();
-		if(json.containsKey("cloud") && json.getJSONObject("cloud").containsKey("aws")){
-			return true;
-		}
-		return false;
-	}
-	
-	
-	
-	
-	public static String getAWSAccessKeyId() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("aws")
-				.getString("accessKeyId");
-	}
 
-
-
-
-	public static String getAWSSecretAccessKey() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("aws")
-				.getString("secretAccessKey");
-	}
-
-
-
-
-	public static String getAWSAMI() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("aws")
-				.getString("ami");
-	}
-
-
-
-
-	public static String getAWSSecurityGroup() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("aws")
-				.getString("securityGroup");
-	}
-
-
-
-
-	public static String getAWSInstanceType() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("aws")
-				.getString("instanceType");
-	}
-
-
-
-
-	public static String getAWSEndpoint() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("aws")
-				.getString("endpoint");
-	}
-	
-	
-	
-	
-	public static boolean rackspaceConfigExists() throws TalesException{
-		load();
-		if(json.containsKey("cloud") && json.getJSONObject("cloud").containsKey("rackspace")){
-			return true;
-		}
-		return false;
-	}
-	
-	
-	
-	
-	public static String getRackspaceUsername() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("rackspace")
-				.getString("username");
-	}
-
-
-
-
-	public static String getRackspaceKey() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("rackspace")
-				.getString("key");
-	}
-
-
-
-
-	public static int getRackspaceImageId() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("rackspace")
-				.getInt("imageId");
-	}
-
-
-
-
-	public static int getRackspaceFlavor() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("rackspace")
-				.getInt("flavor");
-	}
-
-
-
-
-	public static int getRackspaceAccount() throws TalesException{
-		load();
-		return json.getJSONObject("cloud")
-				.getJSONObject("rackspace")
-				.getInt("account");
-	}
-
-	
-	
+		ArrayList<CloudProviderInterface> list = new ArrayList<CloudProviderInterface>();
 		
+		if(json.has("cloudProviders")){
+			for(int i = 0; i < json.getJSONArray("cloudProviders").size(); i++){
+
+				try{
+
+					String path = json.getJSONArray("cloudProviders").getString(i);
+					CloudProviderInterface cloudProvider = (CloudProviderInterface ) Class.forName(path).newInstance();
+
+					list.add(cloudProvider);
+
+				}catch(Exception e){
+					new TalesException(new Throwable(), e);
+				}
+
+			}
+		}
+
+		return list;
+	}
+
+
+
+
 	public static ArrayList<String> getSyncList() throws TalesException{
 		load();
 
 		ArrayList<String> list = new ArrayList<String>();
-		for(int i = 0; i < json.getJSONArray("gitSync").size(); i++){
-			list.add(json.getJSONArray("gitSync").getString(i));
+		
+		if(json.has("gitSync")){
+			for(int i = 0; i < json.getJSONArray("gitSync").size(); i++){
+				list.add(json.getJSONArray("gitSync").getString(i));
+			}
 		}
 
 		return list;
@@ -347,8 +222,11 @@ public class Config{
 		load();
 
 		ArrayList<String> list = new ArrayList<String>();
-		for(int i = 0; i < json.getJSONArray("onStartCompile").size(); i++){
-			list.add(json.getJSONArray("onStartCompile").getString(i));
+		
+		if(json.has("onStartCompile")){
+			for(int i = 0; i < json.getJSONArray("onStartCompile").size(); i++){
+				list.add(json.getJSONArray("onStartCompile").getString(i));
+			}
 		}
 
 		return list;
@@ -361,17 +239,20 @@ public class Config{
 		load();
 
 		ArrayList<DirListenerObj> list = new ArrayList<DirListenerObj>();
-		for(int i = 0; i < json.getJSONArray("dirListener").size(); i++){
+		
+		if(json.has("dirListener")){
+			for(int i = 0; i < json.getJSONArray("dirListener").size(); i++){
 
-			JSONObject jsonObj = json.getJSONArray("dirListener").getJSONObject(i);
+				JSONObject jsonObj = json.getJSONArray("dirListener").getJSONObject(i);
 
-			DirListenerObj obj = new DirListenerObj();
-			obj.setDir(jsonObj.getString("dir"));
-			obj.setExec(jsonObj.getString("exec"));
-			obj.setIgnoreRegex(jsonObj.getString("ignoreRegex"));
+				DirListenerObj obj = new DirListenerObj();
+				obj.setDir(jsonObj.getString("dir"));
+				obj.setExec(jsonObj.getString("exec"));
+				obj.setIgnoreRegex(jsonObj.getString("ignoreRegex"));
 
-			list.add(obj);
-			
+				list.add(obj);
+
+			}
 		}
 
 		return list;
@@ -384,8 +265,11 @@ public class Config{
 		load();
 
 		ArrayList<String> list = new ArrayList<String>();
-		for(int i = 0; i < json.getJSONArray("onStart").size(); i++){
-			list.add(json.getJSONArray("onStart").getString(i));
+		
+		if(json.has("onStart")){
+			for(int i = 0; i < json.getJSONArray("onStart").size(); i++){
+				list.add(json.getJSONArray("onStart").getString(i));
+			}
 		}
 
 		return list;
@@ -394,7 +278,7 @@ public class Config{
 
 
 
-	private synchronized static void load() throws TalesException{
+	private synchronized static void load(){
 
 		if(!inited){
 
@@ -415,7 +299,7 @@ public class Config{
 
 			try{
 
-				File file = new File(Globals.ENVIRONMENTS_CONFIG_DIR + "/" + TalesSystem.getTemplatesGitBranchName() + ".json");
+				File file = new File(Globals.CONFIG_FILE);
 				String data = FileUtils.readFileToString(file);
 				Config.json = (JSONObject) JSONSerializer.toJSON(data);
 
@@ -429,7 +313,7 @@ public class Config{
 				}catch(Exception e1){
 					e.printStackTrace();
 				}
-				
+
 			}
 
 		}

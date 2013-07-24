@@ -46,7 +46,11 @@ public class TasksDB {
 				
 				
 				// checks if the database exists, if not create it
-				DBUtils.checkDatabase(config.getTemplate().getConnectionMetadata(), dbName);
+				DBUtils.checkDatabase(config.getTemplate().getConnectionMetadata().getDataDBHost(), 
+						config.getTemplate().getConnectionMetadata().getDataDBPort(), 
+						config.getTemplate().getConnectionMetadata().getDataDBUsername(), 
+						config.getTemplate().getConnectionMetadata().getDataDBPassword(), 
+						dbName);
 				
 
 				// connects
@@ -54,16 +58,17 @@ public class TasksDB {
 				conn = DriverManager.getConnection("jdbc:mysql://"+
 						config.getTemplate().getConnectionMetadata().getTasksDBHost()+":"+config.getTemplate().getConnectionMetadata().getTasksDBPort()+"/"+
 						Globals.DATABASE_NAMESPACE + dbName +
-						"?user=" + config.getTemplate().getConnectionMetadata().getDBUsername() +
-						"&password=" + config.getTemplate().getConnectionMetadata().getDBPassword() +
+						"?user=" + config.getTemplate().getConnectionMetadata().getDataDBUsername() +
+						"&password=" + config.getTemplate().getConnectionMetadata().getDataDBPassword() +
 						"&useUnicode=true&characterEncoding=UTF-8" +
 						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
-			}
-
-
-			if(!this.tableExists()){
-				this.createTable();
+				
+				
+				if(!this.tableExists()){
+					this.createTable();
+				}
+				
 			}
 			
 
@@ -293,8 +298,8 @@ public class TasksDB {
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					connMetadata.getTasksDBHost()+":"+connMetadata.getTasksDBPort()+"/"+
 					"tales_tasks" +
-					"?user=" + Config.getDBUsername() +
-					"&password=" + Config.getDBPassword() +
+					"?user=" + Config.getDataDBUsername() +
+					"&password=" + Config.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);

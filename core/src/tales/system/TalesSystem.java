@@ -9,19 +9,12 @@ import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
 import tales.config.Config;
+import tales.server.CloudProviderInterface;
 import tales.services.TalesException;
-
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.Reservation;
 
 
 
@@ -35,8 +28,6 @@ public class TalesSystem {
 	private static OperatingSystemMXBean osbean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 	private static RuntimeMXBean runbean = (RuntimeMXBean) ManagementFactory.getRuntimeMXBean();
 	private static int nCPUs = osbean.getAvailableProcessors();
-	private static String branchName;
-	private static Instance instance;
 	private static long prevUpTime = runbean.getUptime();
 	private static float lastResult = 0;
 	private static int pid = 0;
@@ -55,7 +46,6 @@ public class TalesSystem {
 
 			long elapsedCpu = processCpuTime - prevProcessCpuTime;
 			long elapsedTime = upTime - prevUpTime;
-
 			float cpuUsage = Math.min(99F, elapsedCpu / (elapsedTime * 10000F * nCPUs));
 			lastResult = cpuUsage;
 
@@ -103,10 +93,25 @@ public class TalesSystem {
 
 		try{
 
-			
-			// sees if its amazon server
-			if(serverIP == null && Config.AWSConfigExists() && TalesSystem.getAWSInstanceMetadata() != null){
-				serverIP = TalesSystem.getAWSInstanceMetadata().getPublicDnsName();
+
+			// cloud providers
+			try{
+				
+				if(serverIP == null){
+				
+					for(CloudProviderInterface cloudProvider : Config.getCloudProviders()){
+						
+						if(cloudProvider.isApplicationRunningHere()){
+							serverIP = cloudProvider.getDNS();
+							break;
+						}
+						
+					}
+					
+				}
+				
+			}catch(Exception e){
+				e.printStackTrace();
 			}
 
 
@@ -124,7 +129,7 @@ public class TalesSystem {
 						InetAddress addr = a.nextElement();
 						String publicIP = addr.getHostAddress();
 
-						if(publicIP.split("\\.").length == 4 && !publicIP.startsWith("10") && !publicIP.startsWith("127")){
+						if(publicIP.split("\\.").length == 4 && !publicIP.startsWith("10.") && !publicIP.startsWith("127.")){
 							serverIP = publicIP;
 							return serverIP;
 						}
@@ -134,90 +139,24 @@ public class TalesSystem {
 				}
 
 			}
-			
+
 			
 			// last try to get the ip
-			if(serverIP == null){
-				serverIP = InetAddress.getLocalHost().getHostAddress();
+			try{
+				if(serverIP == null){
+					serverIP = InetAddress.getLocalHost().getHostAddress();
+				}
+			}catch(Exception e){
+				e.printStackTrace();
 			}
 
+			
 			return serverIP;
 
-			
-		}catch( Exception e){
-			throw new TalesException(new Throwable(), e);
-		}
-
-	}
-
-
-
-
-	public static String getTemplatesGitBranchName() throws TalesException{
-
-		try{
-
-			
-			if(branchName == null){
-
-				Process process = null;
-
-				try{
-
-					// linux
-					ProcessBuilder builder = new ProcessBuilder("/usr/lib/git-core/git", "--git-dir", System.getProperty("user.home") + "/tales-templates/.git", "branch");
-					process = builder.start();
-
-					String output = IOUtils.toString(process.getInputStream());
-					process.destroy();
-
-					int ini = output.indexOf("*");
-					int end = output.indexOf("\n", ini);
-					branchName = output.substring(ini + 2, end).trim(); // 2 cuz of * + space (example: * master);
-
-				}catch(Exception e){
-					branchName = "development";
-				}
-
-			}
-
-			return branchName;
-
 
 		}catch( Exception e){
 			throw new TalesException(new Throwable(), e);
 		}
-
-	}
-
-
-
-
-	public static Instance getAWSInstanceMetadata() throws Exception{
-
-		if(instance != null){
-			return instance;
-		}
-
-		AmazonEC2 ec2 = new AmazonEC2Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
-
-		DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
-		List<Reservation> reservations = describeInstancesRequest.getReservations();
-
-		for(Reservation reservation : reservations) {
-
-			for(Instance instance : reservation.getInstances()){
-
-				if(instance.getPrivateIpAddress() != null && instance.getPrivateIpAddress().equals(InetAddress.getLocalHost().getHostAddress())){
-					TalesSystem.instance = instance;
-					return instance;
-				}
-
-			}
-
-		}
-
-		return null;
 
 	}
 
@@ -239,6 +178,11 @@ public class TalesSystem {
 				String find = "jar";
 				int ini = processName.indexOf(find) + find.length() + 1;
 				int end = processName.indexOf("\n", ini);
+				
+				if(end < ini){
+					end = processName.length();
+				}
+				
 				processName = processName.substring(ini, end);
 
 				process.destroy();
@@ -251,16 +195,6 @@ public class TalesSystem {
 		}
 
 		return processName;
-	}
-
-
-
-	
-	public static boolean isThisAnAWSServer() throws Exception {
-		if(getAWSInstanceMetadata() != null){
-			return true;
-		}
-		return false;
 	}
 
 }

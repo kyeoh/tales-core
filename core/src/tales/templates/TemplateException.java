@@ -4,6 +4,7 @@ package tales.templates;
 
 
 import tales.services.Logger;
+import tales.services.Task;
 
 
 
@@ -18,10 +19,10 @@ public class TemplateException extends Exception{
 	
 	
 	
-	public TemplateException(Throwable origin, Exception error, int documentId, String url){
+	public TemplateException(Throwable origin, Exception error, Task task){
 
 		try {
-			Logger.templateError(origin, error, documentId, url);
+			Logger.templateError(origin, error, task.getDocumentId(), task.getDocumentName());
 		} catch (Exception j) {
 			j.printStackTrace();
 		}

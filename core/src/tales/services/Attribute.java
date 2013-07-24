@@ -68,6 +68,9 @@ public class Attribute {
 	}
 	
 	public String getData(){
+		if(data == null){
+			data = "";
+		}
 		return data;
 	}
 	

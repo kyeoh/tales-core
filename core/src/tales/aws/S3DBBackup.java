@@ -1,4 +1,4 @@
-package tales.s3;
+package tales.aws;
 
 
 
@@ -57,8 +57,8 @@ public class S3DBBackup {
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					"localhost:"+Config.getDataDBPort()+"/"+
 					"mysql" +
-					"?user="+Config.getDBUsername() +
-					"&password="+Config.getDBPassword() +
+					"?user="+Config.getDataDBUsername() +
+					"&password="+Config.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
@@ -74,8 +74,8 @@ public class S3DBBackup {
 				if(excludeDBNames == null || !excludeDBNames.contains(dbName)){
 
 					String command = "mysqldump --default-character-set=utf8"
-							+ " -u " + Config.getDBUsername()
-							+ " -p" + Config.getDBPassword()
+							+ " -u " + Config.getDataDBUsername()
+							+ " -p" + Config.getDataDBPassword()
 							+ " " + dbName + " | gzip > " + Globals.DB_BACKUP_TEMP_DIR + "/" + dbName + ".sql.gz";
 
 					Logger.log(new Throwable(), "backing up \"" + dbName + "\"");
@@ -107,7 +107,7 @@ public class S3DBBackup {
 				// s3 is not really statefull or multithread -- not sure whats happening in the background
 				// but this blows up if you make multiple instances
 				if(s3 == null){
-					s3 = new AmazonS3Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
+					s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
 				}
 
 

@@ -17,13 +17,13 @@ public class TemplateConnectionCommon implements TemplateConnectionInterface{
 
 	
 	@Override
-	public String getDBUsername() throws Exception {
-		return Config.getDBUsername();
+	public String getDataDBUsername() throws Exception {
+		return Config.getDataDBUsername();
 	}
 
 	@Override
-	public String getDBPassword() throws Exception {
-		return Config.getDBPassword();
+	public String getDataDBPassword() throws Exception {
+		return Config.getDataDBPassword();
 	}
 
 	@Override
@@ -44,26 +44,6 @@ public class TemplateConnectionCommon implements TemplateConnectionInterface{
 	@Override
 	public int getTasksDBPort() throws Exception {
 		return Config.getTasksDBPort();
-	}
-
-	@Override
-	public String getRedisHost() throws Exception {
-		return Config.getRedisHost();
-	}
-
-	@Override
-	public int getRedisPort() throws Exception {
-		return Config.getRedisPort();
-	}
-
-	@Override
-	public String getSolrHost() throws Exception {
-		return Config.getSolrHost();
-	}
-
-	@Override
-	public int getSolrPort() throws Exception {
-		return Config.getSolrPort();
 	}
 
 	@Override

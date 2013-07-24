@@ -1,4 +1,4 @@
-package tales.s3;
+package tales.aws;
 
 
 
@@ -11,7 +11,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import tales.config.Config;
 import tales.services.TalesException;
 import tales.services.Logger;
 import tales.system.AppMonitor;
@@ -36,7 +35,7 @@ public class S3DeleteBucket{
 		try{
 
 
-			AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
+			AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
 
 
 			if(s3.doesBucketExist(s3BucketName)) {

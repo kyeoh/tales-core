@@ -13,11 +13,10 @@ public final class Array {
 
 
 
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	public static ArrayList removeDuplicates(ArrayList array){
-        HashSet hashSet = new HashSet(array);
-        return new ArrayList(hashSet);
+	
+	public static ArrayList<String> removeDuplicates(ArrayList<String> array){
+        HashSet<String> hashSet = new HashSet<String>(array);
+        return new ArrayList<String>(hashSet);
     }
     
 }

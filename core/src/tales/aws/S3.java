@@ -1,4 +1,4 @@
-package tales.s3;
+package tales.aws;
 
 
 
@@ -6,7 +6,6 @@ package tales.s3;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import tales.config.Config;
 import tales.config.Globals;
 import tales.services.Download;
 import tales.services.DownloadException;
@@ -78,12 +77,11 @@ public class S3 {
 
 		try{
 
-
 			String bucketName = Globals.FILES_S3_BUCKET_NAME + metadata.getNamespace().replace("_", "-");
 
 			if (s3 == null){
 
-				s3 = new AmazonS3Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
+				s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
 
 				if(!s3.doesBucketExist(bucketName)) {
 					Logger.log(new Throwable(), "creating -bucketName: " + bucketName);
@@ -92,7 +90,6 @@ public class S3 {
 			}
 
 			return bucketName; 
-
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);

@@ -31,6 +31,5 @@ public class Task {
 	public String getDocumentName(){
 		return document;
 	}
-	
-	
+		
 }

@@ -9,7 +9,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
 import tales.services.Logger;
-import tales.services.Solr;
 import tales.services.TalesDB;
 import tales.services.TalesException;
 import tales.services.TasksDB;
@@ -40,15 +39,6 @@ public class TemplateDataRemover {
 		// tasks
 		try{
 			TasksDB.deleteTaskTablesFromDomain(template.getConnectionMetadata(), template.getMetadata());
-		}catch(Exception e){
-			new TalesException(new Throwable(), e);
-		}
-		
-		
-		// solr
-		try{
-			Solr solr = new Solr(template.getConnectionMetadata(), template.getMetadata());
-			solr.delete();
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}

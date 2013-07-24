@@ -53,7 +53,7 @@ public class Server{
 				
 				
 				// reboots this class
-				String processCall = "java -cp " + Config.getJarPath() + " " + TalesSystem.getProcess();
+				String processCall = "java -cp " + Config.getTemplatesJar() + " " + TalesSystem.getProcess() + " >/dev/null 2>&1";
 				ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", processCall);
 				builder.start();
 				
@@ -96,7 +96,7 @@ public class Server{
 
 				}
 
-				Logger.log(new Throwable(), "server up and running...");
+				Logger.log(new Throwable(), "hello, all ready");
 
 			}
 

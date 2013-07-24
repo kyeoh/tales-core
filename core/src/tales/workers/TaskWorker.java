@@ -24,7 +24,7 @@ public class TaskWorker{
 
 
 	private ScraperConfig config;
-	private FailoverInterface failover;
+	private FailoverController failover;
 	private Worker worker;
 	private Monitor monitor;
 	private int tasksPending;
@@ -33,7 +33,7 @@ public class TaskWorker{
 
 
 
-	public TaskWorker(ScraperConfig config, FailoverInterface failover) throws TalesException{
+	public TaskWorker(ScraperConfig config, FailoverController failover) throws TalesException{
 		this.config = config;
 		this.failover = failover;
 	}
@@ -118,7 +118,7 @@ public class TaskWorker{
 			try {
 
 
-				if(!stop && !failover.isFailingOver() && !failover.hasFailover()){
+				if(!stop && !failover.hasFailed()){
 
 
 					tasksPending = taskDB.count();
@@ -144,7 +144,7 @@ public class TaskWorker{
 
 						// calcs the thread number
 						int maxThreads = config.getThreads() - threads.size();
-						if(maxThreads > 0 && !failover.hasFailover()){
+						if(maxThreads > 0 && !failover.hasFailed()){
 
 
 							for(Task task : taskDB.getList(maxThreads)){
@@ -152,7 +152,7 @@ public class TaskWorker{
 								// template
 								TemplateInterface template = (TemplateInterface) config.getTemplate().getClass().newInstance();
 
-								if(template.isTaskValid(task)){
+								if(!template.isTaskInvalid(task)){
 
 									template.init(config, taskDB, task);
 									threads.add(template);
@@ -180,7 +180,9 @@ public class TaskWorker{
 					}else{
 
 						if(threads.size() == 0){
-							monitor.stop();
+							if(monitor != null){
+								monitor.stop();
+							}
 							stop = true;
 
 						}else{

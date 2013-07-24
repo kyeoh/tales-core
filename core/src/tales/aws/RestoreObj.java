@@ -1,4 +1,4 @@
-package tales.s3;
+package tales.aws;
 
 
 

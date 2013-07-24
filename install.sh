@@ -203,7 +203,7 @@ iptables -A INPUT -i eth0 -p tcp -m tcp --dport 27017 -j ACCEPT
 
 
 # init.d
-echo -e '\n# tales-server\nsudo java -cp /root/tales-core/core/dist/tales-core.jar tales.server.Server' >> /etc/init.d/rc.local
+echo -e '\n# tales-server\nsudo java -cp /root/tales-templates/core/dist/tales-templates.jar tales.server.Server' >> /etc/init.d/rc.local
 
 
 echo ""

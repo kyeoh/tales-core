@@ -13,7 +13,6 @@ import com.mysql.jdbc.Statement;
 
 import tales.config.Config;
 import tales.config.Globals;
-import tales.templates.TemplateConnectionCommon;
 import tales.utils.DBUtils;
 
 
@@ -38,18 +37,25 @@ public class LogsDB {
 			if(conn == null){
 				
 				// checks if mysql is up
-				DBUtils.waitUntilMysqlIsReady(new TemplateConnectionCommon().getDataDBHost(), new TemplateConnectionCommon().getDataDBPort());
+				DBUtils.waitUntilMysqlIsReady(Config.getLogDBHost(), 
+						Config.getLogDBPort(), 
+						Config.getLogDBUsername(), 
+						Config.getLogDBPassword());
 
 				// checks if the database exists, if not create it 
-				DBUtils.checkDatabase(new TemplateConnectionCommon(), dbName);
+				DBUtils.checkDatabase(Config.getLogDBHost(), 
+						Config.getLogDBPort(), 
+						Config.getLogDBUsername(), 
+						Config.getLogDBPassword(), 
+						dbName);
 
 				// connects
 				Class.forName("com.mysql.jdbc.Driver");
 				conn = DriverManager.getConnection("jdbc:mysql://"+
-						Config.getLogDBHost() +":"+ Config.getDataDBPort() +"/"+
+						Config.getLogDBHost() +":"+ Config.getLogDBPort() +"/"+
 						Globals.DATABASE_NAMESPACE + dbName +
-						"?user="+Config.getDBUsername() +
-						"&password="+Config.getDBPassword() +
+						"?user="+Config.getLogDBUsername() +
+						"&password="+Config.getLogDBPassword() +
 						"&useUnicode=true&characterEncoding=UTF-8" +
 						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
@@ -89,7 +95,7 @@ public class LogsDB {
 					+ "`logType` varchar(100) COLLATE utf8_unicode_ci NOT NULL,"
 					+ "`methodPath` varchar(500) COLLATE utf8_unicode_ci NOT NULL,"
 					+ "`lineNumber` int(11) NOT NULL,"
-					+ "`data` varchar(5000) COLLATE utf8_unicode_ci NOT NULL,"
+					+ "`data` TEXT COLLATE utf8_unicode_ci NOT NULL,"
 					+ "`added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "PRIMARY KEY (`id`),"
 					+ "KEY `publicDNS` (`publicDNS`),"

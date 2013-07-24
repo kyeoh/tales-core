@@ -25,17 +25,17 @@ public class DBUtils {
 
 
 
-	public static void checkDatabase(TemplateConnectionInterface connMetadata, String dbName) throws Exception{
+	public static void checkDatabase(String host, int port, String username, String password, String dbName) throws Exception{
 
 		try {
 
 
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
+					host+":"+port+"/"+
 					"mysql" +
-					"?user="+Config.getDBUsername() +
-					"&password="+Config.getDBPassword() +
+					"?user="+username +
+					"&password="+password +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
@@ -49,8 +49,8 @@ public class DBUtils {
 
 		}catch(final Exception e){
 			String[] args = {"dbName: " + dbName, 
-					"dataDBHost: " + connMetadata.getDataDBHost(), 
-					"dataDBPort: " + Integer.toString(Config.getDataDBPort())};
+					"dataDBHost: " + host, 
+					"dataDBPort: " + Integer.toString(port)};
 			throw new TalesException(new Throwable(), e, args);
 		}
 
@@ -114,25 +114,24 @@ public class DBUtils {
 
 
 	public static void waitUntilLocalMysqlIsReady() throws TalesException{
-		waitUntilMysqlIsReady("localhost", Config.getDataDBPort());
+		waitUntilMysqlIsReady("localhost", Config.getDataDBPort(), Config.getDataDBUsername(), Config.getDataDBPassword());
 	}
 	
 	
 	
 	
-	public static void waitUntilMysqlIsReady(String host, int port){
+	public static void waitUntilMysqlIsReady(String host, int port, String username, String password){
 
 		while(true){
 
 			try {
 
-
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 						host + ":" +port+"/"+
 						"mysql" +
-						"?user="+Config.getDBUsername() +
-						"&password="+Config.getDBPassword() +
+						"?user="+username +
+						"&password="+password +
 						"&useUnicode=true&characterEncoding=UTF-8" +
 						"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 						);
@@ -143,8 +142,8 @@ public class DBUtils {
 
 			}catch(final Exception e){	
 				try {
-					Logger.log(new Throwable(), "waiting for mysql to be ready (maybe you havent started it)...");
 					Thread.sleep(1000);
+					Logger.log(new Throwable(), "waiting for mysql to be ready (maybe you havent started it)...");
 				} catch (Exception e1) {}
 			}
 
@@ -167,8 +166,8 @@ public class DBUtils {
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					"localhost:"+Config.getDataDBPort()+"/"+
 					"mysql" +
-					"?user="+Config.getDBUsername() +
-					"&password="+Config.getDBPassword() +
+					"?user="+Config.getDataDBUsername() +
+					"&password="+Config.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
@@ -212,8 +211,8 @@ public class DBUtils {
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
 					Globals.DATABASE_NAMESPACE + dbName +
-					"?user="+connMetadata.getDBUsername() +
-					"&password="+connMetadata.getDBPassword() +
+					"?user="+connMetadata.getDataDBUsername() +
+					"&password="+connMetadata.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);
@@ -256,8 +255,8 @@ public class DBUtils {
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
 					Globals.DATABASE_NAMESPACE + dbName +
-					"?user="+Config.getDBUsername() +
-					"&password="+Config.getDBPassword() +
+					"?user="+Config.getDataDBUsername() +
+					"&password="+Config.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
 					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 					);

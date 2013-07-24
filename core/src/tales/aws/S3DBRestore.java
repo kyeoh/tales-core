@@ -1,4 +1,4 @@
-package tales.s3;
+package tales.aws;
 
 
 
@@ -91,7 +91,7 @@ public class S3DBRestore{
 			// s3 is not really statefull or multithread -- not sure whats happening in the background
 			// but this blows up if you make multiple instances
 			if(s3 == null){
-				s3 = new AmazonS3Client(new BasicAWSCredentials(Config.getAWSAccessKeyId(), Config.getAWSSecretAccessKey()));
+				s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
 			}
 
 
@@ -139,8 +139,8 @@ public class S3DBRestore{
 					Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 							"localhost:" + Config.getDataDBPort()+"/"+
 							"mysql" +
-							"?user="+ Config.getDBUsername() +
-							"&password=" + Config.getDBPassword() +
+							"?user="+ Config.getDataDBUsername() +
+							"&password=" + Config.getDataDBPassword() +
 							"&useUnicode=true&characterEncoding=UTF-8" +
 							"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
 							);
@@ -181,7 +181,7 @@ public class S3DBRestore{
 					// restores the dump to mysql
 					Logger.log(new Throwable(), "restoring file \"" + restoreObj.getName() + "\" to \"" + fullDbName + "\"");
 
-					String command = "gunzip < " + filePath + " | mysql -u " + Config.getDBUsername() + " -p" + Config.getDBPassword() + " " + fullDbName + " --default-character-set=utf8";
+					String command = "gunzip < " + filePath + " | mysql -u " + Config.getDataDBUsername() + " -p" + Config.getDataDBPassword() + " " + fullDbName + " --default-character-set=utf8";
 					ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", command);
 					Process p = builder.start();
 					p.waitFor();

@@ -3,12 +3,15 @@ package tales.scrapers;
 
 
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.codec.binary.Base64;
 
 import tales.config.Config;
 import tales.config.Globals;
@@ -20,10 +23,12 @@ import tales.services.TalesException;
 import tales.services.Task;
 import tales.services.TasksDB;
 import tales.system.AppMonitor;
+import tales.system.ProcessManager;
 import tales.system.TalesSystem;
-import tales.templates.TemplateInterface;
-import tales.workers.DefaultFailover;
-import tales.workers.FailoverInterface;
+import tales.templates.DynamicTemplateMetadata;
+import tales.templates.TemplateAbstract;
+import tales.templates.TemplateMetadataInterface;
+import tales.workers.FailoverController;
 import tales.workers.TaskWorker;
 
 
@@ -36,7 +41,6 @@ public class AttributeScraper{
 
 	private static TalesDB talesDB;
 	private static TasksDB tasksDB;
-	private static long loopReferenceTime;
 	private static TaskWorker taskWorker;
 
 
@@ -47,37 +51,37 @@ public class AttributeScraper{
 		try{
 
 
-			AttributeScraper.loopReferenceTime = loopReferenceTime;
-
-
 			// inits the services
-			talesDB = new TalesDB(scraperConfig.getThreads(), scraperConfig.getTemplate().getConnectionMetadata(), scraperConfig.getTemplate().getMetadata());
+			talesDB = new TalesDB(scraperConfig.getThreads(), 
+					scraperConfig.getTemplate().getConnectionMetadata(), 
+					scraperConfig.getTemplateMetadata());
 			tasksDB = new TasksDB(scraperConfig);
 
 
-			if(AttributeScraper.loopReferenceTime == 0){
+			if(loopReferenceTime == 0){
 
 				ArrayList<Document> documents = talesDB.getMostRecentCrawledDocumentsWithAttributeAndQuery(attributeName, query, 1);
 
 				if(documents.size() > 0){
-					AttributeScraper.loopReferenceTime = documents.get(0).getLastUpdate().getTime();
+					loopReferenceTime = documents.get(0).getLastUpdate().getTime();
 				}
+
 			}
 
 
 			// starts the task machine with the template
-			FailoverInterface failover = new DefaultFailover(scraperConfig.getTemplate().getConnectionMetadata().getFailoverAttemps(), AttributeScraper.loopReferenceTime);
+			FailoverController failover = new FailoverController(scraperConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
 			taskWorker = new TaskWorker(scraperConfig, failover);
 			taskWorker.init();
 
 
 			boolean finished = false;
-			while(!failover.hasFailover() && !taskWorker.isBroken()){
+			while(!failover.hasFailed() && !taskWorker.isBroken()){
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
 
-					ArrayList<Task> tasks = getTasks(attributeName, query);
+					ArrayList<Task> tasks = getTasks(loopReferenceTime, attributeName, query);
 
 					if(tasks.size() > 0){
 
@@ -85,7 +89,7 @@ public class AttributeScraper{
 
 						tasksDB.add(tasks);
 
-						if(!taskWorker.isWorkerActive() && !failover.isFailingOver() && !failover.hasFailover()){
+						if(!taskWorker.isWorkerActive() && !failover.hasFailed()){
 							taskWorker = new TaskWorker(scraperConfig, failover);
 							taskWorker.init();
 						}
@@ -97,11 +101,13 @@ public class AttributeScraper{
 
 				// if no tasks means we are finished
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) == 0){
+
 					if(finished){
 						break;
 					}
 					// forces the loop to happen 1 last time
 					finished = true;
+
 				}else{
 					finished = false;
 				}
@@ -111,23 +117,49 @@ public class AttributeScraper{
 			}
 
 
-			// stops the failover
-			if(!failover.hasFailover()){
-				failover.stop();
+			// failover
+			if(failover.hasFailed()){
+
+
+				String process = TalesSystem.getProcess();
+
+				if(!process.contains("-loopReferenceTime")){
+					process += " -loopReferenceTime " + loopReferenceTime;
+				}
+
+				if(!process.contains("-tpid")){
+					process += " -tpid " + ProcessManager.getId();
+				}
+
+				String url = "http://" + Config.getDashbaordURL() + ":" + Config.getDashbaordPort();
+
+				while(!new Download().urlExists(url)){
+					Thread.sleep(1000);
+				}
+
+				url += "/failover"
+						+ "?cloud-provider=aws"
+						+ "&process=" + URLEncoder.encode(process, "UTF-8");
+
+				Logger.log(new Throwable(), "failing over: " + url);
+				new Download().urlExists(url);
+
+
+				// logs process
+				ProcessManager.failedover();
+
+
+			}else{
+
+				// when finished
+				ProcessManager.finished();
 			}
 
 
 			// deletes the server
-			String url = "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort();
-			if(new Download().urlExists(url)){
-
-				String serverURL = url + "/delete";
-
-				while(!new Download().urlExists(serverURL)){
-					Thread.sleep(100);
-				}
-
-			}
+			String url =  "http://" + TalesSystem.getPublicDNSName() + ":" + Config.getDashbaordPort()
+					+ "/delete";
+			new Download().getURLBytes(url);
 
 
 		}catch(Exception e){
@@ -139,7 +171,7 @@ public class AttributeScraper{
 
 
 
-	private static ArrayList<Task> getTasks(String attributeName, String query) throws TalesException{
+	private static ArrayList<Task> getTasks(long loopReferenceTime, String attributeName, String query) throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
@@ -173,39 +205,92 @@ public class AttributeScraper{
 		try{
 
 			Options options = new Options();
-			options.addOption("template", true, "template class path");
-			options.addOption("attribute", true, "user attribute name");
-			options.addOption("threads", true, "number of templates");
-			options.addOption("query", true, "query");
+			options.addOption("template", true, "template");
+			options.addOption("attribute", true, "attribute");
+			options.addOption("threads", true, "threads");
 			options.addOption("loopReferenceTime", true, "loopReferenceTime");
 			options.addOption("query", true, "query");
-			options.addOption("useCache", true, "useCache");
-			options.addOption("saveCache", true, "saveCache");
+			options.addOption("tpid", true, "tales process id");
+			options.addOption("namespace", true, "namespace");
+			options.addOption("baseURL", true, "baseURL");
+			options.addOption("requiredDocuments", true, "requiredDocuments");
+
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
-			String templatePath = cmd.getOptionValue("template");
+			String templateClass = cmd.getOptionValue("template");
 			String attributeName = cmd.getOptionValue("attribute");
 			int threads = Integer.parseInt(cmd.getOptionValue("threads"));
 
+
+			// reflection / new template
+			TemplateAbstract template = (TemplateAbstract) Class.forName(templateClass).newInstance();
+
+
+			// loop references
 			long loopReferenceTime = 0;
 			if(cmd.hasOption("loopReferenceTime")){
 				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
 			}
 
+
+			// query
 			String query = null;
 			if(cmd.hasOption("query")){
 				query = cmd.getOptionValue("query");
 			}
-			
-			boolean useCache = false;
-			if(cmd.hasOption("useCache")){
-				useCache = Boolean.parseBoolean(cmd.getOptionValue("useCache"));
+
+
+			// tpid
+			if(cmd.hasOption("tpid")){
+
+				String tpid = cmd.getOptionValue("tpid");
+				ProcessManager.setId(tpid);
+
+			}else{
+				ProcessManager.start();
 			}
-			
-			boolean saveCache = false;
-			if(cmd.hasOption("saveCache")){
-				useCache = Boolean.parseBoolean(cmd.getOptionValue("saveCache"));
+
+
+			// namespace
+			String namespace = null;
+			if(cmd.hasOption("namespace")){
+				namespace = cmd.getOptionValue("namespace");
+			}else{
+				namespace = template.getMetadata().getNamespace();
+			}
+
+
+			// baseURL
+			String baseURL = null;
+			if(cmd.hasOption("baseURL")){
+				baseURL = cmd.getOptionValue("baseURL");
+			}else{
+				baseURL = template.getMetadata().getBaseURL();
+			}
+
+
+			// requiredDocuments
+			ArrayList<String> requiredDocuments = null;
+			if(cmd.hasOption("requiredDocuments")){
+
+				String data = cmd.getOptionValue("requiredDocuments");
+
+				if(Base64.isBase64(data.getBytes())){
+					data = 	new String(Base64.decodeBase64(data.getBytes()), "UTF-8");
+				}
+
+				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
+
+			}else{
+				requiredDocuments = template.getMetadata().getRequiredDocuments();
+
+			}
+
+
+			// configFile
+			if(cmd.hasOption("configFile")){
+				Globals.CONFIG_FILE = cmd.getOptionValue("configFile");
 			}
 
 
@@ -228,17 +313,16 @@ public class AttributeScraper{
 			AppMonitor.init();
 
 
-			// reflection / new template
-			TemplateInterface template = (TemplateInterface) Class.forName(templatePath).newInstance();
+			// template metadata
+			TemplateMetadataInterface templateMetadata = new DynamicTemplateMetadata(namespace, baseURL, requiredDocuments);
 
 
 			// scraper config
 			ScraperConfig scraperConfig = new ScraperConfig();
-			scraperConfig.setScraperName("AttributeScraper");
+			scraperConfig.setScraperName("LoopScraper");
 			scraperConfig.setTemplate(template);
+			scraperConfig.setTemplateMetadata(templateMetadata);
 			scraperConfig.setThreads(threads);
-			scraperConfig.setUseCache(useCache);
-			scraperConfig.setSaveCache(saveCache);
 
 
 			// scraper
