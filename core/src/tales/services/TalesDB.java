@@ -126,6 +126,9 @@ public class TalesDB {
 				Logger.log(new Throwable(), "[" + dbName + "] checking required documents...");
 				if(metadata.getRequiredDocuments() != null){
 					for(final String document : metadata.getRequiredDocuments()){
+						
+						Logger.log(new Throwable(), document);
+						
 						if(!new TalesDB(threads, connMetadata, metadata).documentExists(document)){
 							new TalesDB(threads, connMetadata, metadata).addDocument(document);
 						}
