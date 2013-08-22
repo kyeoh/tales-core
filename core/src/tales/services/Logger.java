@@ -32,7 +32,6 @@ public class Logger {
 
 			
 			int pid = TalesSystem.getPid();
-			String publicDNS = TalesSystem.getPublicDNSName();
 			String methodPath = e[0].getClassName() + "." + e[0].getMethodName();
 			int lineNumber = e[0].getLineNumber();
 
@@ -47,18 +46,7 @@ public class Logger {
 
 			
 			// saves logs
-			if(logType.equals(LOG)){
-				LogsDB.log(publicDNS, pid, LOG, methodPath, lineNumber, data);
-
-			}else if(logType.equals(ERROR)){
-				LogsDB.log(publicDNS, pid, ERROR, methodPath, lineNumber, data);
-				
-			}else if(logType.equals(TEMPLATE_ERROR)){
-				LogsDB.log(publicDNS, pid, TEMPLATE_ERROR, methodPath, lineNumber, data);
-			
-			}else if(logType.equals(DOWNLOAD_ERROR)){
-				LogsDB.log(publicDNS, pid, DOWNLOAD_ERROR, methodPath, lineNumber, data);
-			}
+			LogsDB.log(TalesSystem.getPublicDNSName(), pid, logType, methodPath, lineNumber, data);
 			
 			
 			// socket stream
@@ -96,8 +84,8 @@ public class Logger {
 
 
 
-	public static void templateError(Throwable origin, Throwable error, int documentId, String url) {
-		String[] args = {"documentId: " + Integer.toString(documentId), "url: " + url};
+	public static void templateError(Throwable origin, Throwable error, int documentId, String documentName) {
+		String[] args = {"documentId: " + Integer.toString(documentId), "documentName: " + documentName};
 		emit(error.getStackTrace(), TEMPLATE_ERROR, printError(origin, error, args));
 	}
 	

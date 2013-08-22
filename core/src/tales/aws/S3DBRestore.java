@@ -77,8 +77,7 @@ public class S3DBRestore{
 		try{
 			
 			
-			String fullDbName = Globals.DATABASE_NAMESPACE + dbName;
-			Logger.log(new Throwable(), "restoring latest version of \"" + fullDbName + "\"");
+			Logger.log(new Throwable(), "restoring latest version of \"" + dbName + "\"");
 
 
 			// checks if the temp folder exists
@@ -97,7 +96,7 @@ public class S3DBRestore{
 
 			if(s3.doesBucketExist(s3BucketName)){
 				
-				ArrayList<RestoreObj> s3Objs = getS3FilenamesOrderByAdded(s3BucketName, fullDbName);
+				ArrayList<RestoreObj> s3Objs = getS3FilenamesOrderByAdded(s3BucketName, dbName);
 
 				if(s3Objs.size() > 0){
 
@@ -148,7 +147,7 @@ public class S3DBRestore{
 
 					// checks if database exists, if exists then delete
 					Statement statement = (Statement) conn.createStatement();
-					ResultSet rs  = statement.executeQuery("SHOW DATABASES LIKE '" + fullDbName + "'");
+					ResultSet rs  = statement.executeQuery("SHOW DATABASES LIKE '" + dbName + "'");
 
 					try{
 
@@ -157,10 +156,10 @@ public class S3DBRestore{
 						statement.close();
 
 						// deletes the current db
-						Logger.log(new Throwable(), "droppping mysql database \"" + fullDbName + "\"");
+						Logger.log(new Throwable(), "droppping mysql database \"" + dbName + "\"");
 
 						statement = (Statement) conn.createStatement();
-						statement.executeUpdate( "DROP DATABASE " + fullDbName);
+						statement.executeUpdate( "DROP DATABASE " + dbName);
 						statement.close();
 
 
@@ -171,17 +170,17 @@ public class S3DBRestore{
 
 
 					// creates new database
-					Logger.log(new Throwable(), "creating mysql database \"" + fullDbName + "\"");
+					Logger.log(new Throwable(), "creating mysql database \"" + dbName + "\"");
 
 					statement = (Statement) conn.createStatement();
-					statement.executeUpdate("CREATE DATABASE " + fullDbName);
+					statement.executeUpdate("CREATE DATABASE " + dbName);
 					statement.close();
 
 
 					// restores the dump to mysql
-					Logger.log(new Throwable(), "restoring file \"" + restoreObj.getName() + "\" to \"" + fullDbName + "\"");
+					Logger.log(new Throwable(), "restoring file \"" + restoreObj.getName() + "\" to \"" + dbName + "\"");
 
-					String command = "gunzip < " + filePath + " | mysql -u " + Config.getDataDBUsername() + " -p" + Config.getDataDBPassword() + " " + fullDbName + " --default-character-set=utf8";
+					String command = "gunzip < " + filePath + " | mysql -u " + Config.getDataDBUsername() + " -p" + Config.getDataDBPassword() + " " + dbName + " --default-character-set=utf8";
 					ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", command);
 					Process p = builder.start();
 					p.waitFor();

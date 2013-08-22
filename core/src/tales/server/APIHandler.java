@@ -68,7 +68,7 @@ public class APIHandler extends AbstractHandler{
 		}else if(target.startsWith("/kill")){
 			kill(target.replace("/kill ", ""));
 
-
+			
 		}else if(target.startsWith("/errors")){
 			errors(response);
 
@@ -84,6 +84,10 @@ public class APIHandler extends AbstractHandler{
 		}else if(target.startsWith("/finished")){
 			finished(request, response);
 
+			
+		}else if(target.startsWith("/logs")){
+			getLog(request, response);
+			
 		}
 
 	}
@@ -265,7 +269,6 @@ public class APIHandler extends AbstractHandler{
 
 		try{
 
-
 			// gets the errors
 			JSONArray array = new JSONArray();
 
@@ -306,7 +309,7 @@ public class APIHandler extends AbstractHandler{
 
 			JSONArray json = new JSONArray();
 
-			for(String dbName : DBUtils.getLocalTalesDBNames()){
+			for(String dbName : DBUtils.getLocalDBNames()){
 
 				JSONArray tables = new JSONArray();
 				for(String tableName : DBUtils.getTableNames(new TemplateLocalhostConnection(), dbName)){
@@ -395,4 +398,37 @@ public class APIHandler extends AbstractHandler{
 		}
 		
 	}
+	
+	
+	
+	
+	private void getLog(HttpServletRequest request, HttpServletResponse response) {
+
+		try{
+
+			
+			int id = Integer.parseInt(request.getParameter("id"));
+			Log log = LogsDB.getLog(id);
+			
+			JSONObject obj = new JSONObject();
+			obj.put("id", log.getId());
+			obj.put("publicDNS", log.getPublicDNS());
+			obj.put("pid", log.getPid());
+			obj.put("logType", log.getLogType());
+			obj.put("methodPath", log.getMethodPath());
+			obj.put("lineNumber", log.getLineNumber());
+			obj.put("added", log.getAdded());
+			obj.put("data", log.getData());
+
+			response.setContentType("application/json");
+			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().println(obj);
+			
+
+		} catch (Exception e) {
+			new TalesException(new Throwable(), e);
+		}
+
+	}
+	
 }

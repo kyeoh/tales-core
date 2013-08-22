@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import tales.dirlistener.DirListenerObj;
 import tales.server.CloudProviderInterface;
 import tales.services.TalesException;
+import tales.system.TalesSystem;
 import tales.workers.FailoverAttempt;
 
 
@@ -299,7 +300,8 @@ public class Config{
 
 			try{
 
-				File file = new File(Globals.CONFIG_FILE);
+				
+				File file = new File(Globals.CONFIG_FILE_DIR + "/" + TalesSystem.getTemplatesGitBranchName() + ".json");
 				String data = FileUtils.readFileToString(file);
 				Config.json = (JSONObject) JSONSerializer.toJSON(data);
 

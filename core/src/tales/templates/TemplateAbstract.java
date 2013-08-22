@@ -3,7 +3,6 @@ package tales.templates;
 
 
 
-import tales.scrapers.ScraperConfig;
 import tales.services.TalesDB;
 import tales.services.TalesException;
 import tales.services.Task;
@@ -17,7 +16,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 	
 	
 	
-	private ScraperConfig scraperConfig;
+	private TemplateConfig templateConfig;
 	private TasksDB tasksDB;
 	private Task task;
 	protected boolean active = true;
@@ -42,8 +41,8 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	@Override
-	public final void init(ScraperConfig scraperConfig, TasksDB tasksDB, Task task) {
-		this.scraperConfig = scraperConfig;
+	public final void init(TemplateConfig templateConfig, TasksDB tasksDB, Task task) {
+		this.templateConfig = templateConfig;
 		this.tasksDB = tasksDB;
 		this.task = task;
 	}
@@ -51,8 +50,8 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 
-	public final ScraperConfig getScraperConfig(){
-		return scraperConfig;
+	public final TemplateConfig getTemplateConfig(){
+		return templateConfig;
 	}
 
 
@@ -74,7 +73,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	public final TalesDB getTalesDB() throws TalesException{
-		return new TalesDB(this.getScraperConfig().getThreads(), this.getConnectionMetadata(), this.getMetadata());
+		return new TalesDB(this.getTemplateConfig().getThreads(), this.getConnectionMetadata(), this.getMetadata());
 	}
 
 

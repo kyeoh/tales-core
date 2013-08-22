@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import tales.config.Config;
 import tales.config.Globals;
 import tales.services.TalesException;
+import tales.system.TalesSystem;
 
 
 
@@ -44,7 +45,7 @@ public class GitSync {
 		
 		for(String folderPath : Config.getSyncList()){
 
-			String command = "cd " + folderPath + " && git pull origin";
+			String command = "cd " + folderPath + " && git pull origin " + TalesSystem.getTemplatesGitBranchName();
 
 			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", command);
 			Process process = builder.start();

@@ -25,8 +25,9 @@ import tales.services.TasksDB;
 import tales.system.AppMonitor;
 import tales.system.ProcessManager;
 import tales.system.TalesSystem;
-import tales.templates.DynamicTemplateMetadata;
+import tales.templates.TemplateMetadata;
 import tales.templates.TemplateAbstract;
+import tales.templates.TemplateConfig;
 import tales.templates.TemplateMetadataInterface;
 import tales.workers.FailoverController;
 import tales.workers.TaskWorker;
@@ -46,16 +47,16 @@ public class LoopScraper {
 
 
 
-	public static void init(ScraperConfig scraperConfig, long loopReferenceTime) throws TalesException{
+	public static void init(TemplateConfig templateConfig, long loopReferenceTime) throws TalesException{
 
 		try{
 
 
 			// inits the services
-			talesDB = new TalesDB(scraperConfig.getThreads(), 
-					scraperConfig.getTemplate().getConnectionMetadata(), 
-					scraperConfig.getTemplateMetadata());
-			tasksDB = new TasksDB(scraperConfig);
+			talesDB = new TalesDB(templateConfig.getThreads(), 
+					templateConfig.getTemplate().getConnectionMetadata(), 
+					templateConfig.getTemplateMetadata());
+			tasksDB = new TasksDB(templateConfig);
 
 
 			if(loopReferenceTime == 0){
@@ -70,8 +71,8 @@ public class LoopScraper {
 
 
 			// starts the task machine with the template
-			FailoverController failover = new FailoverController(scraperConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
-			taskWorker = new TaskWorker(scraperConfig, failover);
+			FailoverController failover = new FailoverController(templateConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
+			taskWorker = new TaskWorker(templateConfig, failover);
 			taskWorker.init();
 
 
@@ -85,12 +86,12 @@ public class LoopScraper {
 
 					if(tasks.size() > 0){
 
-						Logger.log(new Throwable(), "adding tasks to \"" + scraperConfig.getTaskName() + "\"");
+						Logger.log(new Throwable(), "adding tasks to \"" + templateConfig.getTaskName() + "\"");
 
 						tasksDB.add(tasks);
 
 						if(!taskWorker.isWorkerActive() && !failover.hasFailed()){
-							taskWorker = new TaskWorker(scraperConfig, failover);
+							taskWorker = new TaskWorker(templateConfig, failover);
 							taskWorker.init();
 						}
 
@@ -212,7 +213,6 @@ public class LoopScraper {
 			options.addOption("namespace", true, "namespace");
 			options.addOption("baseURL", true, "baseURL");
 			options.addOption("requiredDocuments", true, "requiredDocuments");
-			options.addOption("configFile", true, "configFile");
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 
@@ -235,7 +235,7 @@ public class LoopScraper {
 			if(cmd.hasOption("tpid")){
 
 				String tpid = cmd.getOptionValue("tpid");
-				ProcessManager.setId(tpid);
+				ProcessManager.registerId(tpid);
 
 			}else{
 				ProcessManager.start();
@@ -276,12 +276,6 @@ public class LoopScraper {
 				requiredDocuments = template.getMetadata().getRequiredDocuments();
 
 			}
-
-
-			// configFile
-			if(cmd.hasOption("configFile")){
-				Globals.CONFIG_FILE = cmd.getOptionValue("configFile");
-			}
 			
 			
 			// when app is killed
@@ -304,19 +298,19 @@ public class LoopScraper {
 
 
 			// template metadata
-			TemplateMetadataInterface templateMetadata = new DynamicTemplateMetadata(namespace, baseURL, requiredDocuments);
+			TemplateMetadataInterface templateMetadata = new TemplateMetadata(namespace, baseURL, requiredDocuments);
 
 
-			// scraper config
-			ScraperConfig scraperConfig = new ScraperConfig();
-			scraperConfig.setScraperName("LoopScraper");
-			scraperConfig.setTemplate(template);
-			scraperConfig.setTemplateMetadata(templateMetadata);
-			scraperConfig.setThreads(threads);
+			// template config
+			TemplateConfig templateConfig = new TemplateConfig();
+			templateConfig.setScraperName("LoopScraper");
+			templateConfig.setTemplate(template);
+			templateConfig.setTemplateMetadata(templateMetadata);
+			templateConfig.setThreads(threads);
 
 
 			// scraper
-			LoopScraper.init(scraperConfig, loopReferenceTime);
+			LoopScraper.init(templateConfig, loopReferenceTime);
 
 
 			// stop

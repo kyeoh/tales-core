@@ -116,10 +116,10 @@ public class DBUtils {
 	public static void waitUntilLocalMysqlIsReady() throws TalesException{
 		waitUntilMysqlIsReady("localhost", Config.getDataDBPort(), Config.getDataDBUsername(), Config.getDataDBPassword());
 	}
-	
-	
-	
-	
+
+
+
+
 	public static void waitUntilMysqlIsReady(String host, int port, String username, String password){
 
 		while(true){
@@ -128,7 +128,7 @@ public class DBUtils {
 
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-						host + ":" +port+"/"+
+						host + ":" + port + "/" +
 						"mysql" +
 						"?user="+username +
 						"&password="+password +
@@ -150,6 +150,57 @@ public class DBUtils {
 		}
 
 	}
+
+
+
+
+	public static ArrayList<String> getLocalDBNames() throws TalesException{
+
+		try{
+
+
+			ArrayList<String> dbNames = new ArrayList<String>();
+
+
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
+					"localhost:"+Config.getDataDBPort()+"/"+
+					"mysql" +
+					"?user="+Config.getDataDBUsername() +
+					"&password="+Config.getDataDBPassword() +
+					"&useUnicode=true&characterEncoding=UTF-8" +
+					"&autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
+					);
+
+			ResultSet rs = conn.getMetaData().getCatalogs();
+
+
+			// lists the dbs
+			while (rs.next()) {
+
+				String dbName = rs.getString("TABLE_CAT");
+				if(!dbName.toLowerCase().equals("information_schema")
+						&& !dbName.toLowerCase().equals("mysql")
+						&& !dbName.toLowerCase().equals("performance_schema")){
+					
+					dbNames.add(dbName);
+				}
+
+			}
+
+			rs.close();
+			conn.close();
+
+
+			return dbNames;
+
+
+		}catch(final Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
+
 
 
 
@@ -210,7 +261,7 @@ public class DBUtils {
 			Class.forName("com.mysql.jdbc.Driver");
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
-					Globals.DATABASE_NAMESPACE + dbName +
+					dbName +
 					"?user="+connMetadata.getDataDBUsername() +
 					"&password="+connMetadata.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
@@ -254,7 +305,7 @@ public class DBUtils {
 			Class.forName("com.mysql.jdbc.Driver");
 			final Connection conn = DriverManager.getConnection("jdbc:mysql://"+
 					connMetadata.getDataDBHost()+":"+connMetadata.getDataDBPort()+"/"+
-					Globals.DATABASE_NAMESPACE + dbName +
+					dbName +
 					"?user="+Config.getDataDBUsername() +
 					"&password="+Config.getDataDBPassword() +
 					"&useUnicode=true&characterEncoding=UTF-8" +
@@ -264,14 +315,14 @@ public class DBUtils {
 			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM " + tableName);
 			final ResultSet rs = statement.executeQuery();
 			rs.next();
-			
+
 			final int count = rs.getInt(1);
-			
+
 			rs.close();
 			statement.close();   
 			conn.close();
 
-			
+
 			return count;
 
 

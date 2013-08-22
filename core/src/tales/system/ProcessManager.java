@@ -25,7 +25,7 @@ public class ProcessManager {
 	public static void start() throws TalesException{
 
 		if(ProcessManager.tpid == null){
-			setId(generateId());
+			registerId(generateId());
 		}
 
 	}
@@ -40,7 +40,7 @@ public class ProcessManager {
 
 
 
-	public static void setId(String tpid) throws TalesException{
+	public static void registerId(String tpid) throws TalesException{
 
 		if(ProcessManager.tpid == null){
 

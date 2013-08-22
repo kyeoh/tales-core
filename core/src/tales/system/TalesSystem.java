@@ -33,6 +33,7 @@ public class TalesSystem {
 	private static int pid = 0;
 	private static long prevProcessCpuTime = ((com.sun.management.OperatingSystemMXBean) osbean).getProcessCpuTime();
 	private static String processName;
+	private static String branchName;
 
 
 
@@ -96,20 +97,20 @@ public class TalesSystem {
 
 			// cloud providers
 			try{
-				
+
 				if(serverIP == null){
-				
+
 					for(CloudProviderInterface cloudProvider : Config.getCloudProviders()){
-						
+
 						if(cloudProvider.isApplicationRunningHere()){
 							serverIP = cloudProvider.getDNS();
 							break;
 						}
-						
+
 					}
-					
+
 				}
-				
+
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -140,7 +141,7 @@ public class TalesSystem {
 
 			}
 
-			
+
 			// last try to get the ip
 			try{
 				if(serverIP == null){
@@ -150,7 +151,7 @@ public class TalesSystem {
 				e.printStackTrace();
 			}
 
-			
+
 			return serverIP;
 
 
@@ -178,11 +179,11 @@ public class TalesSystem {
 				String find = "jar";
 				int ini = processName.indexOf(find) + find.length() + 1;
 				int end = processName.indexOf("\n", ini);
-				
+
 				if(end < ini){
 					end = processName.length();
 				}
-				
+
 				processName = processName.substring(ini, end);
 
 				process.destroy();
@@ -197,4 +198,43 @@ public class TalesSystem {
 		return processName;
 	}
 
+
+
+
+	public static String getTemplatesGitBranchName() throws TalesException{
+
+		try{
+
+
+			if(branchName == null){
+
+				Process process = null;
+
+				try{
+
+					// linux
+					ProcessBuilder builder = new ProcessBuilder("/usr/lib/git-core/git", "--git-dir", System.getProperty("user.home") + "/tales-templates/.git", "branch");
+					process = builder.start();
+
+					String output = IOUtils.toString(process.getInputStream());
+					process.destroy();
+
+					int ini = output.indexOf("*");
+					int end = output.indexOf("\n", ini);
+					branchName = output.substring(ini + 2, end).trim(); // 2 cuz of * + space (example: * master);
+
+				}catch(Exception e){
+					branchName = "development";
+				}
+
+			}
+
+			return branchName;
+
+
+		}catch( Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
 }

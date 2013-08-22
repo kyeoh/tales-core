@@ -34,7 +34,7 @@ public class ProcessDB {
 		try{
 
 
-			if(conn == null){
+			if(conn == null || conn.isClosed()){
 
 				// checks if mysql is up
 				DBUtils.waitUntilMysqlIsReady(new TemplateConnectionCommon().getDataDBHost(), 

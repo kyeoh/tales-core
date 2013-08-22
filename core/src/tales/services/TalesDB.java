@@ -51,10 +51,8 @@ public class TalesDB {
 
 		try{
 
-
 			// db conn
 			conn = TalesDB.connect(threads, connMetadata, metadata);  
-
 
 		}catch(final Exception e){
 			final String[] args = {"dbName: " + dbName};

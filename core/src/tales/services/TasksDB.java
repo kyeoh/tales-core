@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import tales.config.Config;
 import tales.config.Globals;
-import tales.scrapers.ScraperConfig;
+import tales.templates.TemplateConfig;
 import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;
 import tales.utils.DBUtils;
@@ -34,7 +34,7 @@ public class TasksDB {
 
 
 
-	public TasksDB(ScraperConfig config) throws TalesException{
+	public TasksDB(TemplateConfig config) throws TalesException{
 
 		try{
 

@@ -33,9 +33,9 @@ public class LogsDB {
 
 		try{
 
-			
-			if(conn == null){
-				
+
+			if(conn == null || conn.isClosed()){
+
 				// checks if mysql is up
 				DBUtils.waitUntilMysqlIsReady(Config.getLogDBHost(), 
 						Config.getLogDBPort(), 
@@ -65,7 +65,7 @@ public class LogsDB {
 				}
 
 			}
-			
+
 
 		}catch(Exception e){
 			e.printStackTrace(); // dont throw tales exception, this will allow us to reroute the connection.
@@ -87,7 +87,7 @@ public class LogsDB {
 
 		try {
 
-			
+
 			String sql = "CREATE TABLE `logs` ("
 					+ "`id` int(11) NOT NULL AUTO_INCREMENT,"
 					+ "`publicDNS` varchar(100) COLLATE utf8_unicode_ci NOT NULL,"
@@ -108,7 +108,7 @@ public class LogsDB {
 			statement.executeUpdate(sql);
 			statement.close();
 
-	
+
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
 		}
@@ -150,7 +150,7 @@ public class LogsDB {
 
 		try{
 
-			
+
 			if(data != null){
 
 				PreparedStatement statement = conn.prepareStatement("INSERT INTO logs (publicDNS, pid, logType, methodPath, lineNumber, data) values (?,?,?,?,?,?)");
@@ -164,7 +164,7 @@ public class LogsDB {
 				statement.close();
 
 			}
-			
+
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -182,7 +182,7 @@ public class LogsDB {
 
 		try {
 
-			
+
 			ArrayList<Log> list = new ArrayList<Log>();
 			PreparedStatement statement  = conn.prepareStatement("SELECT * FROM logs WHERE logType = \"" + Logger.ERROR + "\" ORDER BY id DESC LIMIT 0,?");
 			statement.setInt(1, amount);
@@ -209,7 +209,7 @@ public class LogsDB {
 			statement.close();
 
 			return list;
-			
+
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -217,4 +217,43 @@ public class LogsDB {
 
 	}
 
+
+
+
+	public static Log getLog(int id) throws TalesException{
+
+		init();
+
+		try {
+
+
+			PreparedStatement statement  = conn.prepareStatement("SELECT * FROM logs WHERE id = ?");
+			statement.setInt(1, id);
+
+			statement.executeQuery();
+			ResultSet rs                 = statement.executeQuery();
+
+			rs.next();
+
+			Log log = new Log();
+			log.setId(rs.getInt("id"));
+			log.setPublicDNS(rs.getString("publicDNS"));
+			log.setPid(rs.getInt("pid"));
+			log.setLogType(rs.getString("logType"));
+			log.setMethodPath(rs.getString("methodPath"));
+			log.setLineNumber(rs.getInt("lineNumber"));
+			log.setData(rs.getString("data"));
+			log.setAdded(rs.getTimestamp("added"));
+
+			rs.close();
+			statement.close();
+
+			return log;
+
+
+		}catch(Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
 }

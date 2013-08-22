@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import tales.scrapers.ScraperConfig;
 import tales.services.Logger;
 import tales.services.TalesException;
 import tales.services.Task;
 import tales.services.TasksDB;
+import tales.templates.TemplateConfig;
 import tales.templates.TemplateInterface;
 import tales.utils.Average;
 
@@ -23,7 +23,7 @@ public class TaskWorker{
 
 
 
-	private ScraperConfig config;
+	private TemplateConfig config;
 	private FailoverController failover;
 	private Worker worker;
 	private Monitor monitor;
@@ -33,7 +33,7 @@ public class TaskWorker{
 
 
 
-	public TaskWorker(ScraperConfig config, FailoverController failover) throws TalesException{
+	public TaskWorker(TemplateConfig config, FailoverController failover) throws TalesException{
 		this.config = config;
 		this.failover = failover;
 	}
