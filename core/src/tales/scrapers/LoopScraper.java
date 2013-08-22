@@ -270,9 +270,14 @@ public class LoopScraper {
 					data = 	new String(Base64.decodeBase64(data.getBytes()), "UTF-8");
 				}
 
+				Logger.log(new Throwable(), "dynamic requiredDocuments");
+				
 				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
 
 			}else{
+				
+				Logger.log(new Throwable(), "template requiredDocuments");
+				
 				requiredDocuments = template.getMetadata().getRequiredDocuments();
 
 			}
