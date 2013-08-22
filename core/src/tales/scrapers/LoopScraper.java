@@ -279,6 +279,8 @@ public class LoopScraper {
 				Logger.log(new Throwable(), "template requiredDocuments");
 				
 				requiredDocuments = template.getMetadata().getRequiredDocuments();
+				
+				Logger.log(new Throwable(), requiredDocuments.size() + " - " + requiredDocuments.toString());
 
 			}
 			
