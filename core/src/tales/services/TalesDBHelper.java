@@ -32,7 +32,7 @@ public class TalesDBHelper {
 
 			docs.put(key, new CopyOnWriteArrayList<String>());
 
-			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplate().getMetadata());
+			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
 			Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
 			t.start();
 
@@ -81,8 +81,8 @@ public class TalesDBHelper {
 			try{
 
 				if(docs.get(key).size() > 0){
-
-					Logger.log(new Throwable(), "adding " + docs.get(key).size() + " names to the documents table...");
+					
+					Logger.log(new Throwable(), "-adding " + docs.get(key).size() + " names to the documents table...");
 
 					for(Iterator<String> it = docs.get(key).iterator(); it.hasNext();){
 

@@ -9,7 +9,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import tales.config.Globals;
 import tales.services.Download;
 import tales.services.DownloadException;
 import tales.services.Logger;
