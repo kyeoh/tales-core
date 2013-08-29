@@ -1,5 +1,5 @@
 // globals
-var companyName = "JobsTheWord";
+var companyName = "t-a-l-e-s";
 var port = 8080;
 var maxLogSize = 20000;
 var logData = [];
