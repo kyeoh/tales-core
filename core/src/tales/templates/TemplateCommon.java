@@ -14,6 +14,7 @@ import tales.services.Download;
 import tales.services.DownloadException;
 import tales.services.Logger;
 import tales.services.TalesDB;
+import tales.services.TalesDBHelper;
 import tales.services.TalesException;
 import tales.services.Task;
 import tales.utils.Array;
@@ -66,7 +67,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			}	
 
 			if(e.getResponseCode() == 503){
-				
+
 				try {
 					this.getTasksDB().add(this.getTask());
 				} catch (TalesException e1) {
@@ -74,7 +75,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 				}
 
 			}
-			
+
 			new TemplateException(new Throwable(), e, this.getTask());
 
 		} catch (Exception e) {
@@ -126,22 +127,14 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 	protected void storeLinks(ArrayList<String> links){
 
-		for(String link : links){
+		try{
 
-			try{
-
-				if(link.length() < Globals.DOCUMENT_NAME_MAX_LENGTH){
-					if(!this.getTalesDB().documentExists(link)){
-						this.getTalesDB().addDocument(link);
-					}
-				}else{
-					new TemplateException(new Throwable(), new Exception("Data too long: " + link), this.getTask());
-				}
-
-			} catch (Exception e) {
-				new TemplateException(new Throwable(), e, this.getTask());
+			for(String link : links){
+				TalesDBHelper.queueAddDocumentName(this.getTemplateConfig(), link);
 			}
 
+		} catch (Exception e) {
+			new TemplateException(new Throwable(), e, this.getTask());
 		}
 
 	}

@@ -84,7 +84,7 @@ public class S3 {
 				s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
 
 				if(!s3.doesBucketExist(bucketName)) {
-					Logger.log(new Throwable(), "creating -bucketName: " + bucketName);
+					Logger.log(new Throwable(), "creating aws s3 bucket -bucketName: " + bucketName);
 					s3.createBucket(bucketName);
 				}
 			}
