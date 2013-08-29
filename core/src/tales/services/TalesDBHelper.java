@@ -95,6 +95,8 @@ public class TalesDBHelper {
 
 					}
 					
+					pending.get(key).clear();
+					
 				}
 
 				Timer timer = new Timer();
