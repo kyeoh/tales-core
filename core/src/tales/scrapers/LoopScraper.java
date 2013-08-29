@@ -273,7 +273,12 @@ public class LoopScraper {
 				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
 
 			}else{
-				requiredDocuments = template.getMetadata().getRequiredDocuments();
+				
+				if(template.getMetadata() != null){
+					requiredDocuments = template.getMetadata().getRequiredDocuments();	
+				}else{
+					requiredDocuments = new ArrayList<String>();
+				}
 
 			}
 			

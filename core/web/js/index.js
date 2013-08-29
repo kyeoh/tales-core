@@ -1,5 +1,5 @@
 // globals
-var companyName = "Tales";
+var companyName = "tales";
 var port = 8080;
 var maxLogSize = 20000;
 var logData = [];

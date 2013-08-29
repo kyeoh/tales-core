@@ -19,7 +19,13 @@ public class DynamicDataDownloader extends TemplateCommon{
 
 	@Override
 	public TemplateMetadataInterface getMetadata() {
+		
+		if(this.getTemplateConfig() == null){
+			return null;
+		}
+		
 		return this.getTemplateConfig().getTemplateMetadata();
+		
 	}
 
 
@@ -29,7 +35,7 @@ public class DynamicDataDownloader extends TemplateCommon{
 	protected void process(TalesDB talesDB, Task task, String url, org.jsoup.nodes.Document doc) throws Exception{
 
 		S3 s3 = new S3();
-		s3.downloadAndAddURL(this.getMetadata(), url, url);
+		s3.addTemplateDoc(this.getMetadata(), url, doc);
 		
 	}
 

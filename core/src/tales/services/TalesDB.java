@@ -124,15 +124,24 @@ public class TalesDB {
 
 				// adds the first document if none
 				Logger.log(new Throwable(), "[" + dbName + "] checking required documents...");
-				if(metadata.getRequiredDocuments() != null){
+				if(metadata.getRequiredDocuments() != null && metadata.getRequiredDocuments().size() > 0){
+					
 					for(final String document : metadata.getRequiredDocuments()){
 						
-						Logger.log(new Throwable(), "-checking: " + document);
-						
 						if(!new TalesDB(threads, connMetadata, metadata).documentExists(document)){
+							Logger.log(new Throwable(), "-adding: " + document);
 							new TalesDB(threads, connMetadata, metadata).addDocument(document);
 						}
+						
 					}
+				
+				}else if(metadata.getRequiredDocuments() == null || metadata.getRequiredDocuments().size() == 0){
+					
+					if(!new TalesDB(threads, connMetadata, metadata).documentExists("/")){
+						Logger.log(new Throwable(), "-adding: /");
+						new TalesDB(threads, connMetadata, metadata).addDocument("/");
+					}
+					
 				}
 
 
