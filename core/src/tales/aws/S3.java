@@ -81,6 +81,7 @@ public class S3 {
 
 			if (s3 == null){
 
+				Logger.log(new Throwable(), "checking aws s3 bucket -bucketName: " + bucketName);
 				s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
 
 				if(!s3.doesBucketExist(bucketName)) {

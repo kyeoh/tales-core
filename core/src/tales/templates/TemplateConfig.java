@@ -3,10 +3,6 @@ package tales.templates;
 
 
 
-
-
-
-
 public class TemplateConfig {
 	
 	
