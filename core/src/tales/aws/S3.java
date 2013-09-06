@@ -6,6 +6,8 @@ package tales.aws;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import tales.config.Globals;
 import tales.services.Download;
 import tales.services.DownloadException;
@@ -37,11 +39,14 @@ public class S3 {
 		try{
 
 			String bucketName = checkBucket(metadata);
-			
+
 			byte[] bytes = new Compress().compresBytesToGzip(doc.html().getBytes());
 			InputStream stream = new ByteArrayInputStream(bytes);
-			
-			s3.putObject(new PutObjectRequest(bucketName, filename, stream, new ObjectMetadata()));
+
+			ObjectMetadata objMetadata = new ObjectMetadata();
+			objMetadata.setContentLength(IOUtils.toByteArray(stream).length);
+
+			s3.putObject(new PutObjectRequest(bucketName, filename, stream, objMetadata));
 
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
@@ -61,7 +66,7 @@ public class S3 {
 			byte[] uncompressBytes = new Download().getURLBytes(url).getBytes();
 			byte[] compressedBytes = new Compress().compresBytesToGzip(uncompressBytes);
 			ByteArrayInputStream stream = new ByteArrayInputStream(compressedBytes);
-			
+
 			s3.putObject(new PutObjectRequest(bucketName, filename, stream, new ObjectMetadata()));
 
 		}catch(Exception e){
