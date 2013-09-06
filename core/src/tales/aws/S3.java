@@ -44,7 +44,7 @@ public class S3 {
 			InputStream stream = new ByteArrayInputStream(bytes);
 
 			ObjectMetadata objMetadata = new ObjectMetadata();
-			objMetadata.setContentLength(IOUtils.toByteArray(stream).length);
+			//objMetadata.setContentLength(IOUtils.toByteArray(stream).length);
 
 			s3.putObject(new PutObjectRequest(bucketName, filename, stream, objMetadata));
 
