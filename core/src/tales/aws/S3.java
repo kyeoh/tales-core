@@ -17,7 +17,8 @@ import tales.utils.Compress;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.Upload;
 
 
 
@@ -27,7 +28,7 @@ public class S3 {
 
 
 
-	private static AmazonS3Client s3;
+	private static TransferManager transferManager;
 
 
 
@@ -37,12 +38,13 @@ public class S3 {
 		try{
 
 			String bucketName = checkBucket(metadata);
-			
+
 			byte[] bytes = new Compress().compresBytesToGzip(doc.html().getBytes());
 			InputStream stream = new ByteArrayInputStream(bytes);
-			
-			s3.putObject(new PutObjectRequest(bucketName, filename, stream, new ObjectMetadata()));
 
+			Upload upload = transferManager.upload(bucketName, filename, stream, new ObjectMetadata());
+			upload.waitForCompletion();
+			
 		}catch(Exception e){
 			throw new TalesException(new Throwable(), e);
 		}
@@ -61,9 +63,10 @@ public class S3 {
 			byte[] uncompressBytes = new Download().getURLBytes(url).getBytes();
 			byte[] compressedBytes = new Compress().compresBytesToGzip(uncompressBytes);
 			ByteArrayInputStream stream = new ByteArrayInputStream(compressedBytes);
-			
-			s3.putObject(new PutObjectRequest(bucketName, filename, stream, new ObjectMetadata()));
 
+			Upload upload = transferManager.upload(bucketName, filename, stream, new ObjectMetadata());
+			upload.waitForCompletion();
+			
 		}catch(Exception e){
 			throw new DownloadException(new Throwable(), e, 0);
 		}
@@ -79,11 +82,15 @@ public class S3 {
 
 			String bucketName = Globals.FILES_S3_BUCKET_NAME + metadata.getNamespace().replace("_", "-");
 
-			if (s3 == null){
+			if (transferManager == null){
 
 				Logger.log(new Throwable(), "checking aws s3 bucket -bucketName: " + bucketName);
-				s3 = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey()));
+				
+				BasicAWSCredentials awsConn = new BasicAWSCredentials(AWSConfig.getAWSAccessKeyId(), AWSConfig.getAWSSecretAccessKey());
+				transferManager = new TransferManager(awsConn);
 
+				AmazonS3Client s3 = new AmazonS3Client(awsConn);
+				
 				if(!s3.doesBucketExist(bucketName)) {
 					Logger.log(new Throwable(), "creating aws s3 bucket -bucketName: " + bucketName);
 					s3.createBucket(bucketName);
