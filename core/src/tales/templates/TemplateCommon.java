@@ -53,7 +53,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			Document doc = Jsoup.parse(html);
 
 			// parses, extracts and saves the data
-			//process(this.getTalesDB(), this.getTask(), url, doc);
+			process(this.getTalesDB(), this.getTask(), url, doc);
 
 			// extracts links from the doc and stores them
 			//storeLinks(extractLinks(doc));
