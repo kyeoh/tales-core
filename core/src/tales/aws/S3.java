@@ -65,9 +65,12 @@ public class S3 {
 
 			byte[] uncompressBytes = new Download().getURLBytes(url).getBytes();
 			byte[] compressedBytes = new Compress().compresBytesToGzip(uncompressBytes);
-			ByteArrayInputStream stream = new ByteArrayInputStream(compressedBytes);
+			InputStream stream = new ByteArrayInputStream(compressedBytes);
+			
+			ObjectMetadata objMetadata = new ObjectMetadata();
+			objMetadata.setContentLength(compressedBytes.length);
 
-			s3.putObject(new PutObjectRequest(bucketName, filename, stream, new ObjectMetadata()));
+			s3.putObject(new PutObjectRequest(bucketName, filename, stream, objMetadata));
 
 		}catch(Exception e){
 			throw new DownloadException(new Throwable(), e, 0);
