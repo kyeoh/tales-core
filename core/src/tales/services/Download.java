@@ -102,13 +102,13 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, null, null);
-			
+
 			if(result.getCharset() != null){
 				return new String(result.getBytes(), result.getCharset());
 			}else{
 				return new String(result.getBytes());
 			}
-		
+
 		}catch(UnsupportedEncodingException e){
 			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
@@ -124,13 +124,13 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, null, post);
-			
+
 			if(result.getCharset() != null){
 				return new String(result.getBytes(), result.getCharset());
 			}else{
 				return new String(result.getBytes());
 			}
-		
+
 		}catch(UnsupportedEncodingException e){
 			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
@@ -146,13 +146,13 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, cookie, null);
-			
+
 			if(result.getCharset() != null){
 				return new String(result.getBytes(), result.getCharset());
 			}else{
 				return new String(result.getBytes());
 			}
-		
+
 		}catch(UnsupportedEncodingException e){
 			String[] args = {"url:" + url};
 			throw new DownloadException(new Throwable(), e, 0, args);
@@ -175,7 +175,7 @@ public class Download {
 		try{
 
 			DownloadByteResult result = getURLBytesWithCookieAndPost(url, cookie, post);
-			
+
 			if(result.getCharset() != null){
 				return new String(result.getBytes(), result.getCharset());
 			}else{
@@ -322,9 +322,13 @@ public class Download {
 			String[] args = new String[2];
 			args[0] = "url: " + url;
 			int responseCode = 0;
-			
-			if(is != null){
-				is.close();
+
+			try {
+				if(is != null){
+					is.close();
+				}
+			} catch (IOException e1) {
+				new DownloadException(new Throwable(), e1, responseCode, args);
 			}
 
 			if(conn != null) {
@@ -441,11 +445,11 @@ public class Download {
 
 			}
 
-			
+
 			String content = conn.getHeaderField(key);
 			conn.disconnect();
-			
-			
+
+
 			return content;
 
 
