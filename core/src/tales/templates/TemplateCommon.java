@@ -56,7 +56,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			process(this.getTalesDB(), this.getTask(), url, doc);
 
 			// extracts links from the doc and stores them
-			//storeLinks(extractLinks(doc));
+			storeLinks(extractLinks(doc));
 
 
 		} catch (DownloadException e) {
@@ -129,7 +129,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 		try{
 
 			for(String link : links){
-				TalesDBHelper.queueAddDocumentName(this.getTemplateConfig(), link);
+				//TalesDBHelper.queueAddDocumentName(this.getTemplateConfig(), link);
 			}
 
 		} catch (Exception e) {
