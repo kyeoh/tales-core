@@ -58,7 +58,6 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			// extracts links from the doc and stores them
 			storeLinks(extractLinks(doc));
 
-
 		} catch (DownloadException e) {
 
 			if(e.getResponseCode() != 404){
