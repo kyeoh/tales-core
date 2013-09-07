@@ -51,13 +51,6 @@ public class TalesDBHelper {
 
 
 
-	public static void finish(){
-
-	}
-
-
-
-
 	public static class Inserter extends TimerTask implements Runnable{
 
 
