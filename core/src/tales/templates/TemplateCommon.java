@@ -48,10 +48,6 @@ public abstract class TemplateCommon extends TemplateAbstract{
 		
 		try {	
 
-			if(!new Download().urlExists(url)){
-				throw new DownloadException(new Throwable(), new Exception(), 404);
-			}
-			
 			String html = new Download().getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
 
 			//Document doc = Jsoup.parse(html);
