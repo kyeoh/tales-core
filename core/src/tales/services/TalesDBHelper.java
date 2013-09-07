@@ -33,17 +33,17 @@ public class TalesDBHelper {
 		if(!pending.containsKey(key)){
 
 			pending.put(key, new CopyOnWriteArrayList<String>());
-			//all.put(key, new ArrayList<String>());
+			all.put(key, new ArrayList<String>());
 
-			//TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
-			//Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
-			//t.start();
+			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
+			Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
+			t.start();
 
 		}
 
 		if(!all.get(key).contains(documentName)){
 			pending.get(key).add(documentName);
-			//all.get(key).add(documentName);
+			all.get(key).add(documentName);
 		}
 
 	}
