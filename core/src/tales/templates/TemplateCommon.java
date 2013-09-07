@@ -50,7 +50,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 			String html = new Download().getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
 
-			//Document doc = Jsoup.parse(html);
+			Document doc = Jsoup.parse(html);
 
 			// parses, extracts and saves the data
 			//process(this.getTalesDB(), this.getTask(), url, doc);
