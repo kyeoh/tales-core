@@ -34,9 +34,9 @@ public class TalesDBHelper {
 			pending.put(key, new CopyOnWriteArrayList<String>());
 			all.put(key, new CopyOnWriteArrayList<String>());
 
-			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
-			Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
-			t.start();
+			//TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
+			//Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
+			//t.start();
 
 		}
 
