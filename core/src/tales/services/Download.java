@@ -196,6 +196,7 @@ public class Download {
 
 
 		HttpURLConnection conn = null;
+		InputStream is = null;
 
 
 		try {
@@ -242,7 +243,7 @@ public class Download {
 
 
 			// downloads the content
-			InputStream is = conn.getInputStream();
+			is = conn.getInputStream();
 
 
 			// checks the types of data
@@ -321,8 +322,12 @@ public class Download {
 			String[] args = new String[2];
 			args[0] = "url: " + url;
 			int responseCode = 0;
+			
+			if(is != null){
+				is.close();
+			}
 
-			if (conn != null) {
+			if(conn != null) {
 				try {
 					responseCode = conn.getResponseCode();
 					args[1] = "responseCode: " + responseCode;
