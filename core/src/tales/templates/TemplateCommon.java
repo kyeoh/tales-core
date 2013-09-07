@@ -45,7 +45,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
 		Logger.log(new Throwable(), "id: " + this.getTask().getDocumentId() + " - " + url);
-		/*
+		
 		try {	
 
 			if(!new Download().urlExists(url)){
@@ -54,13 +54,13 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			
 			String html = new Download().getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
 
-			Document doc = Jsoup.parse(html);
+			//Document doc = Jsoup.parse(html);
 
 			// parses, extracts and saves the data
-			process(this.getTalesDB(), this.getTask(), url, doc);
+			//process(this.getTalesDB(), this.getTask(), url, doc);
 
 			// extracts links from the doc and stores them
-			storeLinks(extractLinks(doc));
+			//storeLinks(extractLinks(doc));
 
 
 		} catch (DownloadException e) {
@@ -92,7 +92,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			new TemplateException(new Throwable(), e, this.getTask());
 
 		}
-*/
+
 		active = false;
 
 	}
