@@ -45,7 +45,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
 		Logger.log(new Throwable(), "id: " + this.getTask().getDocumentId() + " - " + url);
-
+		/*
 		try {	
 
 			if(!new Download().urlExists(url)){
@@ -92,7 +92,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			new TemplateException(new Throwable(), e, this.getTask());
 
 		}
-
+*/
 		active = false;
 
 	}
