@@ -34,8 +34,8 @@ public class DynamicDataDownloader extends TemplateCommon{
 	@Override
 	protected void process(TalesDB talesDB, Task task, String url, org.jsoup.nodes.Document doc) throws Exception{
 
-		S3 s3 = new S3();
-		s3.addTemplateDoc(this.getTemplateConfig().getTemplateMetadata(), url, doc);
+		//S3 s3 = new S3();
+		//s3.addTemplateDoc(this.getTemplateConfig().getTemplateMetadata(), url, doc);
 		
 	}
 
