@@ -83,7 +83,7 @@ public class TalesDBHelper {
 
 				if(pending.get(key).size() > 0){
 
-					Logger.log(new Throwable(), "-adding " + pending.get(key).size() + " names to the documents table...");
+					Logger.log(new Throwable(), "-cached: " + all.get(key).size() + " -adding: " + pending.get(key).size() + " names to the documents table...");
 
 					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
