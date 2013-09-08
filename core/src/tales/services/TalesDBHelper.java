@@ -99,10 +99,10 @@ public class TalesDBHelper {
 						if(!talesDB.documentExists(name)){
 							talesDB.addDocument(name);
 						}
+						
+						pending.get(key).remove(name);
 
 					}
-
-					pending.get(key).clear();
 
 				}
 
