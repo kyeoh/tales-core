@@ -352,7 +352,7 @@ public class TalesDB {
 
 
 			final ArrayList<Document> list      = new ArrayList<Document>();
-			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate ASC LIMIT 0,?");
+			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate ASC, id ASC LIMIT 0,?");
 			statement.setInt(1, number);
 
 
