@@ -939,6 +939,7 @@ public class TalesDB {
 					+ "lastUpdate timestamp NOT NULL DEFAULT '1999-12-31 17:00:00',"
 					+ "active int(2) NOT NULL DEFAULT '1',"
 					+ "PRIMARY KEY (id),"
+					+ "INDEX hash (hash),"
 					+ "KEY lastUpdate (lastUpdate),"
 					+ "KEY active (active)"
 					+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
