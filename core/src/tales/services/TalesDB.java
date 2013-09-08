@@ -273,13 +273,6 @@ public class TalesDB {
 
 			final PreparedStatement statement = conn.prepareStatement(sql);
 			statement.executeUpdate();
-
-
-			final ResultSet rs = statement.getGeneratedKeys();
-			rs.next();
-
-
-			rs.close();
 			statement.close();
 
 
