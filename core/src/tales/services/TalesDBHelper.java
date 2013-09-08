@@ -29,7 +29,6 @@ public class TalesDBHelper {
 	public static synchronized void queueAddDocumentName(TemplateConfig config, String name) throws TalesException{
 		
 		StringBuilder documentName = new StringBuilder(name);
-
 		String key = config.getTaskName();
 
 		if(!pending.containsKey(key)){
@@ -81,7 +80,7 @@ public class TalesDBHelper {
 
 				if(pending.get(key).size() > 0){
 
-					Logger.log(new Throwable(), "-cached: " + all.get(key).size() + " -adding: " + pending.get(key).size() + " names to the documents table...");
+					Logger.log(new Throwable(), "-cached: " + all.get(key).size() + " -adding: " + pending.get(key).size() + " names to the documents table");
 
 					for(Iterator<StringBuilder> it = pending.get(key).iterator(); it.hasNext();){
 
