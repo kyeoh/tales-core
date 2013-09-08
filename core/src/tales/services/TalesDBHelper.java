@@ -46,6 +46,11 @@ public class TalesDBHelper {
 			pending.get(key).add(documentName);
 			all.get(key).add(documentName);
 			
+		}else{
+			
+			all.get(key).remove(documentName);
+			all.get(key).add(documentName);
+			
 		}
 
 	}
@@ -77,9 +82,11 @@ public class TalesDBHelper {
 
 			try{
 
+				Logger.log(new Throwable(), "-cached: " + all.get(key).size());
+				
 				if(pending.get(key).size() > 0){
 
-					Logger.log(new Throwable(), "-cached: " + all.get(key).size() + " -adding: " + pending.get(key).size() + " names to the documents table.");
+					Logger.log(new Throwable(),"-adding: " + pending.get(key).size() + " names to the documents table.");
 
 					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
