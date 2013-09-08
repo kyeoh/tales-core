@@ -121,7 +121,7 @@ public class TalesDBHelper {
 				}
 
 				Timer timer = new Timer();
-				timer.schedule(new TalesDBHelper.Inserter(key, talesDB), 100);
+				timer.schedule(new TalesDBHelper.Inserter(key, talesDB), 10000);
 
 			}catch(Exception e){
 				new TalesException(new Throwable(), e);
