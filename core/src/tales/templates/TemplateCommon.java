@@ -68,7 +68,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 				try {
 					
-					Logger.log(new Throwable(), "*** unexpected failure, retrying later: " + url);
+					Logger.log(new Throwable(), "*** unexpected failure, readding task to taskDB: " + this.getTask().getDocumentName());
 					this.getTasksDB().add(this.getTask());
 					
 				} catch (TalesException e1) {
