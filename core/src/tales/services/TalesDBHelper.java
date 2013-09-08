@@ -52,7 +52,7 @@ public class TalesDBHelper {
 			}
 			
 			pending.get(key).add(documentName);
-			all.get(key).add(documentName);
+			all.get(key).add(0, documentName);
 			
 		}else{
 			
