@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import tales.config.Globals;
 import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;
@@ -143,13 +145,6 @@ public class TalesDB {
 					
 				}
 
-
-				// checks if the ignored document table exists
-				Logger.log(new Throwable(), "[" + dbName + "] checking ignored documents table...");
-				if(!TalesDB.ignoredDocumentsTableExists(conn)){
-					TalesDB.createIgnoredDocumentsTable(conn);
-				}
-
 			}
 
 
@@ -188,10 +183,10 @@ public class TalesDB {
 		
 		try{
 
-
-			// db query
-			final PreparedStatement statement = conn.prepareStatement("INSERT INTO documents (name) values (?)", Statement.RETURN_GENERATED_KEYS);
-			statement.setString(1, name);
+			
+			final PreparedStatement statement = conn.prepareStatement("INSERT INTO documents (hash, name) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+			statement.setString(1, DigestUtils.shaHex(name));
+			statement.setString(2, name);
 			statement.executeUpdate();
 
 
@@ -229,8 +224,8 @@ public class TalesDB {
 			boolean exists = false;
 
 
-			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM documents WHERE name=? LIMIT 1");
-			statement.setString(1, name);
+			final PreparedStatement statement = conn.prepareStatement("SELECT count(*) FROM documents WHERE hash=? LIMIT 1");
+			statement.setString(1, DigestUtils.shaHex(name));
 
 
 			final ResultSet rs = statement.executeQuery();
@@ -258,36 +253,6 @@ public class TalesDB {
 
 
 
-
-	public synchronized final void bulkAddDocumentsIfDontExist(ArrayList<String> names) throws TalesException{
-		
-		try{
-			
-			Statement statement = conn.createStatement();
-			 
-			for (String name : names) {
-				
-				final String sql = "INSERT INTO documents (name) "
-						+ "SELECT * FROM (SELECT '" + name + "') AS tmp "
-						+ "WHERE NOT EXISTS ("
-						+ "SELECT name FROM documents WHERE name = '" + name + "' LIMIT 1"
-						+ ") LIMIT 1;";
-				
-			    statement.addBatch(sql);
-			    
-			}
-			
-			statement.executeBatch();
-			statement.close();
-
-		}catch(final Exception e){
-			throw new TalesException(new Throwable(), e);
-		}
-		
-	}
-	
-	
-	
 	
 	public synchronized final boolean documentIdExists(final int documentId) throws TalesException{
 
@@ -968,6 +933,7 @@ public class TalesDB {
 
 
 			final String sql = "CREATE TABLE documents (id int(11) NOT NULL AUTO_INCREMENT,"
+					+ "hash varchar(40) NOT NULL,"
 					+ "name varchar(" + Globals.DOCUMENT_NAME_MAX_LENGTH + ") NOT NULL,"
 					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "lastUpdate timestamp NOT NULL DEFAULT '1999-12-31 17:00:00',"
@@ -1013,120 +979,6 @@ public class TalesDB {
 
 
 		return exists;
-
-	}
-
-
-
-
-	private synchronized final static void createIgnoredDocumentsTable(Connection conn) throws TalesException{
-
-
-		try {
-
-
-			final String sql = "CREATE TABLE ignoredDocuments ("
-					+ "id INT NOT NULL AUTO_INCREMENT, "
-					+ "name VARCHAR(1000) NOT NULL, "
-					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-					+ "PRIMARY KEY (id)" 
-					+ ") ENGINE = MYISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
-
-
-			final Statement statement = (Statement) conn.createStatement();
-			statement.executeUpdate(sql);
-			statement.close();
-
-
-		}catch(final Exception e){
-			throw new TalesException(new Throwable(), e);
-		}
-
-	}
-
-
-
-
-	private synchronized final static boolean ignoredDocumentsTableExists(Connection conn) throws TalesException{
-
-
-		boolean exists          = false;
-
-
-		try {
-
-
-			final ResultSet tables = conn.getMetaData().getTables(null, null, "ignoredDocuments", null);
-			if(tables.next()){
-				exists = true;
-			}
-
-
-		}catch(final Exception e){
-			new TalesException(new Throwable(), e);
-		}
-
-
-		return exists;
-
-	}
-
-
-
-
-	public synchronized final void addIgnoredDocument(final String name) throws TalesException{
-
-
-		try{
-
-
-			final PreparedStatement statement = conn.prepareStatement("INSERT INTO ignoredDocuments (name) values (?)");
-			statement.setString(1, name);
-			statement.executeUpdate();
-			statement.close();
-
-
-		}catch(final Exception e){
-			final String[] args = {"name: " + name};
-			throw new TalesException(new Throwable(), e, args);
-		}
-
-	}
-
-
-
-
-	public synchronized final boolean ignoredDocumentExists(final String name) throws TalesException{
-
-
-		try{
-
-
-			final PreparedStatement statement  = conn.prepareStatement("SELECT count(*) FROM ignoredDocuments WHERE name=? LIMIT 1");
-			statement.setString(1, name);
-
-
-			final ResultSet rs                 = statement.executeQuery();
-			rs.next();
-
-
-			boolean exists                     = false;
-			if(rs.getInt(1) > 0){
-				exists                         = true;
-			}
-
-
-			rs.close();
-			statement.close();
-
-
-			return exists;
-
-
-		}catch(final Exception e){
-			final String[] args = {"name: " + name};
-			throw new TalesException(new Throwable(), e, args);
-		}
 
 	}
 
