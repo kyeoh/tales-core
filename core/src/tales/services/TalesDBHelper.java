@@ -20,21 +20,20 @@ public class TalesDBHelper {
 
 
 
-	private static HashMap<String, CopyOnWriteArrayList<StringBuilder>> pending = new HashMap<String, CopyOnWriteArrayList<StringBuilder>>();
-	private static HashMap<String, ArrayList<StringBuilder>> all = new HashMap<String, ArrayList<StringBuilder>>();
+	private static HashMap<String, CopyOnWriteArrayList<String>> pending = new HashMap<String, CopyOnWriteArrayList<String>>();
+	private static HashMap<String, ArrayList<String>> all = new HashMap<String, ArrayList<String>>();
 
 
 
 
-	public static synchronized void queueAddDocumentName(TemplateConfig config, String name) throws TalesException{
-		
-		StringBuilder documentName = new StringBuilder(name);
+	public static synchronized void queueAddDocumentName(TemplateConfig config, String documentName) throws TalesException{
+
 		String key = config.getTaskName();
 
 		if(!pending.containsKey(key)){
 
-			pending.put(key, new CopyOnWriteArrayList<StringBuilder>());
-			all.put(key, new ArrayList<StringBuilder>());
+			pending.put(key, new CopyOnWriteArrayList<String>());
+			all.put(key, new ArrayList<String>());
 
 			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
 			Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
@@ -80,9 +79,9 @@ public class TalesDBHelper {
 
 				if(pending.get(key).size() > 0){
 
-					Logger.log(new Throwable(), "-cached: " + all.get(key).size() + " -adding: " + pending.get(key).size() + " names to the documents table");
+					Logger.log(new Throwable(), "-cached: " + all.get(key).size() + " -adding: " + pending.get(key).size() + " names to the documents table.");
 
-					for(Iterator<StringBuilder> it = pending.get(key).iterator(); it.hasNext();){
+					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
 						String name = it.next().toString();
 
