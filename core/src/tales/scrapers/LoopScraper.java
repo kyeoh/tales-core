@@ -19,6 +19,7 @@ import tales.services.Document;
 import tales.services.Download;
 import tales.services.Logger;
 import tales.services.TalesDB;
+import tales.services.TalesDBHelper;
 import tales.services.TalesException;
 import tales.services.Task;
 import tales.services.TasksDB;
@@ -81,6 +82,8 @@ public class LoopScraper {
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
+					
+					TalesDBHelper.finish(templateConfig);
 
 					ArrayList<Task> tasks = getTasks(loopReferenceTime);
 

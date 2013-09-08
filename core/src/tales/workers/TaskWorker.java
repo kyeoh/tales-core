@@ -180,14 +180,7 @@ public class TaskWorker{
 
 					}else{
 
-						if(threads.size() == 0){
-							
-							try{
-								TalesDBHelper.finish(config);
-							} catch (Exception e) {
-								new TalesException(new Throwable(), e);
-							}
-							
+						if(threads.size() == 0){							
 							if(monitor != null){
 								monitor.stop();
 							}
