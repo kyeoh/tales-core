@@ -6,6 +6,7 @@ package tales.services;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -16,8 +17,6 @@ import tales.config.Globals;
 import tales.templates.TemplateConnectionInterface;
 import tales.templates.TemplateMetadataInterface;
 import tales.utils.DBUtils;
-
-import com.mysql.jdbc.Statement;
 
 
 
@@ -260,27 +259,29 @@ public class TalesDB {
 
 
 
-	public synchronized final void addDocumentIfDontExist(String name) throws TalesException{
+	public synchronized final void bulkAddDocumentsIfDontExist(ArrayList<String> names) throws TalesException{
 		
 		try{
-
-
-			final String sql = "INSERT INTO documents (name) "
-					+ "SELECT * FROM (SELECT '" + name + "') AS tmp "
-					+ "WHERE NOT EXISTS ("
-					+ "SELECT name FROM documents WHERE name = '" + name + "'"
-					+ ") LIMIT 1;";
-
-			final PreparedStatement statement = conn.prepareStatement(sql);
-			statement.executeUpdate();
+			
+			Statement statement = conn.createStatement();
+			 
+			for (String name : names) {
+				
+				final String sql = "INSERT INTO documents (name) "
+						+ "SELECT * FROM (SELECT '" + name + "') AS tmp "
+						+ "WHERE NOT EXISTS ("
+						+ "SELECT name FROM documents WHERE name = '" + name + "'"
+						+ ") LIMIT 1;";
+				
+			    statement.addBatch(sql);
+			    
+			}
+			
+			statement.executeBatch();
 			statement.close();
 
-
 		}catch(final Exception e){
-
-			final String[] args = {"name: " + name};
-			throw new TalesException(new Throwable(), e, args);
-
+			throw new TalesException(new Throwable(), e);
 		}
 		
 	}

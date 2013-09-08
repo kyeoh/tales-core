@@ -105,14 +105,17 @@ public class TalesDBHelper {
 								
 				if(pending.get(key).size() > 0){
 
+					ArrayList<String> names = new ArrayList<String>();
+					
 					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
 						String name = it.next().toString();
-						talesDB.addDocumentIfDontExist(name);
+						names.add(name);
 						pending.get(key).remove(name);
 
 					}
 					
+					talesDB.bulkAddDocumentsIfDontExist(names);
 					paused = false;
 
 				}
