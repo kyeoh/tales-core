@@ -272,7 +272,6 @@ public class TalesDB {
 					+ ") LIMIT 1;";
 
 			final PreparedStatement statement = conn.prepareStatement(sql);
-			statement.setString(1, name);
 			statement.executeUpdate();
 
 
