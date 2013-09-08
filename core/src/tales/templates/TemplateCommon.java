@@ -128,9 +128,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 		try{
 
 			for(String link : links){
-				if(!TalesDBHelper.isCached(this.getTemplateConfig(), link)){
-					this.getTalesDB().addDocumentIfDontExist(link);
-				}
+				TalesDBHelper.queueAddDocumentName(this.getTemplateConfig(), link);
 			}
 
 		} catch (Exception e) {
