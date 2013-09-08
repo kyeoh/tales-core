@@ -115,7 +115,14 @@ public class TalesDBHelper {
 
 					}
 					
-					talesDB.bulkAddDocumentsIfDontExist(names);
+					for(String name : names){
+						
+						if(!talesDB.documentExists(name)){
+							talesDB.addDocument(name);
+						}
+						
+					}
+					
 					paused = false;
 
 				}
