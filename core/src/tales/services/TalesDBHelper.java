@@ -51,7 +51,10 @@ public class TalesDBHelper {
 				all.get(key).remove(all.get(key).size() - 1);
 			}
 			
-			pending.get(key).add(documentName);
+			if(!pending.get(key).contains(documentName)){
+				pending.get(key).add(documentName);
+			}
+			
 			all.get(key).add(0, documentName);
 			
 		}else{
