@@ -86,10 +86,10 @@ public class TaskWorker{
 	public boolean isBroken(){
 		return worker.isBroken();
 	}
-	
-	
-	
-	
+
+
+
+
 	private class Worker implements Runnable{
 
 
@@ -99,7 +99,7 @@ public class TaskWorker{
 		private CopyOnWriteArrayList<TemplateInterface> threads;
 		private TasksDB taskDB;
 		private boolean broke;
-		
+
 
 
 
@@ -181,9 +181,6 @@ public class TaskWorker{
 					}else{
 
 						if(threads.size() == 0){
-							
-							TalesDBHelper.finish(config);
-							
 							if(monitor != null){
 								monitor.stop();
 							}
@@ -230,6 +227,12 @@ public class TaskWorker{
 
 			}
 
+			try{
+				TalesDBHelper.finish(config);
+			} catch (Exception e) {
+				new TalesException(new Throwable(), e);
+			}
+
 		}
 
 
@@ -252,10 +255,10 @@ public class TaskWorker{
 			return tasks;
 
 		}
-		
-		
-		
-		
+
+
+
+
 		public boolean isBroken(){
 			return broke;
 		}
@@ -282,7 +285,7 @@ public class TaskWorker{
 
 			stop = false;
 			processAverage = new Average(20);
-			
+
 		}
 
 
@@ -292,7 +295,7 @@ public class TaskWorker{
 
 			try{
 
-				
+
 				if(!stop){
 
 					// process per second
@@ -316,7 +319,7 @@ public class TaskWorker{
 					t.start();
 
 				}
-				
+
 
 			} catch (Exception e) {
 				new TalesException(new Throwable(), e);
