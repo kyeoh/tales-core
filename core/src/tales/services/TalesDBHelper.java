@@ -69,7 +69,7 @@ public class TalesDBHelper {
 			
 		}
 		
-		if(pending.get(key).size() > Config.getCacheSize()){
+		if(pending.get(key).size() == Config.getCacheSize()){
 			paused = true;	
 		}
 
