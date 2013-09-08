@@ -31,6 +31,7 @@ public class TalesDBHelper {
 
 		String key = config.getTaskName();
 
+		// inits
 		if(!pending.containsKey(key)){
 
 			pending.put(key, new CopyOnWriteArrayList<String>());
@@ -42,7 +43,13 @@ public class TalesDBHelper {
 			new Thread(new TalesDBHelper.Monitor(key)).start();
 
 		}
+		
+		// checks size
+		if(all.get(key).size() == Config.getCacheSize()){
+			Logger.log(new Throwable(), all.get(key).remove(all.get(key).size()));
+		}
 
+		// sorts by more often
 		if(!all.get(key).contains(documentName)){
 			
 			pending.get(key).add(documentName);
