@@ -68,7 +68,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 				try {
 					
-					Logger.log(new Throwable(), "*** " + url);
+					Logger.log(new Throwable(), "*** unexpected failure, retrying later: " + url);
 					this.getTasksDB().add(this.getTask());
 					
 				} catch (TalesException e1) {
