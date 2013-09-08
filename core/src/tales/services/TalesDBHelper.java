@@ -23,6 +23,7 @@ public class TalesDBHelper {
 
 	private static HashMap<String, CopyOnWriteArrayList<String>> pending = new HashMap<String, CopyOnWriteArrayList<String>>();
 	private static HashMap<String, ArrayList<String>> all = new HashMap<String, ArrayList<String>>();
+	private static HashMap<String, TalesDB> talesDBs = new HashMap<String, TalesDB>();
 
 
 
@@ -36,10 +37,9 @@ public class TalesDBHelper {
 
 			pending.put(key, new CopyOnWriteArrayList<String>());
 			all.put(key, new ArrayList<String>(Config.getCacheSize()));
-
-			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
+			talesDBs.put(key, new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata()));
 			
-			new Thread(new TalesDBHelper.Inserter(key, talesDB)).start();
+			new Thread(new TalesDBHelper.Inserter(key)).start();
 			new Thread(new TalesDBHelper.Monitor(key)).start();
 
 		}
@@ -51,7 +51,7 @@ public class TalesDBHelper {
 				all.get(key).remove(all.get(key).size() - 1);
 			}
 			
-			if(!pending.get(key).contains(documentName)){
+			if(!pending.get(key).contains(documentName) && !talesDBs.get(key).documentExists(documentName)){
 				pending.get(key).add(documentName);
 			}
 			
@@ -75,14 +75,12 @@ public class TalesDBHelper {
 
 
 		private String key;
-		private TalesDB talesDB;
 
 
 
-
-		public Inserter(String key, TalesDB talesDB){
+		
+		public Inserter(String key){
 			this.key = key;
-			this.talesDB = talesDB;
 		}
 
 
@@ -98,11 +96,7 @@ public class TalesDBHelper {
 					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
 						String name = it.next().toString();
-
-						if(!talesDB.documentExists(name)){
-							talesDB.addDocument(name);
-						}
-						
+						talesDBs.get(key).addDocument(name);
 						pending.get(key).remove(name);
 
 					}
