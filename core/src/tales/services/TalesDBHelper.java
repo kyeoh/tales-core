@@ -92,8 +92,6 @@ public class TalesDBHelper {
 								
 				if(pending.get(key).size() > 0){
 
-					Logger.log(new Throwable(),"-adding: " + pending.get(key).size() + " names to the documents table.");
-
 					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
 						String name = it.next().toString();
@@ -144,7 +142,7 @@ public class TalesDBHelper {
 
 			try{
 				
-				Logger.log(new Throwable(), "-cached: " + all.get(key).size());
+				Logger.log(new Throwable(), "-pending: " + pending.get(key).size() + " -cached: " + all.get(key).size());
 				Timer timer = new Timer();
 				timer.schedule(new TalesDBHelper.Monitor(key), 10000);
 
