@@ -5,10 +5,8 @@ package tales.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import tales.config.Config;
 import tales.templates.TemplateConfig;
@@ -26,7 +24,7 @@ public class TalesDBHelper {
 
 
 
-	public static synchronized void queueAddDocumentName(TemplateConfig config, String documentName) throws Exception{
+	public static synchronized boolean isCached(TemplateConfig config, String documentName) throws Exception{
 		
 		String key = config.getTaskName();
 
@@ -47,10 +45,14 @@ public class TalesDBHelper {
 			
 			all.get(key).add(0, documentName);
 			
+			return false;
+			
 		}else{
 			
 			all.get(key).remove(documentName);
 			all.get(key).add(0, documentName);
+			
+			return true;
 			
 		}
 

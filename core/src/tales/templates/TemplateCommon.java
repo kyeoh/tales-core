@@ -128,9 +128,8 @@ public abstract class TemplateCommon extends TemplateAbstract{
 		try{
 
 			for(String link : links){
-				if(TalesDBHelper.isCached(this.getTemplateConfig(), link) 
-						&& !talesDB.documentExists(name)){
-					talesDB.addDocument(name);
+				if(!TalesDBHelper.isCached(this.getTemplateConfig(), link) && !this.getTalesDB().documentExists(link)){
+					this.getTalesDB().addDocument(link);
 				}
 			}
 
