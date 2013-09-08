@@ -78,8 +78,21 @@ public class TalesDBHelper {
 
 
 
-
-	public static class Inserter extends TimerTask implements Runnable{
+	
+	public static void finish(TemplateConfig config) throws Exception{
+		
+		String key = config.getTaskName();
+		
+		while(pending.get(key).size() > 0){
+			Thread.sleep(1000);
+		}
+		
+	}
+	
+	
+	
+	
+	private static class Inserter extends TimerTask implements Runnable{
 
 
 
@@ -136,7 +149,7 @@ public class TalesDBHelper {
 	
 	
 	
-	public static class Monitor extends TimerTask implements Runnable{
+	private static class Monitor extends TimerTask implements Runnable{
 
 
 
