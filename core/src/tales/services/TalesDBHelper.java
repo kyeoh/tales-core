@@ -83,7 +83,7 @@ public class TalesDBHelper {
 		
 		String key = config.getTaskName();
 		
-		while(pending.get(key).size() > 0){
+		while(pending.containsKey(key) && pending.get(key).size() > 0){
 			Thread.sleep(1000);
 		}
 		
