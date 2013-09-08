@@ -20,7 +20,7 @@ public class TalesDBHelper {
 
 
 
-	private static HashMap<String, CopyOnWriteArrayList<StringBuilder>> pending = new HashMap<String, CopyOnWriteArrayList<StringBuilder>>();
+	private static HashMap<String, CopyOnWriteArrayList<String>> pending = new HashMap<String, CopyOnWriteArrayList<String>>();
 	private static HashMap<String, ArrayList<StringBuilder>> all = new HashMap<String, ArrayList<StringBuilder>>();
 
 
@@ -34,7 +34,7 @@ public class TalesDBHelper {
 
 		if(!pending.containsKey(key)){
 
-			pending.put(key, new CopyOnWriteArrayList<StringBuilder>());
+			pending.put(key, new CopyOnWriteArrayList<String>());
 			all.put(key, new ArrayList<StringBuilder>());
 
 			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
@@ -45,7 +45,7 @@ public class TalesDBHelper {
 
 		if(!all.get(key).contains(documentName)){
 			
-			pending.get(key).add(documentName);
+			pending.get(key).add(name);
 			all.get(key).add(documentName);
 			
 		}
