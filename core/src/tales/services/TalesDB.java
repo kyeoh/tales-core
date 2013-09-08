@@ -260,6 +260,41 @@ public class TalesDB {
 
 
 
+	public synchronized final void addDocumentIfDontExist(String name) throws TalesException{
+		
+		try{
+
+			final String sql = "INSERT INTO documents (name) "
+					+ "SELECT * FROM (SELECT '" + name + "') AS tmp "
+					+ "WHERE NOT EXISTS ("
+					+ "SELECT name FROM documents WHERE name = '" + name + "'"
+					+ ") LIMIT 1;";
+
+			final PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, name);
+			statement.executeUpdate();
+
+
+			final ResultSet rs = statement.getGeneratedKeys();
+			rs.next();
+
+
+			rs.close();
+			statement.close();
+
+
+		}catch(final Exception e){
+
+			final String[] args = {"name: " + name};
+			throw new TalesException(new Throwable(), e, args);
+
+		}
+		
+	}
+	
+	
+	
+	
 	public synchronized final boolean documentIdExists(final int documentId) throws TalesException{
 
 		try {
