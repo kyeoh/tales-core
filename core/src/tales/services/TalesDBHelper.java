@@ -23,16 +23,11 @@ public class TalesDBHelper {
 
 	private static HashMap<String, CopyOnWriteArrayList<String>> pending = new HashMap<String, CopyOnWriteArrayList<String>>();
 	private static HashMap<String, ArrayList<String>> all = new HashMap<String, ArrayList<String>>();
-	private static boolean paused = false;
 
 
 
 
 	public static synchronized void queueAddDocumentName(TemplateConfig config, String documentName) throws Exception{
-		
-		while(paused){
-			Thread.sleep(1000);
-		}
 
 		String key = config.getTaskName();
 
@@ -43,55 +38,50 @@ public class TalesDBHelper {
 			all.put(key, new ArrayList<String>(Config.getCacheSize()));
 
 			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
-			
+
 			new Thread(new TalesDBHelper.Inserter(key, talesDB)).start();
 			new Thread(new TalesDBHelper.Monitor(key)).start();
 
 		}
 
 		if(!all.get(key).contains(documentName)){
-			
+
 			// checks size
 			if(all.get(key).size() == Config.getCacheSize()){
 				all.get(key).remove(all.get(key).size() - 1);
 			}
-			
+
+			all.get(key).add(0, documentName);
+
 			if(!pending.get(key).contains(documentName)){
 				pending.get(key).add(documentName);
 			}
-			
-			all.get(key).add(0, documentName);
-			
+
 		}else{
-			
+
 			all.get(key).remove(documentName);
 			all.get(key).add(0, documentName);
-			
-		}
-		
-		// pause
-		if(pending.get(key).size() > Config.getCacheSize()){
-			paused = true;	
+
 		}
 
 	}
 
 
 
-	
-	public static void finish(TemplateConfig config) throws Exception{
-		
+
+	public static void waitAndFinish(TemplateConfig config) throws Exception{
+
 		String key = config.getTaskName();
-		
+
 		while(pending.containsKey(key) && pending.get(key).size() > 0){
 			Thread.sleep(1000);
 		}
-		
+
 	}
-	
-	
-	
-	
+
+
+
+
 	private static class Inserter extends TimerTask implements Runnable{
 
 
@@ -115,23 +105,16 @@ public class TalesDBHelper {
 		public void run() {
 
 			try{
-								
-				if(pending.get(key).size() > 0){
 
-					
-					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
+				for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
-						String name = it.next().toString();
-						
-						if(!talesDB.documentExists(name)){
-							talesDB.addDocument(name);
-						}
-						
-						pending.get(key).remove(name);
+					String name = it.next().toString();
 
+					if(!talesDB.documentExists(name)){
+						talesDB.addDocument(name);
 					}
-					
-					paused = false;
+
+					pending.get(key).remove(name);
 
 				}
 
@@ -145,10 +128,10 @@ public class TalesDBHelper {
 		}
 
 	}
-	
-	
-	
-	
+
+
+
+
 	private static class Monitor extends TimerTask implements Runnable{
 
 
@@ -158,7 +141,7 @@ public class TalesDBHelper {
 
 
 
-		
+
 		public Monitor(String key){
 			this.key = key;		
 		}
@@ -170,7 +153,7 @@ public class TalesDBHelper {
 		public void run() {
 
 			try{
-				
+
 				Logger.log(new Throwable(), "-pending: " + pending.get(key).size() + " -cached: " + all.get(key).size());
 				Timer timer = new Timer();
 				timer.schedule(new TalesDBHelper.Monitor(key), 10000);

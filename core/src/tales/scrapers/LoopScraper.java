@@ -83,7 +83,7 @@ public class LoopScraper {
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
 					
-					TalesDBHelper.finish(templateConfig);
+					TalesDBHelper.waitAndFinish(templateConfig);
 
 					ArrayList<Task> tasks = getTasks(loopReferenceTime);
 
