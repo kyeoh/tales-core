@@ -48,8 +48,8 @@ public class TalesDBHelper {
 			
 		}else{
 			
-			all.get(key).remove(documentName);
-			all.get(key).add(documentName);
+			//all.get(key).remove(documentName);
+			//all.get(key).add(documentName);
 			
 		}
 
