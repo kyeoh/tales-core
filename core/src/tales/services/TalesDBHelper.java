@@ -48,7 +48,7 @@ public class TalesDBHelper {
 			
 			// checks size
 			if(all.get(key).size() == Config.getCacheSize()){
-				Logger.log(new Throwable(), all.get(key).remove(all.get(key).size() - 1));
+				all.get(key).remove(all.get(key).size() - 1);
 			}
 			
 			pending.get(key).add(documentName);
