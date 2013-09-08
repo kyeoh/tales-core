@@ -148,6 +148,16 @@ public class Config{
 
 
 
+	public static int getCacheSize() throws TalesException{
+		load();
+		return json.getJSONObject("templates")
+				.getJSONObject("common")
+				.getInt("cacheSize");
+	}
+	
+	
+	
+	
 	public static ArrayList<FailoverAttempt> getFailoverAttemps() throws TalesException{
 		load();
 

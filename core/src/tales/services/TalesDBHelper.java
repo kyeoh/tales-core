@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import tales.config.Config;
 import tales.templates.TemplateConfig;
 
 
@@ -33,7 +34,7 @@ public class TalesDBHelper {
 		if(!pending.containsKey(key)){
 
 			pending.put(key, new CopyOnWriteArrayList<String>());
-			all.put(key, new ArrayList<String>());
+			all.put(key, new ArrayList<String>(Config.getCacheSize()));
 
 			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
 			
@@ -49,8 +50,8 @@ public class TalesDBHelper {
 			
 		}else{
 			
-			//all.get(key).remove(documentName);
-			//all.get(key).add(documentName);
+			all.get(key).remove(documentName);
+			all.get(key).add(0, documentName);
 			
 		}
 
@@ -126,6 +127,7 @@ public class TalesDBHelper {
 
 
 
+		
 		public Monitor(String key){
 			this.key = key;		
 		}
