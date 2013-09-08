@@ -36,8 +36,9 @@ public class TalesDBHelper {
 			all.put(key, new ArrayList<String>());
 
 			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
-			Thread t = new Thread(new TalesDBHelper.Inserter(key, talesDB));
-			t.start();
+			
+			new Thread(new TalesDBHelper.Inserter(key, talesDB)).start();
+			new Thread(new TalesDBHelper.Monitor(key)).start();
 
 		}
 
@@ -81,7 +82,7 @@ public class TalesDBHelper {
 		public void run() {
 
 			try{
-
+				
 				Logger.log(new Throwable(), "-cached: " + all.get(key).size());
 				
 				if(pending.get(key).size() > 0){
@@ -104,6 +105,42 @@ public class TalesDBHelper {
 
 				Timer timer = new Timer();
 				timer.schedule(new TalesDBHelper.Inserter(key, talesDB), 10000);
+
+			}catch(Exception e){
+				new TalesException(new Throwable(), e);
+			}
+
+		}
+
+	}
+	
+	
+	
+	
+	public static class Monitor extends TimerTask implements Runnable{
+
+
+
+
+		private String key;
+
+
+
+		public Monitor(String key){
+			this.key = key;		
+		}
+
+
+
+
+		@Override
+		public void run() {
+
+			try{
+				
+				Logger.log(new Throwable(), "-cached: " + all.get(key).size());
+				Timer timer = new Timer();
+				timer.schedule(new TalesDBHelper.Monitor(key), 10000);
 
 			}catch(Exception e){
 				new TalesException(new Throwable(), e);
