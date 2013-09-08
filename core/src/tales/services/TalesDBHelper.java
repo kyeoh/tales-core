@@ -23,11 +23,16 @@ public class TalesDBHelper {
 
 	private static HashMap<String, CopyOnWriteArrayList<String>> pending = new HashMap<String, CopyOnWriteArrayList<String>>();
 	private static HashMap<String, ArrayList<String>> all = new HashMap<String, ArrayList<String>>();
+	private static boolean paused = false;
 
 
 
 
-	public static synchronized void queueAddDocumentName(TemplateConfig config, String documentName) throws TalesException{
+	public static synchronized void queueAddDocumentName(TemplateConfig config, String documentName) throws Exception{
+		
+		while(paused){
+			Thread.sleep(1000);
+		}
 
 		String key = config.getTaskName();
 
@@ -62,6 +67,10 @@ public class TalesDBHelper {
 			all.get(key).remove(documentName);
 			all.get(key).add(0, documentName);
 			
+		}
+		
+		if(pending.get(key).size() > Config.getCacheSize()){
+			paused = true;	
 		}
 
 	}
@@ -106,6 +115,8 @@ public class TalesDBHelper {
 						pending.get(key).remove(name);
 
 					}
+					
+					paused = false;
 
 				}
 
