@@ -110,8 +110,6 @@ public class TalesDBHelper {
 						String name = it.next().toString();
 						talesDB.addDocumentIfDontExist(name);
 						pending.get(key).remove(name);
-						
-						Logger.log(new Throwable(), name);
 
 					}
 					
