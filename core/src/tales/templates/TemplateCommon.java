@@ -67,10 +67,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			if(e.getResponseCode() == 503){
 
 				try {
-					
-					Logger.log(new Throwable(), "*** unexpected failure, readding task to taskDB: " + this.getTask().getDocumentName());
-					this.getTasksDB().add(this.getTask());
-					
+					this.getTasksDB().add(this.getTask());					
 				} catch (TalesException e1) {
 					new TemplateException(new Throwable(), e1, this.getTask());
 				}
