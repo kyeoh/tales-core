@@ -32,7 +32,7 @@ public class TalesDBHelper {
 		String key = config.getTaskName();
 
 		// inits
-		if(!pending.containsKey(key)){
+		if(!all.containsKey(key)){
 
 			pending.put(key, new CopyOnWriteArrayList<String>());
 			all.put(key, new ArrayList<String>(Config.getCacheSize()));
@@ -43,14 +43,13 @@ public class TalesDBHelper {
 			new Thread(new TalesDBHelper.Monitor(key)).start();
 
 		}
-		
-		// checks size
-		if(all.get(key).size() == Config.getCacheSize()){
-			Logger.log(new Throwable(), all.get(key).remove(all.get(key).size()));
-		}
 
-		// sorts by more often
 		if(!all.get(key).contains(documentName)){
+			
+			// checks size
+			if(all.get(key).size() == Config.getCacheSize()){
+				Logger.log(new Throwable(), all.get(key).remove(all.get(key).size()));
+			}
 			
 			pending.get(key).add(documentName);
 			all.get(key).add(documentName);
@@ -90,9 +89,7 @@ public class TalesDBHelper {
 		public void run() {
 
 			try{
-				
-				Logger.log(new Throwable(), "-cached: " + all.get(key).size());
-				
+								
 				if(pending.get(key).size() > 0){
 
 					Logger.log(new Throwable(),"-adding: " + pending.get(key).size() + " names to the documents table.");
