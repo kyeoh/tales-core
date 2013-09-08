@@ -264,6 +264,7 @@ public class TalesDB {
 		
 		try{
 
+
 			final String sql = "INSERT INTO documents (name) "
 					+ "SELECT * FROM (SELECT '" + name + "') AS tmp "
 					+ "WHERE NOT EXISTS ("
