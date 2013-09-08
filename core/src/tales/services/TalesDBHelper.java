@@ -23,7 +23,6 @@ public class TalesDBHelper {
 
 	private static HashMap<String, CopyOnWriteArrayList<String>> pending = new HashMap<String, CopyOnWriteArrayList<String>>();
 	private static HashMap<String, ArrayList<String>> all = new HashMap<String, ArrayList<String>>();
-	private static HashMap<String, TalesDB> talesDBs = new HashMap<String, TalesDB>();
 
 
 
@@ -37,9 +36,10 @@ public class TalesDBHelper {
 
 			pending.put(key, new CopyOnWriteArrayList<String>());
 			all.put(key, new ArrayList<String>(Config.getCacheSize()));
-			talesDBs.put(key, new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata()));
+
+			TalesDB talesDB = new TalesDB(config.getThreads(), config.getTemplate().getConnectionMetadata(), config.getTemplateMetadata());
 			
-			new Thread(new TalesDBHelper.Inserter(key)).start();
+			new Thread(new TalesDBHelper.Inserter(key, talesDB)).start();
 			new Thread(new TalesDBHelper.Monitor(key)).start();
 
 		}
@@ -51,7 +51,7 @@ public class TalesDBHelper {
 				all.get(key).remove(all.get(key).size() - 1);
 			}
 			
-			if(!pending.get(key).contains(documentName) && !talesDBs.get(key).documentExists(documentName)){
+			if(!pending.get(key).contains(documentName)){
 				pending.get(key).add(documentName);
 			}
 			
@@ -75,12 +75,14 @@ public class TalesDBHelper {
 
 
 		private String key;
+		private TalesDB talesDB;
 
 
 
-		
-		public Inserter(String key){
+
+		public Inserter(String key, TalesDB talesDB){
 			this.key = key;
+			this.talesDB = talesDB;
 		}
 
 
@@ -96,7 +98,11 @@ public class TalesDBHelper {
 					for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
 						String name = it.next().toString();
-						talesDBs.get(key).addDocument(name);
+
+						if(!talesDB.documentExists(name)){
+							talesDB.addDocument(name);
+						}
+						
 						pending.get(key).remove(name);
 
 					}
@@ -104,7 +110,7 @@ public class TalesDBHelper {
 				}
 
 				Timer timer = new Timer();
-				timer.schedule(new TalesDBHelper.Inserter(key), 10000);
+				timer.schedule(new TalesDBHelper.Inserter(key, talesDB), 10000);
 
 			}catch(Exception e){
 				new TalesException(new Throwable(), e);
