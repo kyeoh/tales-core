@@ -270,7 +270,7 @@ public class TalesDB {
 				final String sql = "INSERT INTO documents (name) "
 						+ "SELECT * FROM (SELECT '" + name + "') AS tmp "
 						+ "WHERE NOT EXISTS ("
-						+ "SELECT name FROM documents WHERE name = '" + name + "'"
+						+ "SELECT name FROM documents WHERE name = '" + name + "' LIMIT 1"
 						+ ") LIMIT 1;";
 				
 			    statement.addBatch(sql);
