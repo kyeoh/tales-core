@@ -109,12 +109,12 @@ public class TalesDBHelper {
 				for(Iterator<String> it = pending.get(key).iterator(); it.hasNext();){
 
 					String name = it.next().toString();
+					
+					pending.get(key).remove(name);
 
 					if(!talesDB.documentExists(name)){
 						talesDB.addDocument(name);
 					}
-
-					pending.get(key).remove(name);
 
 				}
 
