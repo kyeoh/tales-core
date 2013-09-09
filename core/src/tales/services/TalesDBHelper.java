@@ -56,7 +56,11 @@ public class TalesDBHelper {
 			if(!pending.get(key).contains(documentName)){
 				pending.get(key).add(documentName);
 			}
-
+			
+			if(pending.get(key).size() == Config.getCacheSize()){
+				waitAndFinish(config);
+			}
+				
 		}else{
 
 			all.get(key).remove(documentName);
