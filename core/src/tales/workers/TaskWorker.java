@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import tales.services.Logger;
-import tales.services.TalesDBHelper;
 import tales.services.TalesException;
 import tales.services.Task;
 import tales.services.TasksDB;
