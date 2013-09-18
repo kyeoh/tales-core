@@ -1,9 +1,8 @@
-package tales.templates;
+package tales.aws;
 
 
 
 
-import tales.aws.S3;
 import tales.services.TalesDB;
 import tales.services.Task;
 import tales.templates.TemplateCommon;
@@ -12,7 +11,7 @@ import tales.templates.TemplateMetadataInterface;
 
 
 
-public class DynamicDataDownloader extends TemplateCommon{
+public class AWSDataDownloader extends TemplateCommon{
 
 
 

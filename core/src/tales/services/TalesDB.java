@@ -53,7 +53,7 @@ public class TalesDB {
 		try{
 
 			// db conn
-			conn = TalesDB.connect(threads, connMetadata, metadata);  
+			conn = TalesDB.connect(threads, connMetadata, metadata);
 
 		}catch(final Exception e){
 			final String[] args = {"dbName: " + dbName};
@@ -346,7 +346,7 @@ public class TalesDB {
 
 
 			final ArrayList<Document> list      = new ArrayList<Document>();
-			final PreparedStatement statement   = conn.prepareStatement("SELECT *,lastUpdate FROM documents WHERE active = 1 ORDER BY lastUpdate ASC, id ASC LIMIT 0,?");
+			final PreparedStatement statement   = conn.prepareStatement("SELECT * FROM documents WHERE active = 1 ORDER BY lastUpdate ASC, id ASC LIMIT 0,?");
 			statement.setInt(1, number);
 
 
@@ -1212,6 +1212,47 @@ public class TalesDB {
 
 		}catch(final Exception e){
 			final String[] args = {"attributeName: " + attributeName};
+			throw new TalesException(new Throwable(), e, args);
+		}
+
+	}
+
+
+
+
+	public Connection getConnection() {
+		return conn;
+	}
+	
+	
+	
+	
+	public final String getDocumentName(final int documentId) throws TalesException{
+
+
+		try{
+
+
+			final PreparedStatement statement = conn.prepareStatement("SELECT name FROM documents WHERE id = ?");
+			statement.setInt(1, documentId);
+
+
+			final ResultSet rs                = statement.executeQuery();
+			rs.next();
+
+
+			String name = rs.getString("name");
+
+
+			rs.close();
+			statement.close();
+
+
+			return name;
+
+
+		}catch(final Exception e){
+			final String[] args = {"documentId: " + documentId};
 			throw new TalesException(new Throwable(), e, args);
 		}
 

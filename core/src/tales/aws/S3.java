@@ -6,8 +6,6 @@ package tales.aws;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
-
 import tales.config.Globals;
 import tales.services.Download;
 import tales.services.DownloadException;
