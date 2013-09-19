@@ -60,7 +60,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 		} catch (DownloadException e) {
 
-			if(e.getResponseCode() != 404){
+			if(e.getResponseCode() != 0 && e.getResponseCode() != 404){
 				failed = true;
 			}	
 
