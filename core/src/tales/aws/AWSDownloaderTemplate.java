@@ -11,7 +11,7 @@ import tales.templates.TemplateMetadataInterface;
 
 
 
-public class AWSDataDownloader extends TemplateCommon{
+public class AWSDownloaderTemplate extends TemplateCommon{
 
 
 

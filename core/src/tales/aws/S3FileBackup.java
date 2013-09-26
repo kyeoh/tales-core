@@ -35,7 +35,7 @@ public class S3FileBackup {
 
 
 
-	public static void backupAllExcept(String s3BucketName, String fileName) throws TalesException{
+	public static void backupFile(String s3BucketName, String fileName) throws TalesException{
 
 		try{
 
@@ -98,8 +98,8 @@ public class S3FileBackup {
 			AppMonitor.init();
 
 
-			// backups the dbs
-			S3FileBackup.backupAllExcept(s3Bucket, fileName);
+			// backups a file
+			S3FileBackup.backupFile(s3Bucket, fileName);
 
 
 			// stop
