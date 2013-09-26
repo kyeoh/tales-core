@@ -59,7 +59,6 @@ public class SequentialScraper {
 					templateConfig.getTemplateMetadata());
 			tasksDB = new TasksDB(templateConfig);
 
-
 			// starts the task machine with the template
 			FailoverController failover = new FailoverController(templateConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
 			taskWorker = new TaskWorker(templateConfig, failover);
