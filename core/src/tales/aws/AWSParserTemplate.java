@@ -74,7 +74,7 @@ public class AWSParserTemplate extends TemplateCommon{
 
 	protected  void process(TalesDB talesDB, Task task, String url, org.jsoup.nodes.Document doc) throws Exception{
 		
-		Logger.log(new Throwable(), doc.select("title").toString());
+		Logger.log(new Throwable(), doc.select("title").toString().replace("/n", ""));
 
 	}
 
