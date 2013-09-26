@@ -3,11 +3,6 @@ package tales.aws;
 
 
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import tales.services.Download;
-import tales.services.DownloadException;
 import tales.services.Logger;
 import tales.services.TalesDB;
 import tales.services.TalesException;
@@ -15,7 +10,7 @@ import tales.services.Task;
 import tales.templates.TemplateCommon;
 import tales.templates.TemplateException;
 import tales.templates.TemplateMetadataInterface;
-import tales.utils.Compress;
+import tales.utils.GZIP;
 
 
 
@@ -48,12 +43,12 @@ public class AWSS3ParserTemplate extends TemplateCommon{
 		try {	
 			
 			S3 s3 = new S3();
-			byte[] bytes = s3.getFile(metadata, url);
-			bytes = new Compress().decompresGzipToBytes(bytes);
+			byte[] bytes = s3.getFile(this.getMetadata(), url);
+			bytes = new GZIP().decompresGzipToBytes(bytes);
 			
 			System.out.println(new String(bytes, "UTF-8"));
 
-			process(getTalesDB(), getTask(), url, null);
+			process(this.getTalesDB(), this.getTask(), url, null);
 
 		} catch (Exception e) {
 

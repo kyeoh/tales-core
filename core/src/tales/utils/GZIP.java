@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 
 
 
-public class Compress {
+public class GZIP {
 
 
 
