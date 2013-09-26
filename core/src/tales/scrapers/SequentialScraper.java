@@ -63,6 +63,16 @@ public class SequentialScraper {
 			FailoverController failover = new FailoverController(templateConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
 			taskWorker = new TaskWorker(templateConfig, failover);
 			taskWorker.init();
+			
+			// checks where it is at / offset
+			if(offset == 0 && tasksDB.count() > 0){
+				
+				Task task = tasksDB.getList(1).get(0);
+				tasksDB.add(task);
+				
+				offset = task.getDocumentId();
+				
+			}
 
 
 			boolean finished = false;

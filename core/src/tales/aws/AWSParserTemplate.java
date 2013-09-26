@@ -3,6 +3,9 @@ package tales.aws;
 
 
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import tales.services.Logger;
 import tales.services.TalesDB;
 import tales.services.TalesException;
@@ -16,10 +19,10 @@ import tales.utils.GZIP;
 
 
 public class AWSParserTemplate extends TemplateCommon{
+	
 
-	
-	
-	
+
+
 	@Override
 	public TemplateMetadataInterface getMetadata() {
 
@@ -39,18 +42,16 @@ public class AWSParserTemplate extends TemplateCommon{
 
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
 		Logger.log(new Throwable(), "id: " + this.getTask().getDocumentId() + " - " + url);
-		
+
 		try {	
-			
+
 			S3 s3 = new S3();
 			byte[] bytes = s3.getFile(this.getMetadata(), url);
 			bytes = new GZIP().decompresGzipToBytes(bytes);
-			
-			System.out.println(0);
-			System.out.println(new String(bytes, "UTF-8"));
-			System.out.println(1);
-			
-			process(this.getTalesDB(), this.getTask(), url, null);
+
+			Document doc = Jsoup.parse(new String(bytes, "UTF-8"));
+
+			process(this.getTalesDB(), this.getTask(), url, doc);
 
 		} catch (Exception e) {
 
@@ -67,12 +68,13 @@ public class AWSParserTemplate extends TemplateCommon{
 		active = false;
 
 	}
-	
-	
-	
-	
-	@Override
-	protected void process(TalesDB talesDB, Task task, String url, org.jsoup.nodes.Document doc) throws Exception{
+
+
+
+
+	protected  void process(TalesDB talesDB, Task task, String url, org.jsoup.nodes.Document doc) throws Exception{
+		
+		Logger.log(new Throwable(), doc.select("title").toString());
 
 	}
 
@@ -81,6 +83,7 @@ public class AWSParserTemplate extends TemplateCommon{
 
 	@Override
 	public boolean isTaskInvalid(Task task) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
