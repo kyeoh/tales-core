@@ -6,6 +6,8 @@ package tales.aws;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import tales.config.Globals;
 import tales.services.Download;
 import tales.services.DownloadException;
@@ -18,6 +20,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 
 
 
@@ -43,7 +46,7 @@ public class S3 {
 
 			ObjectMetadata objMetadata = new ObjectMetadata();
 			objMetadata.setContentLength(bytes.length);
-			
+
 			s3.putObject(new PutObjectRequest(bucketName, filename, stream, objMetadata));
 
 		}catch(Exception e){
@@ -64,7 +67,7 @@ public class S3 {
 			byte[] uncompressBytes = new Download().getURLBytes(url).getBytes();
 			byte[] compressedBytes = new Compress().compresBytesToGzip(uncompressBytes);
 			InputStream stream = new ByteArrayInputStream(compressedBytes);
-			
+
 			ObjectMetadata objMetadata = new ObjectMetadata();
 			objMetadata.setContentLength(compressedBytes.length);
 
@@ -73,6 +76,17 @@ public class S3 {
 		}catch(Exception e){
 			throw new DownloadException(new Throwable(), e, 0);
 		}
+
+	}
+
+
+
+
+	public static byte[] getFile(TemplateMetadataInterface metadata, String filename) throws Exception{
+
+		String bucketName = checkBucket(metadata);
+		S3Object obj = s3.getObject(bucketName, filename);
+		return IOUtils.toByteArray(obj.getObjectContent());
 
 	}
 
