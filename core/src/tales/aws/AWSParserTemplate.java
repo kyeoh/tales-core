@@ -15,7 +15,7 @@ import tales.utils.GZIP;
 
 
 
-public class AWSS3ParserTemplate extends TemplateCommon{
+public class AWSParserTemplate extends TemplateCommon{
 
 	
 	
