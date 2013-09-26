@@ -40,7 +40,7 @@ public class AWSParserTemplate extends TemplateCommon{
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
 		url = url.replace("//", "/");
 		
-		url = "http:/technorati.com/search?q=PDA&return=posts&submit=&sort=relevance&topic=overall&source=blogs&authority=high&page=2";
+		url = "http://technorati.com/about/contact.html";
 		
 		Logger.log(new Throwable(), "id: " + this.getTask().getDocumentId() + " - " + url);
 		
