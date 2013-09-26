@@ -46,8 +46,10 @@ public class AWSParserTemplate extends TemplateCommon{
 			byte[] bytes = s3.getFile(this.getMetadata(), url);
 			bytes = new GZIP().decompresGzipToBytes(bytes);
 			
+			System.out.println(0);
 			System.out.println(new String(bytes, "UTF-8"));
-
+			System.out.println(1);
+			
 			process(this.getTalesDB(), this.getTask(), url, null);
 
 		} catch (Exception e) {
