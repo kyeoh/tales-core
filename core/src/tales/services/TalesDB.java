@@ -934,7 +934,7 @@ public class TalesDB {
 
 			final String sql = "CREATE TABLE documents (id int(11) NOT NULL AUTO_INCREMENT,"
 					+ "hash varchar(40) NOT NULL,"
-					+ "name varchar(" + Globals.DOCUMENT_NAME_MAX_LENGTH + ") NOT NULL,"
+					+ "name text NOT NULL,"
 					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "lastUpdate timestamp NOT NULL DEFAULT '1999-12-31 17:00:00',"
 					+ "active int(2) NOT NULL DEFAULT '1',"

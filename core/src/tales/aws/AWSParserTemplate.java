@@ -83,7 +83,6 @@ public class AWSParserTemplate extends TemplateCommon{
 
 	@Override
 	public boolean isTaskInvalid(Task task) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

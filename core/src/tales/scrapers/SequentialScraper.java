@@ -44,6 +44,7 @@ public class SequentialScraper {
 	private static TalesDB talesDB;
 	private static TasksDB tasksDB;
 	private static TaskWorker taskWorker;
+	private static int offset;
 
 
 
@@ -70,7 +71,7 @@ public class SequentialScraper {
 				Task task = tasksDB.getList(1).get(0);
 				tasksDB.add(task);
 				
-				offset = task.getDocumentId();
+				SequentialScraper.offset = task.getDocumentId();
 				
 			}
 
@@ -83,7 +84,7 @@ public class SequentialScraper {
 					
 					TalesDBHelper.waitAndFinish(templateConfig);
 
-					ArrayList<Task> tasks = getTasks(offset);
+					ArrayList<Task> tasks = getTasks();
 
 					if(tasks.size() > 0){
 
@@ -126,7 +127,7 @@ public class SequentialScraper {
 				String process = TalesSystem.getProcess();
 
 				if(!process.contains("-offset")){
-					process += " -offset " + offset;
+					process += " -offset " + SequentialScraper.offset;
 				}
 
 				if(!process.contains("-tpid")){
@@ -173,7 +174,7 @@ public class SequentialScraper {
 
 
 
-	private static ArrayList<Task> getTasks(int offset) throws TalesException{
+	private static ArrayList<Task> getTasks() throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
