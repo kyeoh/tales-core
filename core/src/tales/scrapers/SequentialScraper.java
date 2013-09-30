@@ -60,10 +60,12 @@ public class SequentialScraper {
 					templateConfig.getTemplateMetadata());
 			tasksDB = new TasksDB(templateConfig);
 
+			
 			// starts the task machine with the template
 			FailoverController failover = new FailoverController(templateConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
 			taskWorker = new TaskWorker(templateConfig, failover);
 			taskWorker.init();
+			
 			
 			// checks where it is at / offset
 			if(offset == 0 && tasksDB.count() > 0){
@@ -73,6 +75,8 @@ public class SequentialScraper {
 				
 				SequentialScraper.offset = task.getDocumentId();
 				
+			}else{
+				SequentialScraper.offset = offset;
 			}
 
 
@@ -181,7 +185,7 @@ public class SequentialScraper {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
-			
+						
 			int documentId = offset++;
 			
 			if(talesDB.documentIdExists(documentId)){
@@ -194,6 +198,9 @@ public class SequentialScraper {
 
 				tasks.add(task);
 				
+			}else{
+				offset--;
+				break;
 			}
 			
 		}

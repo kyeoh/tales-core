@@ -58,6 +58,29 @@ public class S3 {
 
 
 
+	public void addBytes(TemplateMetadataInterface metadata, String filename, byte[] bytes) throws TalesException{
+
+		try{
+
+			String bucketName = checkBucket(metadata);
+
+			bytes = new GZIP().compresBytesToGzip(bytes);
+			InputStream stream = new ByteArrayInputStream(bytes);
+
+			ObjectMetadata objMetadata = new ObjectMetadata();
+			objMetadata.setContentLength(bytes.length);
+
+			s3.putObject(new PutObjectRequest(bucketName, filename, stream, objMetadata));
+
+		}catch(Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
+	
+	
+	
+	
 	public void downloadAndAddURL(TemplateMetadataInterface metadata, String filename, String url) throws DownloadException{
 
 		try{

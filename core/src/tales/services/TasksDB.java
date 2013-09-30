@@ -210,7 +210,7 @@ public class TasksDB {
 			final String sql = "CREATE TABLE " +  taskName + " ("
 					+ "id INT NOT NULL AUTO_INCREMENT, "
 					+ "documentId INT NOT NULL, "
-					+ "name VARCHAR(" + Globals.DOCUMENT_NAME_MAX_LENGTH + ") NOT NULL, "
+					+ "name text NOT NULL, "
 					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
 					+ "PRIMARY KEY (id)" 
 					+ ") ENGINE = MYISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";

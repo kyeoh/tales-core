@@ -13,6 +13,7 @@ import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -304,6 +305,15 @@ public class Download {
 
 			}
 
+			// asks for the cookie
+			String responseCookie = null;
+			if(conn.getHeaderFields().containsKey("Set-Cookie")){
+				
+				List<String> cookies = conn.getHeaderFields().get("Set-Cookie");
+				responseCookie = StringUtils.join(cookies, ";");
+				
+				
+			}
 
 			// close input stream conns
 			is.close();
@@ -314,6 +324,7 @@ public class Download {
 			DownloadByteResult result = new DownloadByteResult();
 			result.setCharset(charset);
 			result.setBytes(bytes);
+			result.setCookie(responseCookie);
 			return result;
 
 

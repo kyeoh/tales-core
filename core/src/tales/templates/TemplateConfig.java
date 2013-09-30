@@ -10,7 +10,7 @@ public class TemplateConfig {
 	
 	private String scraperName;
 	private TemplateInterface template;
-	private int threads;
+	private int threads = 1;
 	private TemplateMetadataInterface templateMetadata;
 	
 	
