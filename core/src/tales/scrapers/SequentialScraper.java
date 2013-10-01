@@ -187,6 +187,11 @@ public class SequentialScraper {
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
 						
 			int documentId = offset++;
+						
+			if(talesDB.getDocumentsCount() < documentId){
+				offset--;
+				break;
+			}
 			
 			if(talesDB.documentIdExists(documentId)){
 				
@@ -198,9 +203,6 @@ public class SequentialScraper {
 
 				tasks.add(task);
 				
-			}else{
-				offset--;
-				break;
 			}
 			
 		}
