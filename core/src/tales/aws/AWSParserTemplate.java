@@ -34,15 +34,7 @@ public abstract class AWSParserTemplate extends TemplateAbstract{
 			process(this.getTalesDB(), this.getTask(), url, bytes);
 
 		} catch (Exception e) {
-
-			try {
-				this.getTasksDB().add(this.getTask());
-			} catch (TalesException e1) {
-				new TemplateException(new Throwable(), e1, this.getTask());
-			}
-
 			new TemplateException(new Throwable(), e, this.getTask());
-
 		}
 
 		active = false;
