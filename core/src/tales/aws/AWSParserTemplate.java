@@ -54,12 +54,4 @@ public abstract class AWSParserTemplate extends TemplateAbstract{
 
 	protected abstract void process(TalesDB talesDB, Task task, String url, byte[] bytes) throws Exception;
 
-
-
-
-	@Override
-	public boolean isTaskInvalid(Task task) {
-		return false;
-	}
-
 }
