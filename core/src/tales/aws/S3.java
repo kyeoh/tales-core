@@ -18,6 +18,7 @@ import tales.utils.GZIP;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -116,6 +117,17 @@ public class S3 {
 
 
 
+	public boolean fileExists(TemplateMetadataInterface metadata, String filename) throws TalesException {
+		
+		String bucketName = checkBucket(metadata);
+		ObjectListing list = s3.listObjects(bucketName, filename);
+	    return list.getObjectSummaries().size() > 0;
+		
+	}
+	
+	
+	
+	
 	private synchronized static String checkBucket(TemplateMetadataInterface metadata) throws TalesException{
 
 		try{

@@ -25,10 +25,15 @@ public abstract class AWSParserTemplate extends TemplateAbstract{
 		try {	
 
 			S3 s3 = new S3();
-			byte[] bytes = s3.getFile(this.getMetadata(), url);
-			bytes = new GZIP().decompresGzipToBytes(bytes);
 
-			process(this.getTalesDB(), this.getTask(), url, bytes);
+			if(s3.fileExists(this.getMetadata(), url)){
+
+				byte[] bytes = s3.getFile(this.getMetadata(), url);
+				bytes = new GZIP().decompresGzipToBytes(bytes);
+
+				process(this.getTalesDB(), this.getTask(), url, bytes);
+
+			}
 
 		} catch (Exception e) {
 			new TemplateException(new Throwable(), e, this.getTask());
