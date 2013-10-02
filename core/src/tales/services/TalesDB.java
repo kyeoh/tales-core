@@ -1258,4 +1258,41 @@ public class TalesDB {
 
 	}
 	
+	
+	
+	
+	public final Document getLastDocument() throws TalesException{
+
+
+		try{
+
+
+			final PreparedStatement statement = conn.prepareStatement("SELECT * FROM documents ORDER BY id DESC LIMIT 1");
+
+
+			final ResultSet rs                = statement.executeQuery();
+			rs.next();
+
+
+			final Document document = new Document();
+			document.setId(rs.getInt("id"));
+			document.setName(rs.getString("name"));
+			document.setAdded(rs.getTimestamp("added"));
+			document.setLastUpdate(rs.getTimestamp("lastUpdate"));
+			document.setActive(rs.getBoolean("active"));
+
+
+			rs.close();
+			statement.close();
+
+
+			return document;
+
+
+		}catch(final Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
+	
 }

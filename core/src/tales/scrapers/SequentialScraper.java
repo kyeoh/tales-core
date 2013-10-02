@@ -188,7 +188,7 @@ public class SequentialScraper {
 						
 			int documentId = offset++;
 						
-			if(talesDB.getDocumentsCount() < documentId){
+			if(talesDB.getLastDocument().getId() < documentId){
 				offset--;
 				break;
 			}
