@@ -62,7 +62,7 @@ public class SequentialScraper {
 			
 			
 			// cleans the taskDB
-			TasksDB.deleteTaskTablesFromDomain(templateConfig.getTemplate().getConnectionMetadata(), templateConfig.getTemplateMetadata());
+			tasksDB.clearTable();
 
 			
 			// starts the task machine with the template

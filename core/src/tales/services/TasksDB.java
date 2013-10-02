@@ -329,5 +329,25 @@ public class TasksDB {
 		}
 
 	}
+	
+	
+	
+	
+	public synchronized void clearTable() throws TalesException{
+
+		try {
+
+			
+			Statement statement = (Statement) conn.createStatement();
+			final String sql = "TRUNCATE " +  taskName;
+			statement.executeUpdate(sql);
+			statement.close();
+
+
+		}catch(Exception e){
+			String[] args = {"taskName: " + taskName};
+			throw new TalesException(new Throwable(), e, args);
+		}
+	}
 
 }
