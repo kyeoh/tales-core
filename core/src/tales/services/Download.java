@@ -324,7 +324,7 @@ public class Download {
 			DownloadByteResult result = new DownloadByteResult();
 			result.setCharset(charset);
 			result.setBytes(bytes);
-			result.setCookie(responseCookie);
+			result.setCookies(responseCookie);
 			return result;
 
 

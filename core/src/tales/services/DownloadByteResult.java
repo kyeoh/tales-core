@@ -10,7 +10,7 @@ public class DownloadByteResult {
 	
 	private String charset = "";
 	private byte[] bytes;
-	private String cookie;
+	private String cookies;
 
 	
 	
@@ -39,13 +39,13 @@ public class DownloadByteResult {
 	
 	
 	
-	public void setCookie(String cookie){
-		this.cookie = cookie;
+	public void setCookies(String cookies){
+		this.cookies = cookies;
 	}
 	
 	
-	public String getCookie(){
-		return cookie;
+	public String getCookies(){
+		return cookies;
 	}
 	
 }
