@@ -3,7 +3,6 @@ package tales.aws;
 
 
 
-import tales.services.Logger;
 import tales.services.TalesDB;
 import tales.services.Task;
 import tales.templates.TemplateAbstract;
@@ -22,7 +21,6 @@ public abstract class AWSParserTemplate extends TemplateAbstract{
 	public void run(){	
 
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
-		Logger.log(new Throwable(), "id: " + this.getTask().getDocumentId() + " - " + url);
 
 		try {	
 
