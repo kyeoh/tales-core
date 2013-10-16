@@ -180,10 +180,14 @@ public class TaskWorker{
 					}else{
 
 						if(threads.size() == 0){							
+							
 							if(monitor != null){
 								monitor.stop();
 							}
+							
 							stop = true;
+							
+							taskDB.closeConnection();
 
 						}else{
 							Thread.sleep(50);
