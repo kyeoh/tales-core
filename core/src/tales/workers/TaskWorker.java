@@ -148,6 +148,9 @@ public class TaskWorker{
 
 
 							for(Task task : taskDB.getList(maxThreads)){
+								
+								// deletes the task from the queue
+								taskDB.deleteTaskWithDocumentId(task.getDocumentId());
 
 								// template
 								TemplateInterface template = (TemplateInterface) config.getTemplate().getClass().newInstance();
@@ -163,9 +166,6 @@ public class TaskWorker{
 									processed++;
 
 								}
-
-								// deletes the task from the queue
-								taskDB.deleteTaskWithDocumentId(task.getDocumentId());
 
 							}
 

@@ -212,7 +212,8 @@ public class TasksDB {
 					+ "documentId INT NOT NULL, "
 					+ "name text NOT NULL, "
 					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-					+ "PRIMARY KEY (id)" 
+					+ "PRIMARY KEY (id), " 
+					+ "KEY documentId (documentId)"
 					+ ") ENGINE = MYISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
 			statement.executeUpdate(sql);
 			statement.close();

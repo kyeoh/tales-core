@@ -33,7 +33,6 @@ public class SocketStream {
 
 	private static synchronized void init() throws Exception{
 
-
 		if(connection == null){
 
 

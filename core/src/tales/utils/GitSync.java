@@ -22,16 +22,16 @@ public class GitSync {
 
 
 
-	private static Syncer syncer;
+	private static Caller caller;
 
 
 
 
 	public static void init(){
 		
-		if(syncer == null){
-			syncer = new Syncer();
-			syncer.run();
+		if(caller == null){
+			caller = new Caller();
+			caller.run();
 		}
 		
 	}
@@ -63,7 +63,7 @@ public class GitSync {
 	
 	
 	
-	private static class Syncer extends TimerTask{
+	private static class Caller extends TimerTask{
 
 		public void run(){
 
@@ -73,7 +73,7 @@ public class GitSync {
 				new TalesException(new Throwable(), e);
 			}
 
-			new Timer().schedule(new Syncer(), Globals.GIT_SYNC_REFESH_INTERVAL);
+			new Timer().schedule(new Caller(), Globals.GIT_SYNC_REFESH_INTERVAL);
 		}
 
 	}	
