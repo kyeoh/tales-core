@@ -187,12 +187,13 @@ public class SequentialScraper {
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
+		talesDB.getLastDocument().getId()
 		
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
 						
 			int documentId = offset++;
 						
-			if(talesDB.getLastDocument().getId() < documentId){
+			if(lastDocumentId < documentId){
 				offset--;
 				break;
 			}
