@@ -45,6 +45,7 @@ public class SequentialScraper {
 	private static TasksDB tasksDB;
 	private static TaskWorker taskWorker;
 	private static int offset;
+	private static int lastDocumentId;
 
 
 
@@ -187,7 +188,10 @@ public class SequentialScraper {
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
-		int lastDocumentId = talesDB.getLastDocument().getId();
+		
+		if(lastDocumentId == 0 || offset == lastDocumentId){
+			lastDocumentId = talesDB.getLastDocument().getId();
+		}
 		
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
 						
