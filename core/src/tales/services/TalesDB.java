@@ -1298,48 +1298,46 @@ public class TalesDB {
 
 
 
-	public final Document getAndUpdateRandomDocument() throws TalesException{
+	public final ArrayList<Document> getAndUpdateLastUpdateRandomDocuments(final int number) throws TalesException{
 
 
 		try {
 
 
-			final String sql = "SELECT * FROM documents "
-					+ "AS r1 "
-					+ "JOIN "
-					+ "(SELECT (RAND() * (SELECT MAX(id) FROM documents)) AS calcId) "
-					+ "AS r2 "
-					+ "WHERE r1.id >= r2.calcId "
-					+ "AND lastUpdate = '" + Globals.DEFAULT_TIMESTAMP + "' "
-					+ "ORDER BY r1.id ASC "
-					+ "LIMIT 1";
-
-			final PreparedStatement statement   = conn.prepareStatement(sql);
+			final ArrayList<Document> list      = new ArrayList<Document>();
+			final PreparedStatement statement   = conn.prepareStatement("SELECT * FROM documents WHERE active = 1 ORDER BY lastUpdate ASC, RAND() LIMIT 0,?");
+			statement.setInt(1, number);
 
 
 			final ResultSet rs                  = statement.executeQuery();
-			rs.next();
 
-			final Document document = new Document();
-			document.setId(rs.getInt("id"));
-			document.setName(rs.getString("name"));
-			document.setAdded(rs.getTimestamp("added"));
-			document.setLastUpdate(rs.getTimestamp("lastUpdate"));
-			document.setActive(rs.getBoolean("active"));
+			while(rs.next()){
 
-			// update
-			updateDocumentLastUpdate(document.getId());
+				final Document document = new Document();
+				document.setId(rs.getInt("id"));
+				document.setName(rs.getString("name"));
+				document.setAdded(rs.getTimestamp("added"));
+				document.setLastUpdate(rs.getTimestamp("lastUpdate"));
+				document.setActive(rs.getBoolean("active"));
+
+				list.add(document);
+
+				// update
+				updateDocumentLastUpdate(document.getId());
+
+			}
 
 
 			rs.close();
 			statement.close();
 
 
-			return document;
+			return list;
 
 
 		}catch(final Exception e){
-			throw new TalesException(new Throwable(), e);
+			final String[] args = {"number: " + number};
+			throw new TalesException(new Throwable(), e, args);
 		}
 
 	}

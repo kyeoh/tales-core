@@ -48,7 +48,7 @@ public class LoopScraper {
 
 
 
-	public static void init(TemplateConfig templateConfig, long loopReferenceTime) throws TalesException{
+	public static void init(TemplateConfig templateConfig, long loopReferenceTime, boolean sparsed) throws TalesException{
 
 		try{
 
@@ -82,10 +82,10 @@ public class LoopScraper {
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
-					
+
 					TalesDBHelper.waitAndFinish(templateConfig);
 
-					ArrayList<Task> tasks = getTasks(loopReferenceTime);
+					ArrayList<Task> tasks = getTasks(loopReferenceTime, sparsed);
 
 					if(tasks.size() > 0){
 
@@ -175,13 +175,20 @@ public class LoopScraper {
 
 
 
-	private static ArrayList<Task> getTasks(long loopReferenceTime) throws TalesException{
+	private static ArrayList<Task> getTasks(long loopReferenceTime, boolean sparsed) throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
+		ArrayList<Document> documents;
 
-		for(Document document : talesDB.getAndUpdateLastCrawledDocuments(Globals.MAX_TASKS)){
+		if(sparsed){
+			documents = talesDB.getAndUpdateLastUpdateRandomDocuments(Globals.MAX_TASKS);
+		}else{
+			documents = talesDB.getAndUpdateLastCrawledDocuments(Globals.MAX_TASKS);
+		}
+
+		for(Document document : documents){
 
 			// checks if the most recently crawled user is older than this new user, 
 			// this means that the "most recent user" is now old and we have looped			
@@ -213,6 +220,7 @@ public class LoopScraper {
 			options.addOption("threads", true, "threads");
 			options.addOption("loopReferenceTime", true, "loopReferenceTime");
 			options.addOption("tpid", true, "tales process id");
+			options.addOption("sparsed", true, "sparsed");
 			options.addOption("namespace", true, "namespace");
 			options.addOption("baseURL", true, "baseURL");
 			options.addOption("requiredDocuments", true, "requiredDocuments");
@@ -243,6 +251,14 @@ public class LoopScraper {
 			}else{
 				ProcessManager.start();
 			}
+
+
+			// sparsed
+			boolean sparsed = false;
+			if(cmd.hasOption("sparsed")){
+				sparsed = Boolean.parseBoolean(cmd.getOptionValue("sparsed"));
+			}
+
 
 
 			// namespace
@@ -276,7 +292,7 @@ public class LoopScraper {
 				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
 
 			}else{
-				
+
 				if(template.getMetadata() != null){
 					requiredDocuments = template.getMetadata().getRequiredDocuments();	
 				}else{
@@ -284,8 +300,8 @@ public class LoopScraper {
 				}
 
 			}
-			
-			
+
+
 			// when app is killed
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 
@@ -318,7 +334,7 @@ public class LoopScraper {
 
 
 			// scraper
-			LoopScraper.init(templateConfig, loopReferenceTime);
+			LoopScraper.init(templateConfig, loopReferenceTime, sparsed);
 
 
 			// stop
