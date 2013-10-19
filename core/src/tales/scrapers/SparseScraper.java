@@ -167,6 +167,8 @@ public class SparseScraper {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
+			
+			Logger.log(new Throwable(), i);
 
 			Document document = talesDB.getAndUpdateRandomDocument();
 

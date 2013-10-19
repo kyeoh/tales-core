@@ -61,6 +61,12 @@ public class Logger {
 
 
 
+	public static void log(Throwable origin, int data){
+		log(origin, Integer.toString(data));
+	}
+	
+	
+	
 	
 	public static void log(Throwable origin, String data){
 		System.out.format("%-50s %-2s %s %n", origin.getStackTrace()[0].getClassName(), "|", data);

@@ -1314,7 +1314,6 @@ public class TalesDB {
 					+ "ORDER BY r1.id ASC "
 					+ "LIMIT 1";
 
-			final ArrayList<Document> list      = new ArrayList<Document>();
 			final PreparedStatement statement   = conn.prepareStatement(sql);
 
 
