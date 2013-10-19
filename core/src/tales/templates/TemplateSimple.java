@@ -52,6 +52,6 @@ public abstract class TemplateSimple extends TemplateAbstract{
 
 
 
-	protected abstract void process(TalesDB talesDB, Task task, String url) throws Exception;
+	protected abstract void process(TalesDB talesDB, Task task, String url) throws DownloadException, Exception;
 
 }
