@@ -197,11 +197,11 @@ public class TalesSystem {
 
 		return processName;
 	}
-
-
-
-
-	public static String getTemplatesGitBranchName() throws TalesException{
+	
+	
+	
+	
+	public static String getFolderGitBranchName(String path) throws TalesException{
 
 		try{
 
@@ -213,7 +213,7 @@ public class TalesSystem {
 				try{
 
 					// linux
-					ProcessBuilder builder = new ProcessBuilder("/usr/lib/git-core/git", "--git-dir", System.getProperty("user.home") + "/tales-templates/.git", "branch");
+					ProcessBuilder builder = new ProcessBuilder("/usr/lib/git-core/git", "--git-dir", path + ".git", "branch");
 					process = builder.start();
 
 					String output = IOUtils.toString(process.getInputStream());

@@ -311,7 +311,7 @@ public class Config{
 			try{
 
 				
-				File file = new File(Globals.CONFIG_FILE_DIR + "/" + TalesSystem.getTemplatesGitBranchName() + ".json");
+				File file = new File(Globals.CONFIG_FILE_DIR + "/" + TalesSystem.getFolderGitBranchName("~/tales-templates/") + ".json");
 				String data = FileUtils.readFileToString(file);
 				Config.json = (JSONObject) JSONSerializer.toJSON(data);
 

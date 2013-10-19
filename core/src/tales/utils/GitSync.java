@@ -44,8 +44,8 @@ public class GitSync {
 		String output = "";
 		
 		for(String folderPath : Config.getSyncList()){
-
-			String command = "cd " + folderPath + " && git pull origin " + TalesSystem.getTemplatesGitBranchName();
+			
+			String command = "cd " + folderPath + " && git pull origin " + TalesSystem.getFolderGitBranchName(folderPath);
 
 			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", command);
 			Process process = builder.start();
