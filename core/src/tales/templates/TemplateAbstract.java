@@ -19,6 +19,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 	private TemplateConfig templateConfig;
 	private TasksDB tasksDB;
 	private Task task;
+	
 	protected boolean active = true;
 	protected boolean failed = false;
 	protected TemplateMetadataInterface metadata;
