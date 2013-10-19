@@ -45,7 +45,7 @@ public class TalesDB {
 
 
 
-	
+
 	public TalesDB(final int threads, final TemplateConnectionInterface connMetadata, final TemplateMetadataInterface metadata) throws TalesException{
 
 		this.dbName = metadata.getNamespace();
@@ -126,23 +126,23 @@ public class TalesDB {
 				// adds the first document if none
 				Logger.log(new Throwable(), "[" + dbName + "] checking required documents...");
 				if(metadata.getRequiredDocuments() != null && metadata.getRequiredDocuments().size() > 0){
-					
+
 					for(final String document : metadata.getRequiredDocuments()){
-						
+
 						if(!new TalesDB(threads, connMetadata, metadata).documentExists(document)){
 							Logger.log(new Throwable(), "-adding: " + document);
 							new TalesDB(threads, connMetadata, metadata).addDocument(document);
 						}
-						
+
 					}
-				
+
 				}else if(metadata.getRequiredDocuments() == null || metadata.getRequiredDocuments().size() == 0){
-					
+
 					if(!new TalesDB(threads, connMetadata, metadata).documentExists("/")){
 						Logger.log(new Throwable(), "-adding: /");
 						new TalesDB(threads, connMetadata, metadata).addDocument("/");
 					}
-					
+
 				}
 
 			}
@@ -180,10 +180,10 @@ public class TalesDB {
 
 
 	public synchronized final int addDocument(final String name) throws TalesException{
-		
+
 		try{
 
-			
+
 			final PreparedStatement statement = conn.prepareStatement("INSERT INTO documents (hash, name) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, DigestUtils.shaHex(name));
 			statement.setString(2, name);
@@ -253,7 +253,7 @@ public class TalesDB {
 
 
 
-	
+
 	public synchronized final boolean documentIdExists(final int documentId) throws TalesException{
 
 		try {
@@ -888,7 +888,7 @@ public class TalesDB {
 			final String[] args = {"attributeName: " + attributeName};
 			throw new TalesException(new Throwable(), e, args);
 		}
-		
+
 	}
 
 
@@ -923,9 +923,9 @@ public class TalesDB {
 
 	}
 
-	
-	
-	
+
+
+
 	private synchronized final static void createDocumentsTable(Connection conn) throws TalesException{
 
 
@@ -936,7 +936,7 @@ public class TalesDB {
 					+ "hash varchar(40) NOT NULL,"
 					+ "name text NOT NULL,"
 					+ "added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-					+ "lastUpdate timestamp NOT NULL DEFAULT '1999-12-31 17:00:00',"
+					+ "lastUpdate timestamp NOT NULL DEFAULT '" + Globals.DEFAULT_TIMESTAMP + "',"
 					+ "active int(2) NOT NULL DEFAULT '1',"
 					+ "PRIMARY KEY (id),"
 					+ "INDEX hash (hash),"
@@ -1223,10 +1223,10 @@ public class TalesDB {
 	public Connection getConnection() {
 		return conn;
 	}
-	
-	
-	
-	
+
+
+
+
 	public final String getDocumentName(final int documentId) throws TalesException{
 
 
@@ -1257,10 +1257,10 @@ public class TalesDB {
 		}
 
 	}
-	
-	
-	
-	
+
+
+
+
 	public final Document getLastDocument() throws TalesException{
 
 
@@ -1294,5 +1294,54 @@ public class TalesDB {
 		}
 
 	}
-	
+
+
+
+
+	public final Document getAndUpdateRandomDocument() throws TalesException{
+
+
+		try {
+
+
+			final String sql = "SELECT * FROM documents "
+					+ "AS r1 "
+					+ "JOIN "
+					+ "(SELECT (RAND() * (SELECT MAX(id) FROM documents)) AS calcId) "
+					+ "AS r2 "
+					+ "WHERE r1.id >= r2.calcId "
+					+ "AND lastUpdate = '" + Globals.DEFAULT_TIMESTAMP + "' "
+					+ "ORDER BY r1.id ASC "
+					+ "LIMIT 1";
+
+			final ArrayList<Document> list      = new ArrayList<Document>();
+			final PreparedStatement statement   = conn.prepareStatement(sql);
+
+
+			final ResultSet rs                  = statement.executeQuery();
+			rs.next();
+
+			final Document document = new Document();
+			document.setId(rs.getInt("id"));
+			document.setName(rs.getString("name"));
+			document.setAdded(rs.getTimestamp("added"));
+			document.setLastUpdate(rs.getTimestamp("lastUpdate"));
+			document.setActive(rs.getBoolean("active"));
+
+			// update
+			updateDocumentLastUpdate(document.getId());
+
+
+			rs.close();
+			statement.close();
+
+
+			return document;
+
+
+		}catch(final Exception e){
+			throw new TalesException(new Throwable(), e);
+		}
+
+	}
 }

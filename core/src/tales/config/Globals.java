@@ -8,6 +8,7 @@ public class Globals {
 	
 	
 	
+	public static String DEFAULT_TIMESTAMP 				 = "1999-12-31 17:00:00";
 	public static int MIN_TASKS                          = 500;
 	public static int MAX_TASKS                          = 5000;
 	
