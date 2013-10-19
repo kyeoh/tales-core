@@ -202,6 +202,8 @@ public class TalesSystem {
 	
 	
 	public static String getFolderGitBranchName(String path) throws TalesException{
+		
+		path = path.replace("~", System.getProperty("user.home"));
 
 		try{
 
