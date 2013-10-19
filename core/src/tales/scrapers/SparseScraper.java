@@ -48,7 +48,7 @@ public class SparseScraper {
 
 
 
-	public static void init(TemplateConfig templateConfig, long loopReferenceTime) throws TalesException{
+	public static void init(TemplateConfig templateConfig) throws TalesException{
 
 		try{
 
@@ -58,17 +58,6 @@ public class SparseScraper {
 					templateConfig.getTemplate().getConnectionMetadata(), 
 					templateConfig.getTemplateMetadata());
 			tasksDB = new TasksDB(templateConfig);
-
-
-			if(loopReferenceTime == 0){
-
-				ArrayList<Document> documents = talesDB.getMostRecentCrawledDocuments(1);
-
-				if(documents.size() > 0){
-					loopReferenceTime = documents.get(0).getLastUpdate().getTime();
-				}
-
-			}
 
 
 			// starts the task machine with the template
@@ -82,10 +71,10 @@ public class SparseScraper {
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
-					
+
 					TalesDBHelper.waitAndFinish(templateConfig);
 
-					ArrayList<Task> tasks = getTasks(loopReferenceTime);
+					ArrayList<Task> tasks = getTasks();
 
 					if(tasks.size() > 0){
 
@@ -126,10 +115,6 @@ public class SparseScraper {
 
 
 				String process = TalesSystem.getProcess();
-
-				if(!process.contains("-loopReferenceTime")){
-					process += " -loopReferenceTime " + loopReferenceTime;
-				}
 
 				if(!process.contains("-tpid")){
 					process += " -tpid " + ProcessManager.getId();
@@ -175,27 +160,21 @@ public class SparseScraper {
 
 
 
-	private static ArrayList<Task> getTasks(long loopReferenceTime) throws TalesException{
+	private static ArrayList<Task> getTasks() throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
 		ArrayList<Task> tasks = new ArrayList<Task>();
-		
+
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
-			
+
 			Document document = talesDB.getAndUpdateRandomDocument();
 
-			// checks if the most recently crawled user is older than this new user, 
-			// this means that the "most recent user" is now old and we have looped			
-			if(loopReferenceTime >= document.getLastUpdate().getTime()){
+			Task task = new Task();
+			task.setDocumentId(document.getId());
+			task.setDocumentName(document.getName());
 
-				Task task = new Task();
-				task.setDocumentId(document.getId());
-				task.setDocumentName(document.getName());
-
-				tasks.add(task);
-
-			}
+			tasks.add(task);
 
 		}
 
@@ -213,7 +192,6 @@ public class SparseScraper {
 			Options options = new Options();
 			options.addOption("template", true, "template");
 			options.addOption("threads", true, "threads");
-			options.addOption("loopReferenceTime", true, "loopReferenceTime");
 			options.addOption("tpid", true, "tales process id");
 			options.addOption("namespace", true, "namespace");
 			options.addOption("baseURL", true, "baseURL");
@@ -227,13 +205,6 @@ public class SparseScraper {
 
 			// reflection / new template
 			TemplateAbstract template = (TemplateAbstract) Class.forName(templateClass).newInstance();
-
-
-			// loop references
-			long loopReferenceTime = 0;
-			if(cmd.hasOption("loopReferenceTime")){
-				loopReferenceTime = Long.parseLong(cmd.getOptionValue("loopReferenceTime"));
-			}
 
 
 			// tpid
@@ -278,7 +249,7 @@ public class SparseScraper {
 				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
 
 			}else{
-				
+
 				if(template.getMetadata() != null){
 					requiredDocuments = template.getMetadata().getRequiredDocuments();	
 				}else{
@@ -286,8 +257,8 @@ public class SparseScraper {
 				}
 
 			}
-			
-			
+
+
 			// when app is killed
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 
@@ -320,7 +291,7 @@ public class SparseScraper {
 
 
 			// scraper
-			SparseScraper.init(templateConfig, loopReferenceTime);
+			SparseScraper.init(templateConfig);
 
 
 			// stop
