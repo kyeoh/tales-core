@@ -284,7 +284,7 @@ public class SparseScraper {
 
 			// template config
 			TemplateConfig templateConfig = new TemplateConfig();
-			templateConfig.setScraperName("LoopScraper");
+			templateConfig.setScraperName("SparseScraper");
 			templateConfig.setTemplate(template);
 			templateConfig.setTemplateMetadata(templateMetadata);
 			templateConfig.setThreads(threads);
