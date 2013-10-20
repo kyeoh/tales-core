@@ -14,7 +14,6 @@ import org.apache.commons.io.IOUtils;
 
 import tales.config.Config;
 import tales.server.CloudProviderInterface;
-import tales.services.Logger;
 import tales.services.TalesException;
 
 
