@@ -89,8 +89,8 @@ public class AppMonitor{
 
 
 				// print
-				String path = System.getProperty("user.dir") + "/../";
-				Logger.log(new Throwable(), " -freeMem: " + TalesSystem.getFreeMemory() + " -memUsed: " + TalesSystem.getMemoryUsage() +  " -serverCPUAvg: " +  cpuAverage.getAverage() + " -uptime: " + totalTime + " secs -branch: " + TalesSystem.getFolderGitBranchName(path));
+				String path = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();;
+				Logger.log(new Throwable(), path + " -freeMem: " + TalesSystem.getFreeMemory() + " -memUsed: " + TalesSystem.getMemoryUsage() +  " -serverCPUAvg: " +  cpuAverage.getAverage() + " -uptime: " + totalTime + " secs -branch: " + TalesSystem.getFolderGitBranchName(path));
 
 
 				// loop

@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 
 import tales.config.Config;
 import tales.server.CloudProviderInterface;
+import tales.services.Logger;
 import tales.services.TalesException;
 
 
@@ -197,39 +198,35 @@ public class TalesSystem {
 
 		return processName;
 	}
-	
-	
-	
-	
+
+
+
+
 	public static String getFolderGitBranchName(String path) throws TalesException{
-		
+
 		path = path.replace("~", System.getProperty("user.home"));
 
 		try{
 
+			Process process = null;
 
-			if(branchName == null){
+			try{
 
-				Process process = null;
+				// linux
+				ProcessBuilder builder = new ProcessBuilder("/usr/lib/git-core/git", "--git-dir", path + ".git", "branch");
+				process = builder.start();
 
-				try{
+				String output = IOUtils.toString(process.getInputStream());
+				process.destroy();
 
-					// linux
-					ProcessBuilder builder = new ProcessBuilder("/usr/lib/git-core/git", "--git-dir", path + ".git", "branch");
-					process = builder.start();
+				int ini = output.indexOf("*");
+				int end = output.indexOf("\n", ini);
+				branchName = output.substring(ini + 2, end).trim(); // 2 cuz of * + space (example: * master);
 
-					String output = IOUtils.toString(process.getInputStream());
-					process.destroy();
-
-					int ini = output.indexOf("*");
-					int end = output.indexOf("\n", ini);
-					branchName = output.substring(ini + 2, end).trim(); // 2 cuz of * + space (example: * master);
-
-				}catch(Exception e){
-					branchName = "development";
-				}
-
+			}catch(Exception e){
+				branchName = "development";
 			}
+
 
 			return branchName;
 
