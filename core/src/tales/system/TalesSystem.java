@@ -33,7 +33,6 @@ public class TalesSystem {
 	private static int pid = 0;
 	private static long prevProcessCpuTime = ((com.sun.management.OperatingSystemMXBean) osbean).getProcessCpuTime();
 	private static String processName;
-	private static String branchName;
 
 
 
@@ -208,6 +207,7 @@ public class TalesSystem {
 		try{
 
 			Process process = null;
+			String branchName;
 
 			try{
 

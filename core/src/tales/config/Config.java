@@ -309,7 +309,6 @@ public class Config{
 		public void run() {
 
 			try{
-
 				
 				File file = new File(Globals.CONFIG_FILE_DIR + "/" + TalesSystem.getFolderGitBranchName("~/tales-templates/") + ".json");
 				String data = FileUtils.readFileToString(file);

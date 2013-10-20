@@ -403,8 +403,8 @@ function setServerStats(div, json){
 function checkDatabasesInfo(publicDNS, div){
 	
 	$.get("http://" + publicDNS + ":" + port + "/databases", function(databases){
-		
-		if(databases.length > 1){
+				
+		if(databases.length > 0){
 			
 			div.html("");
 			div.append("<h2>" + publicDNS + "</h2>");
