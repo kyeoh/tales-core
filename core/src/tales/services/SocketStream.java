@@ -89,8 +89,8 @@ public class SocketStream {
 
 				if(!wait){
 					init();
-					System.out.println(logs.toString());
 					connection.sendMessage(logs.toString());
+					logs.clear();
 				}
 
 				// loop
@@ -119,8 +119,6 @@ public class SocketStream {
 				}, Globals.SOCKET_STREAM_RECONNECT_INTERVAL);
 
 			}
-
-			logs.clear();
 
 		}
 
