@@ -39,7 +39,6 @@ public class SocketStream {
 
 		if(connection == null){
 
-
 			URI uri = new URI("ws://" + Config.getDashbaordURL() + ":" + Config.getDashbaordPort());
 
 			WebSocketClientFactory webSocketClientFactory = new WebSocketClientFactory();
@@ -59,6 +58,7 @@ public class SocketStream {
 			});
 
 			connection = futureConnection.get();
+			
 		}
 
 	}
@@ -118,7 +118,7 @@ public class SocketStream {
 
 			}
 
-			logs = null;
+			logs = new JSONArray();
 
 		}
 
