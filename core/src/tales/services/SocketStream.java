@@ -89,6 +89,7 @@ public class SocketStream {
 
 				if(!wait){
 					init();
+					System.out.println(logs.toString());
 					connection.sendMessage(logs.toString());
 				}
 
