@@ -99,7 +99,7 @@ public class SocketStream {
 				}
 
 				// loop
-				Thread.sleep(100);
+				Thread.sleep(50);
 				Thread t = new Thread(new Stream());
 				t.start();
 
@@ -116,7 +116,6 @@ public class SocketStream {
 						wait = false;
 
 						// loop
-						try{Thread.sleep(100);}catch(Exception e){};
 						Thread t = new Thread(new Stream());
 						t.start();
 
