@@ -8,13 +8,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Future;
 
+import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
 
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
-import org.json.JSONObject;
 
 import tales.config.Config;
 import tales.config.Globals;
@@ -73,9 +73,8 @@ public class SocketStream {
 			new SocketStream().new Stream().run();
 
 		}
-System.out.println(json.toString());
-		logs.add(json.toString());
-		System.out.println("logs: " + logs.toString());
+		
+		logs.add(json);
 
 	}
 
