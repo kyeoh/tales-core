@@ -87,7 +87,7 @@ public class SocketStream {
 
 			try{
 
-				if(!wait){
+				if(!wait && logs.size() > 0){
 					
 					System.out.println(logs.size());
 					
