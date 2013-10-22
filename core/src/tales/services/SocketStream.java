@@ -57,7 +57,7 @@ public class SocketStream {
 			});
 
 			connection = futureConnection.get();
-			
+
 		}
 
 	}
@@ -66,16 +66,16 @@ public class SocketStream {
 
 
 	public synchronized static void stream(JSONObject json) throws Exception{
-		
-		logs.add(json);
-		
+
 		if(logs == null){
-			
+
 			logs = new JSONArray();
 			new SocketStream().new Stream().run();
-			
+
 		}
-		
+
+		logs.add(json);
+
 	}
 
 
@@ -91,7 +91,7 @@ public class SocketStream {
 					init();
 					connection.sendMessage(logs.toString());
 				}
-				
+
 				// loop
 				Thread.sleep(100);
 				Thread t = new Thread(new Stream());
@@ -105,16 +105,16 @@ public class SocketStream {
 				new Timer().schedule(new TimerTask() {
 					@Override
 					public void run() {
-						
+
 						wait = false;
-						
+
 						// loop
 						try{Thread.sleep(100);}catch(Exception e){};
 						Thread t = new Thread(new Stream());
 						t.start();
-						
+
 					}
-					
+
 				}, Globals.SOCKET_STREAM_RECONNECT_INTERVAL);
 
 			}
