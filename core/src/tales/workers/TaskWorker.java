@@ -283,7 +283,7 @@ public class TaskWorker{
 		public Monitor(){
 
 			stop = false;
-			processAverage = new Average(5);
+			processAverage = new Average(20);
 			
 		}
 
