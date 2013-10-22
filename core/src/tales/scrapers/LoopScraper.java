@@ -87,9 +87,8 @@ public class LoopScraper {
 
 					int addedCount = addTasks(tasksDB, loopReferenceTime, sparsed);
 
-					if(addedCount > 0 && !failover.hasFailed()){
+					if(addedCount > 0){
 						taskWorker.init();
-
 					}
 
 				}
