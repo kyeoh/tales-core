@@ -74,7 +74,7 @@ public class SocketStream {
 
 		}
 
-		logs.add(json);
+		logs.add(json.toString());
 
 	}
 
