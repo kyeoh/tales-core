@@ -75,7 +75,6 @@ public class SocketStream {
 		}
 		
 		logs.add(json.toString());
-		System.out.println("--" + logs.size());
 
 	}
 
@@ -90,7 +89,6 @@ public class SocketStream {
 
 				if(!wait){
 					init();
-					System.out.println(logs.size());
 					connection.sendMessage(logs.toString());
 					logs.clear();
 				}
@@ -109,6 +107,7 @@ public class SocketStream {
 					@Override
 					public void run() {
 
+						logs.clear();
 						wait = false;
 
 						// loop
