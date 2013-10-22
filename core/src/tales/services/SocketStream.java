@@ -9,7 +9,6 @@ import java.util.TimerTask;
 import java.util.concurrent.Future;
 
 import net.sf.json.JSONObject;
-import net.sf.json.JSONArray;
 
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
@@ -29,7 +28,6 @@ public class SocketStream {
 
 	private static Connection connection;
 	private static boolean wait = false;
-	private static JSONArray logs;
 
 
 
@@ -37,6 +35,7 @@ public class SocketStream {
 	private static synchronized void init() throws Exception{
 
 		if(connection == null){
+
 
 			URI uri = new URI("ws://" + Config.getDashbaordURL() + ":" + Config.getDashbaordPort());
 
@@ -57,7 +56,6 @@ public class SocketStream {
 			});
 
 			connection = futureConnection.get();
-
 		}
 
 	}
@@ -67,66 +65,27 @@ public class SocketStream {
 
 	public synchronized static void stream(JSONObject json) throws Exception{
 
-		if(logs == null){
+		try{
 
-			logs = new JSONArray();
-			new SocketStream().new Stream().run();
-
-		}
-		
-		logs.add(json.toString());
-
-	}
-
-
-
-
-	private class Stream implements Runnable{
-
-		public void run(){
-
-			try{
-
-				if(!wait && logs.size() > 0){
-					
-					init();
-					
-					String content = logs.toString();
-					logs.clear();
-					
-					connection.sendMessage(content);
-					
-				}
-
-				// loop
-				Thread.sleep(50);
-				Thread t = new Thread(new Stream());
-				t.start();
-
-			}catch(Exception e){
-
-				wait = true;
-				Logger.cleanPrint(new Throwable(), "cant connect to dashboard, retrying in " + (Globals.SOCKET_STREAM_RECONNECT_INTERVAL / 1000) + " secs...");
-
-				new Timer().schedule(new TimerTask() {
-					@Override
-					public void run() {
-
-						logs.clear();
-						wait = false;
-
-						// loop
-						Thread t = new Thread(new Stream());
-						t.start();
-
-					}
-
-				}, Globals.SOCKET_STREAM_RECONNECT_INTERVAL);
-
+			if(!wait){
+				init();
+				connection.sendMessage(json.toString());
 			}
 
-		}
+		}catch(Exception e){
 
+			wait = true;
+			Logger.cleanPrint(new Throwable(), "cant connect to dashboard, retrying in " + (Globals.SOCKET_STREAM_RECONNECT_INTERVAL / 1000) + " secs...");
+
+			new Timer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					wait = false;
+				}
+			}, Globals.SOCKET_STREAM_RECONNECT_INTERVAL);
+			
+		}
+		
 	}
 
 }
