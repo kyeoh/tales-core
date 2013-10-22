@@ -43,7 +43,9 @@ public class TaskWorker{
 
 	public void init() throws TalesException{
 
-		if(worker == null){
+		if(worker == null || (!worker.isWorkerActive() && !worker.isBroken())){
+			
+			Logger.log(new Throwable(), "starting TaskWorker");
 
 			worker = new Worker();
 			Thread t = new Thread(worker);
@@ -52,7 +54,7 @@ public class TaskWorker{
 			monitor = new Monitor();
 			t = new Thread(monitor);
 			t.start();
-
+			
 		}
 
 	}

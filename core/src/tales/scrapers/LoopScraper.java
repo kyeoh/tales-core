@@ -85,18 +85,10 @@ public class LoopScraper {
 
 					TalesDBHelper.waitAndFinish(templateConfig);
 
-					ArrayList<Task> tasks = getTasks(loopReferenceTime, sparsed);
+					int addedCount = addTasks(tasksDB, loopReferenceTime, sparsed);
 
-					if(tasks.size() > 0){
-
-						Logger.log(new Throwable(), "adding tasks to \"" + templateConfig.getTaskName() + "\"");
-
-						tasksDB.add(tasks);
-
-						if(!taskWorker.isWorkerActive() && !failover.hasFailed()){
-							taskWorker = new TaskWorker(templateConfig, failover);
-							taskWorker.init();
-						}
+					if(addedCount > 0 && !failover.hasFailed()){
+						taskWorker.init();
 
 					}
 
@@ -175,11 +167,10 @@ public class LoopScraper {
 
 
 
-	private static ArrayList<Task> getTasks(long loopReferenceTime, boolean sparsed) throws TalesException{
+	private static int addTasks(TasksDB tasksDB, long loopReferenceTime, boolean sparsed) throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
 
-		ArrayList<Task> tasks = new ArrayList<Task>();
 		ArrayList<Document> documents;
 
 		if(sparsed){
@@ -187,6 +178,8 @@ public class LoopScraper {
 		}else{
 			documents = talesDB.getAndUpdateLastCrawledDocuments(Globals.MAX_TASKS);
 		}
+
+		int added = 0;
 
 		for(Document document : documents){
 
@@ -198,13 +191,14 @@ public class LoopScraper {
 				task.setDocumentId(document.getId());
 				task.setDocumentName(document.getName());
 
-				tasks.add(task);
+				tasksDB.add(task);
+				added++;
 
 			}
 
 		}
 
-		return tasks;
+		return added;
 
 	}
 
