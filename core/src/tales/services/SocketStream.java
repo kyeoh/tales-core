@@ -118,7 +118,7 @@ public class SocketStream {
 
 			}
 
-			logs = new JSONArray();
+			logs.clear();
 
 		}
 
