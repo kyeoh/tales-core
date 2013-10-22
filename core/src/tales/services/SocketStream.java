@@ -89,8 +89,8 @@ public class SocketStream {
 
 				if(!wait){
 					init();
-					connection.sendMessage(logs.toString());
-					logs.clear();
+					String content = logs.toString();
+					connection.sendMessage(content);
 				}
 
 				// loop
