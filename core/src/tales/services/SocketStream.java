@@ -74,9 +74,7 @@ public class SocketStream {
 
 		}
 		
-		System.out.println(json.toString());
 		logs.add(json.toString());
-		System.out.println(logs.toString());
 
 	}
 
@@ -91,6 +89,7 @@ public class SocketStream {
 
 				if(!wait){
 					init();
+					System.out.println(logs.toString());
 					connection.sendMessage(logs.toString());
 				}
 
