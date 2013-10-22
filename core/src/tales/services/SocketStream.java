@@ -30,7 +30,6 @@ public class SocketStream {
 	private static Connection connection;
 	private static boolean wait = false;
 	private static JSONArray logs;
-	private static Stream stream;
 
 
 
@@ -70,9 +69,11 @@ public class SocketStream {
 		
 		logs.add(json);
 		
-		if(stream == null){
-			stream = new SocketStream().new Stream();
-			stream.run();
+		if(logs == null){
+			
+			logs = new JSONArray();
+			new SocketStream().new Stream().run();
+			
 		}
 		
 	}
