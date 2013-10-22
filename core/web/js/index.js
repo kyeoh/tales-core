@@ -40,6 +40,8 @@ $(document).ready(function() {
 			
 				//data = JSON.parse(data.data);
 				data = JSON.parse(data.data);
+				
+				alert(data.length + " - " + JSON.stringify(data));
 		
 				for(var i = 0; i < data.length; i++){
 				
