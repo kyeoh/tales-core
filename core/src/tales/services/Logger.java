@@ -6,7 +6,7 @@ package tales.services;
 import java.util.Formatter;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 
 import tales.system.TalesSystem;
 
@@ -37,12 +37,12 @@ public class Logger {
 
 			
 			// websockets stream
-			JSONObject obj = new JSONObject();
-			obj.put("pid", pid);
-			obj.put("process", TalesSystem.getProcess());
-			obj.put("publicDNS", TalesSystem.getPublicDNSName());
-			obj.put("methodPath", methodPath);
-			obj.put("data", data);
+			JSONObject obj = new JSONObject()
+			.put("pid", pid)
+			.put("process", TalesSystem.getProcess())
+			.put("publicDNS", TalesSystem.getPublicDNSName())
+			.put("methodPath", methodPath)
+			.put("data", data);
 
 			
 			// saves logs
