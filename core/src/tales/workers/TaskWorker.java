@@ -5,9 +5,7 @@ package tales.workers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Timer;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.TimerTask;
 
 import tales.services.Logger;
 import tales.services.TalesException;
@@ -91,7 +89,7 @@ public class TaskWorker{
 	
 	
 	
-	private class Worker extends TimerTask{
+	private class Worker implements Runnable{
 
 
 
@@ -192,7 +190,9 @@ public class TaskWorker{
 							taskDB.closeConnection();
 
 						}else{
-							new Timer().schedule(new Worker(), 50);
+							Thread.sleep(50);
+							Thread t = new Thread(this);
+							t.start();
 						}
 
 					}
@@ -265,7 +265,7 @@ public class TaskWorker{
 
 
 
-	private class Monitor extends TimerTask{
+	private class Monitor implements Runnable{
 
 
 
@@ -310,8 +310,10 @@ public class TaskWorker{
 					}
 
 					loops++;
-					
-					new Timer().schedule(new Monitor(), 50);
+
+					Thread.sleep(50);
+					Thread t = new Thread(this);
+					t.start();
 
 				}
 				
