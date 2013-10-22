@@ -89,11 +89,11 @@ public class SocketStream {
 
 				if(!wait && logs.size() > 0){
 					
-					System.out.println(logs.size());
-					
 					init();
+					
 					String content = logs.toString();
 					logs.clear();
+					
 					connection.sendMessage(content);
 					
 				}
