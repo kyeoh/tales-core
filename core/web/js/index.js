@@ -37,7 +37,7 @@ $(document).ready(function() {
         ws.onmessage = function(data) {
 
 			if(!paused){
-			alert(JSON.stringify(data));
+			alert(JSON.stringify(data.data));
 				//data = JSON.parse(data.data);
 				data = [JSON.parse(data.data)];
 		
