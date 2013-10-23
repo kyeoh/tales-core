@@ -3,7 +3,6 @@ package tales.templates;
 
 
 
-import tales.services.Logger;
 import tales.services.TalesDB;
 import tales.services.TalesException;
 import tales.services.Task;
