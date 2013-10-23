@@ -44,6 +44,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 	@Override
 	public final void init(TemplateConfig templateConfig, TasksDB tasksDB, Task task) {
+		Logger.log(new Throwable(), templateConfig + "");
 		this.templateConfig = templateConfig;
 		this.tasksDB = tasksDB;
 		this.task = task;
@@ -75,10 +76,6 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	public final TalesDB getTalesDB() throws TalesException{
-		Logger.log(new Throwable(), this.getTemplateConfig() + " getTemplateConfig");
-		Logger.log(new Throwable(), this.getConnectionMetadata() + " getConnectionMetadata");
-		Logger.log(new Throwable(), this.getMetadata() + " getMetadata");
-		Logger.log(new Throwable(), this.getTemplateConfig().getThreads() + " getThreads");
 		return new TalesDB(this.getTemplateConfig().getThreads(), this.getConnectionMetadata(), this.getMetadata());
 	}
 
