@@ -44,7 +44,6 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 	@Override
 	public final void init(TemplateConfig templateConfig, TasksDB tasksDB, Task task) {
-		Logger.log(new Throwable(), templateConfig + "");
 		this.templateConfig = templateConfig;
 		this.tasksDB = tasksDB;
 		this.task = task;
@@ -54,6 +53,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	public final TemplateConfig getTemplateConfig(){
+		Logger.log(new Throwable(), templateConfig + "--------------");
 		return templateConfig;
 	}
 
