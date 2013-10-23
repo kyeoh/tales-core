@@ -77,6 +77,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	public final TalesDB getTalesDB() throws TalesException{
+		Logger.log(new Throwable(), templateConfig + " |||||||||||||||| " + task);
 		return new TalesDB(this.getTemplateConfig().getThreads(), this.getConnectionMetadata(), this.getMetadata());
 	}
 
