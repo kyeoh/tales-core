@@ -93,19 +93,10 @@ public class SequentialScraper {
 					
 					TalesDBHelper.waitAndFinish(templateConfig);
 
-					ArrayList<Task> tasks = getTasks();
+					int addedCount = addTasks(tasksDB);
 
-					if(tasks.size() > 0){
-
-						Logger.log(new Throwable(), "adding tasks to \"" + templateConfig.getTaskName() + "\"");
-
-						tasksDB.add(tasks);
-
-						if(!taskWorker.isWorkerActive() && !failover.hasFailed()){
-							taskWorker = new TaskWorker(templateConfig, failover);
-							taskWorker.init();
-						}
-
+					if(addedCount > 0){
+						taskWorker.init();
 					}
 
 				}
@@ -183,15 +174,15 @@ public class SequentialScraper {
 
 
 
-	private static ArrayList<Task> getTasks() throws TalesException{
+	private static int addTasks(TasksDB tasksDB) throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
-
-		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		if(lastDocumentId == 0 || offset == lastDocumentId){
 			lastDocumentId = talesDB.getLastDocument().getId();
 		}
+		
+		int added = 0;
 		
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
 						
@@ -210,13 +201,14 @@ public class SequentialScraper {
 				task.setDocumentId(document.getId());
 				task.setDocumentName(document.getName());
 
-				tasks.add(task);
+				tasksDB.add(task);
+				added++;
 				
 			}
 			
 		}
 
-		return tasks;
+		return added;
 
 	}
 
