@@ -47,6 +47,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 		this.templateConfig = templateConfig;
 		this.tasksDB = tasksDB;
 		this.task = task;
+		Logger.log(new Throwable(), "********************* " + this.task);
 	}
 
 
