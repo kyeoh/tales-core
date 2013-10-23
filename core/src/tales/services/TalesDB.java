@@ -1267,7 +1267,7 @@ public class TalesDB {
 		try{
 
 
-			final PreparedStatement statement = conn.prepareStatement("SELECT * FROM documents ORDER BY id DESC LIMIT 1");
+			final PreparedStatement statement = conn.prepareStatement("SELECT * FROM documents WHERE active = 1 ORDER BY id DESC LIMIT 1");
 
 
 			final ResultSet rs                = statement.executeQuery();
