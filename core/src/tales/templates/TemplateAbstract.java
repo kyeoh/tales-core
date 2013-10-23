@@ -53,7 +53,7 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	public final TemplateConfig getTemplateConfig(){
-		Logger.log(new Throwable(), templateConfig + " -------------- " + task.getDocumentId() + " - " + task.getDocumentName());
+		Logger.log(new Throwable(), templateConfig + " -------------- " + task);
 		return templateConfig;
 	}
 
