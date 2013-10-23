@@ -156,10 +156,10 @@ public class TaskWorker{
 
 								// template
 								TemplateInterface template = (TemplateInterface) config.getTemplate().getClass().newInstance();
-
+								template.init(config, taskDB, task);
+								
 								if(!template.isTaskInvalid(task)){
 
-									template.init(config, taskDB, task);
 									threads.add(template);
 
 									Thread t = new Thread((Runnable)template);

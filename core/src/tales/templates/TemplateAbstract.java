@@ -3,7 +3,6 @@ package tales.templates;
 
 
 
-import tales.services.Logger;
 import tales.services.TalesDB;
 import tales.services.TalesException;
 import tales.services.Task;
@@ -47,14 +46,12 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 		this.templateConfig = templateConfig;
 		this.tasksDB = tasksDB;
 		this.task = task;
-		Logger.log(new Throwable(), "********************* " + this.task);
 	}
 
 
 
 
 	public final TemplateConfig getTemplateConfig(){
-		Logger.log(new Throwable(), templateConfig + " -------------- " + task);
 		return templateConfig;
 	}
 
@@ -77,7 +74,6 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 	public final TalesDB getTalesDB() throws TalesException{
-		Logger.log(new Throwable(), templateConfig + " |||||||||||||||| " + task);
 		return new TalesDB(this.getTemplateConfig().getThreads(), this.getConnectionMetadata(), this.getMetadata());
 	}
 
