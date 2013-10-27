@@ -14,6 +14,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -71,8 +72,7 @@ public class Download {
 			conn.setRequestProperty("User-Agent", userAgent);			
 			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
 			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
-			conn.setRequestMethod("HEAD");			
-
+			conn.setRequestMethod("HEAD");
 
 			boolean result = (conn.getResponseCode() == HttpURLConnection.HTTP_OK);
 
@@ -479,6 +479,56 @@ public class Download {
 			}
 
 			throw new DownloadException(new Throwable(), e, responseCode, args);
+		}
+
+	}
+	
+	
+	
+	
+	public Map<String, List<String>> getHead(String url) {
+
+
+		HttpURLConnection conn = null;
+
+
+		try {
+
+
+			if(url.equals(URLDecoder.decode(url, "UTF-8"))){
+				url = URIUtil.encodeQuery(url);
+			}
+
+
+			if(url.contains("https://")){
+				disableSSLValidation();
+				conn = (HttpsURLConnection) new URL(url).openConnection();
+			}else{
+				conn = (HttpURLConnection) new URL(url).openConnection();
+			}
+
+
+			conn.setInstanceFollowRedirects(true);			
+			conn.setRequestProperty("User-Agent", userAgent);			
+			conn.setReadTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
+			conn.setConnectTimeout(Globals.DOWNLOADER_MAX_TIMEOUT_INTERVAL);			
+			conn.setRequestMethod("HEAD");
+
+			Map<String, List<String>> headerFields = conn.getHeaderFields();
+
+			conn.disconnect();
+
+			return headerFields;
+
+
+		}catch (Exception e){
+
+			if (conn != null) {
+				conn.disconnect();
+			}
+
+			return null;
+
 		}
 
 	}
