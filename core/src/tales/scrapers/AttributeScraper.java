@@ -269,7 +269,8 @@ public class AttributeScraper{
 			String baseURL = null;
 			if(cmd.hasOption("baseURL")){
 				baseURL = cmd.getOptionValue("baseURL");
-			}else{
+				
+			}else if(template.getMetadata() != null){
 				baseURL = template.getMetadata().getBaseURL();
 			}
 

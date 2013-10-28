@@ -60,26 +60,26 @@ public class SequentialScraper {
 					templateConfig.getTemplate().getConnectionMetadata(), 
 					templateConfig.getTemplateMetadata());
 			tasksDB = new TasksDB(templateConfig);
-			
-			
+
+
 			// cleans the taskDB
 			tasksDB.clearTable();
 
-			
+
 			// starts the task machine with the template
 			FailoverController failover = new FailoverController(templateConfig.getTemplate().getConnectionMetadata().getFailoverAttemps());
 			taskWorker = new TaskWorker(templateConfig, failover);
 			taskWorker.init();
-			
-			
+
+
 			// checks where it is at / offset
 			if(offset == 0 && tasksDB.count() > 0){
-				
+
 				Task task = tasksDB.getList(1).get(0);
 				tasksDB.add(task);
-				
+
 				SequentialScraper.offset = task.getDocumentId();
-				
+
 			}else{
 				SequentialScraper.offset = offset;
 			}
@@ -90,7 +90,7 @@ public class SequentialScraper {
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
-					
+
 					TalesDBHelper.waitAndFinish(templateConfig);
 
 					int addedCount = addTasks(tasksDB);
@@ -177,35 +177,35 @@ public class SequentialScraper {
 	private static int addTasks(TasksDB tasksDB) throws TalesException{
 
 		Logger.log(new Throwable(), "adding more tasks to the queue");
-		
+
 		if(lastDocumentId == 0 || offset == lastDocumentId){
 			lastDocumentId = talesDB.getLastDocument().getId();
 		}
-		
+
 		int added = 0;
-		
+
 		for(int i = 0; i < Globals.MAX_TASKS; i++){
-						
+
 			int documentId = offset++;
-						
+
 			if(lastDocumentId < documentId){
 				offset--;
 				break;
 			}
-			
+
 			if(talesDB.documentIdExists(documentId)){
-				
+
 				Document document = talesDB.getDocument(documentId);
-				
+
 				Task task = new Task();
 				task.setDocumentId(document.getId());
 				task.setDocumentName(document.getName());
 
 				tasksDB.add(task);
 				added++;
-				
+
 			}
-			
+
 		}
 
 		return added;
@@ -269,7 +269,8 @@ public class SequentialScraper {
 			String baseURL = null;
 			if(cmd.hasOption("baseURL")){
 				baseURL = cmd.getOptionValue("baseURL");
-			}else{
+				
+			}else if(template.getMetadata() != null){
 				baseURL = template.getMetadata().getBaseURL();
 			}
 
@@ -287,7 +288,7 @@ public class SequentialScraper {
 				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
 
 			}else{
-				
+
 				if(template.getMetadata() != null){
 					requiredDocuments = template.getMetadata().getRequiredDocuments();	
 				}else{
@@ -295,8 +296,8 @@ public class SequentialScraper {
 				}
 
 			}
-			
-			
+
+
 			// when app is killed
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 
