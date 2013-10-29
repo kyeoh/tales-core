@@ -176,7 +176,7 @@ public class SequentialScraper {
 
 	private static int addTasks(TasksDB tasksDB) throws TalesException{
 
-		Logger.log(new Throwable(), "adding more tasks to the queue");
+		Logger.log(new Throwable(), "adding more tasks to the queue - " + offset + " - " + lastDocumentId);
 
 		if(lastDocumentId == 0 || offset == lastDocumentId){
 			lastDocumentId = talesDB.getLastDocument().getId();
