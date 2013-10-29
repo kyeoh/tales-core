@@ -96,7 +96,7 @@ public class AppMonitor{
 				// loop
 				if(active){
 
-					Thread.sleep(1000);
+					Thread.sleep(20000);
 					Thread t = new Thread(this);
 					t.start();
 
