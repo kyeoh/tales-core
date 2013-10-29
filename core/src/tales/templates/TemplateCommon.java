@@ -45,7 +45,7 @@ public abstract class TemplateCommon extends TemplateAbstract{
 
 		String url = getDownloadURL(this.getMetadata(), this.getTask());
 		Logger.log(new Throwable(), "id: " + this.getTask().getDocumentId() + " - " + url);
-		
+
 		try {	
 
 			String html = new Download().getURLContentWithCookieAndPost(url, this.getDownloadCookie(), this.getDownloadPost());
@@ -108,7 +108,10 @@ public abstract class TemplateCommon extends TemplateAbstract{
 			if(element.hasAttr("href")){
 
 				String link = element.attr("href");
-				link = link.replace(this.getMetadata().getBaseURL(), "");
+
+				if(this.getMetadata() != null){
+					link = link.replace(this.getMetadata().getBaseURL(), "");
+				}
 
 				if(link.startsWith("/")) {
 					links.add(link);
