@@ -31,8 +31,8 @@ $(document).ready(function() {
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
 		var ws = new WebSocket(location);
-	
 		ws.binaryType = 'arraybuffer';
+		
 		ws.onopen = function() {
 			
 			$("title").text(companyName);
@@ -43,6 +43,7 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
+	alert(JSON.stringify(data))
 	alert(data.data.length)
 	
 	var gunzip = new Zlib.Gunzip(data.data);
