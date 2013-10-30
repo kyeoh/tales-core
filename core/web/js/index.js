@@ -43,6 +43,7 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
+	alert(JSON.stringify(data))
 	alert(data.data.length)
 	
 	var gunzip = new Zlib.Gunzip(data.data);
