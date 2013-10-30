@@ -62,6 +62,8 @@ public class SocketServlet extends WebSocketHandler {
 					
 					bytes = new Deflate().deflate(bytes);
 					
+					System.out.println(bytes.length);
+					
 					socket.connection.sendMessage(bytes, 0, bytes.length);	
 					
 				}catch (IOException e){
