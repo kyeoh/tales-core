@@ -42,8 +42,7 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
-	alert("--" + data.data)
-	var c = new Uint8Array(data.data, 0, data.data.byteLength)
+	var c = new Uint8Array(data.data)
 	alert(c.byteOffset)
 	alert(c.length)
 	var gunzip = new Zlib.Gunzip(c.buffer);
