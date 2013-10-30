@@ -26,7 +26,7 @@ $(document).ready(function() {
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
 		var ws = new WebSocket(location);
 		ws.binaryType = 'blob';
-		
+		alert(1)
 		ws.onopen = function() {
 			
 			$("title").text(companyName);
