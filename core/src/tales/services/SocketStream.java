@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import tales.config.Config;
 import tales.config.Globals;
+import tales.utils.GZIP;
 
 
 
@@ -68,7 +69,9 @@ public class SocketStream {
 
 			if(!wait){
 				init();
-				connection.sendMessage(json.toString());
+				byte[] bytes = new GZIP().compresBytesToGzip(json.toString().getBytes());
+				//connection.sendMessage(json.toString());
+				connection.sendMessage(bytes, 0, bytes.length);
 			}
 
 		}catch(Exception e){
