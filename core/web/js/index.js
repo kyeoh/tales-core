@@ -21,12 +21,6 @@ $(document).ready(function() {
 	
 	$("h1").text(companyName);
 	
-	function uintToString(uintArray) {
-	    var encodedString = String.fromCharCode.apply(null, uintArray),
-	        decodedString = decodeURIComponent(escape(encodedString));
-	    return decodedString;
-	}
-	
 	function start(){
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
@@ -42,15 +36,10 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
-	var c = new Uint8Array(data.data)
 	
-	var inflate = new Zlib.RawInflate(c);
-	var plain = inflate.decompress();
+		alert(data.data.byteLength)
+		alert(data.data.bytesLength)
 	
-	alert("$" + plain.length)
-	alert(uintToString(plain))
-	alert(uintToString(plain).length)
-
 			if(!paused){
 			
 				//data = JSON.parse(data.data);
