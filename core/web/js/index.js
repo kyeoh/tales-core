@@ -49,7 +49,7 @@ $(document).ready(function() {
 	alert("----")
 	var plain = gunzip.decompress();
 	
-	alert(plain.length)
+	alert("$" + plain.length)
 	alert(uintToString(plain))
 	alert(uintToString(plain).length)
 
