@@ -37,13 +37,12 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
-	alert(1)
 	alert(data.data)
 	
 	var gunzip = new Zlib.Gunzip(compressed);
+		alert(3)
 	var plain = gunzip.decompress();
 	
-	alert(3)
 	alert(plain)
 
 			if(!paused){
