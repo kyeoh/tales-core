@@ -43,7 +43,7 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
-	alert(data.data)
+	alert(data.data.length)
 	
 	var gunzip = new Zlib.Gunzip(data.data);
 		alert(3)
