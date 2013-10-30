@@ -67,7 +67,7 @@ public class SocketServlet extends WebSocketHandler {
 					socket.connection.sendMessage(bytes, 0, bytes.length);	
 					
 				}catch (IOException e){
-					broadcast.remove(socket);
+					//broadcast.remove(socket);
 					e.printStackTrace();
 				}
 			}
