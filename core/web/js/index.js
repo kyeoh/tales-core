@@ -36,7 +36,7 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
-	alert(1)
+	alert(data.data)
 	var result = JSInflate.inflate(data.data);
 		alert(result)
 		alert(data.data.bytesLength)
