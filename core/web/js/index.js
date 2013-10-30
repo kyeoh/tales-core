@@ -42,6 +42,7 @@ $(document).ready(function() {
 	var gunzip = new Zlib.Gunzip(data.data);
 		alert(3)
 	var plain = gunzip.decompress();
+	plain = String.fromCharCode.apply(null, plain);
 	
 	alert(plain)
 
