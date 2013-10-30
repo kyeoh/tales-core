@@ -50,6 +50,10 @@ $(document).ready(function() {
 	alert("----")
 	var plain = gunzip.decompress();
 	
+	var inflate = new Zlib.Inflate(c);
+	var output = inflate.decompress();
+	alert("o " + output)
+	
 	alert("$" + plain.length)
 	alert(uintToString(plain))
 	alert(uintToString(plain).length)
