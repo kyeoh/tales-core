@@ -39,7 +39,7 @@ $(document).ready(function() {
 	alert(1)
 	alert(JSON.stringify(data))
 	var result = JSInflate.inflate(data);
-		alert(data.data.byteLength)
+		alert(result)
 		alert(data.data.bytesLength)
 	
 			if(!paused){
