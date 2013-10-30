@@ -31,7 +31,7 @@ public class SocketServlet extends WebSocketHandler {
 
 
 
-	class SocketController implements WebSocket.OnTextMessage {
+	class SocketController implements WebSocket.OnBinaryMessage {
 
 		private Connection connection;
 
@@ -41,12 +41,12 @@ public class SocketServlet extends WebSocketHandler {
 		}
 
 		@Override
-		public void onMessage(String data) {
+		public void onMessage(byte[] bytes, int offset, int length) {
 
 			for(SocketController socket : broadcast){
 				
 				try{
-					socket.connection.sendMessage(data);	
+					socket.connection.sendMessage(bytes, offset, length);	
 				}catch (IOException e){
 					broadcast.remove(socket);
 					e.printStackTrace();
