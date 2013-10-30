@@ -50,7 +50,7 @@ $(document).ready(function() {
 	var plain = gunzip.decompress();
 	
 	alert(plain.length)
-	alert(uintToString(plain))
+	alert(plain)
 	alert(uintToString(plain).length)
 
 			if(!paused){
