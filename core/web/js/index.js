@@ -39,7 +39,7 @@ $(document).ready(function() {
 	
 	alert(data.data)
 	
-	var gunzip = new Zlib.Gunzip(compressed);
+	var gunzip = new Zlib.Gunzip(data.data);
 		alert(3)
 	var plain = gunzip.decompress();
 	
