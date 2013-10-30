@@ -40,12 +40,11 @@ $(document).ready(function() {
 	alert(1)
 	alert(data.data)
 	
-	var inflate = new Zlib.Inflate(data.data);
+	var gunzip = new Zlib.Gunzip(compressed);
+	var plain = gunzip.decompress();
 	
-	alert(2)
-	var output = inflate.decompress();
 	alert(3)
-	alert(output)
+	alert(plain)
 
 			if(!paused){
 			
