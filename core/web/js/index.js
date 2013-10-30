@@ -45,7 +45,7 @@ $(document).ready(function() {
 	
 	alert(JSON.stringify(data))
 	alert(data.data.byteLength)
-	alert(data.data.offset)
+	alert(data.data.byteOffset)
 	
 	var gunzip = new Zlib.Gunzip(data.data);
 		alert(3)
