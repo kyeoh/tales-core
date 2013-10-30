@@ -36,8 +36,7 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
-	alert(1)
-	alert(data.data)
+	alert(JSON.stringify(data))
 	alert(JSInflate.inflate(data.data));
 	var result = JSInflate.inflate(data.data);
 		alert(result)
