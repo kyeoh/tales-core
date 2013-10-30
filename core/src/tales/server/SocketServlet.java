@@ -12,6 +12,7 @@ import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
 import tales.services.Logger;
+import tales.utils.GZIP;
 
 
 
@@ -48,8 +49,9 @@ public class SocketServlet extends WebSocketHandler {
 			for(SocketController socket : broadcast){
 				
 				try{
-					Logger.log(new Throwable(), offset + " - " + length);
-					socket.connection.sendMessage(bytes, offset, length);	
+					System.out.println(offset + " - " + length);
+					System.out.println(new GZIP().decompresGzipToBytes(bytes));
+					socket.connection.sendMessage(bytes, 0, bytes.length);	
 				}catch (IOException e){
 					broadcast.remove(socket);
 					e.printStackTrace();
