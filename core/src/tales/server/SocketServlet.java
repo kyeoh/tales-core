@@ -3,20 +3,15 @@ package tales.server;
 
 
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
 import tales.services.Logger;
-import tales.utils.Deflate;
-import tales.utils.GZIP;
 
 
 
@@ -53,21 +48,10 @@ public class SocketServlet extends WebSocketHandler {
 			for(SocketController socket : broadcast){
 				
 				try{
-					
-					InputStream is = new ByteArrayInputStream(bytes); 
-					bytes = IOUtils.toByteArray(is);
-					bytes = new GZIP().decompresGzipToBytes(bytes);
-						
-					System.out.println(new String(bytes, "UTF-8"));
-					
-					bytes = new Deflate().deflate(bytes);
-					
-					System.out.println(bytes.length);
-					
-					socket.connection.sendMessage(bytes, 0, bytes.length);	
-					
+					Logger.log(new Throwable(), offset + " - " + length);
+					socket.connection.sendMessage(bytes, offset, length);	
 				}catch (IOException e){
-					//broadcast.remove(socket);
+					broadcast.remove(socket);
 					e.printStackTrace();
 				}
 			}
