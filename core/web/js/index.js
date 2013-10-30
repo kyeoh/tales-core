@@ -43,9 +43,10 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
-	alert(JSON.stringify(data.data))
-	alert(data.data.byteLength)
-	alert(data.data.byteOffset)
+	var content = new Int8Array(data.data)
+	alert(content)
+	alert(content.byteLength)
+	alert(content.byteOffset)
 	
 	var gunzip = new Zlib.Gunzip(data.data);
 	var plain = gunzip.decompress();
