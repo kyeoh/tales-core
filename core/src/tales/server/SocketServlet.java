@@ -54,7 +54,7 @@ public class SocketServlet extends WebSocketHandler {
 				
 				try{
 					
-					InputStream is = new ByteArrayInputStream(bytes, offset, length); 
+					InputStream is = new ByteArrayInputStream(bytes); 
 					bytes = IOUtils.toByteArray(is);
 					bytes = new GZIP().decompresGzipToBytes(bytes);
 						
