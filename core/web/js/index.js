@@ -36,7 +36,7 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
-	alert(data);
+	alert(data.data);
 
 			if(!paused){
 			
