@@ -45,7 +45,7 @@ $(document).ready(function() {
 	var c = new Uint8Array(data.data)
 	alert(c.byteOffset)
 	alert(c.length)
-	var gunzip = new Zlib.Gunzip(c.buffer);
+	var gunzip = new Zlib.Gunzip(c);
 	var plain = gunzip.decompress();
 	
 	alert(plain.length)
