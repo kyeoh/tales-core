@@ -43,16 +43,9 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	var c = new Uint8Array(data.data)
-	alert(c.byteOffset)
-	alert(c.length)
-	alert(c.buffer)
-	var gunzip = new Zlib.Gunzip(c);
-	alert("----")
-	var plain = gunzip.decompress();
 	
-	var inflate = new Zlib.Inflate(c);
-	var output = inflate.decompress();
-	alert("o " + output)
+	var inflate = new Zlib.RawInflate(c);
+	var plain = inflate.decompress();
 	
 	alert("$" + plain.length)
 	alert(uintToString(plain))
