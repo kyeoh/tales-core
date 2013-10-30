@@ -31,7 +31,7 @@ $(document).ready(function() {
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
 		var ws = new WebSocket(location);
-		ws.binaryType = 'blob';
+		ws.binaryType = 'arraybuffer';
 		
 		ws.onopen = function() {
 			
@@ -44,7 +44,7 @@ $(document).ready(function() {
         ws.onmessage = function(data) {
 	
 	alert(JSON.stringify(data))
-	alert(data.data.length)
+	alert(data.data.byteLength)
 	
 	var gunzip = new Zlib.Gunzip(data.data);
 		alert(3)
