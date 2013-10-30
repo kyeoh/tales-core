@@ -24,9 +24,8 @@ $(document).ready(function() {
 	function start(){
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
-		var ws = new WebSocket(location);
-		ws.binaryType = 'blob';
-		
+		var ws = $.WebSocket(location);
+	
 		ws.onopen = function() {
 			
 			$("title").text(companyName);
@@ -36,13 +35,7 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
-	alert(JSON.stringify(data))
-	alert(String.fromCharCode.apply(null, new Uint16Array(data.data)));
-	alert(RawDeflate.inflate(data.data));
-	var result = JSInflate.inflate(data.data);
-		alert(result)
-		alert(data.data.bytesLength)
-	
+
 			if(!paused){
 			
 				//data = JSON.parse(data.data);

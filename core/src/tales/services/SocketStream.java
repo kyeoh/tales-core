@@ -70,7 +70,7 @@ public class SocketStream {
 
 			if(!wait){
 				init();
-				byte[] bytes = new Deflate().deflate(json.toString().getBytes());
+				byte[] bytes = new GZIP().compresBytesToGzip(json.toString().getBytes());
 				connection.sendMessage(bytes, 0, bytes.length);
 			}
 
