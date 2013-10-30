@@ -52,12 +52,15 @@ public class SocketServlet extends WebSocketHandler {
 			for(SocketController socket : broadcast){
 				
 				try{
+					
 					InputStream is = new ByteArrayInputStream(bytes, offset, length); 
 					bytes = IOUtils.toByteArray(is);
+					bytes = new GZIP().decompresGzipToBytes(bytes);
 					
-					System.out.println(offset + " - " + length);
-					System.out.println(new GZIP().decompresGzipToBytes(bytes));
+					System.out.println(new String(bytes, "UTF-8"));
+					
 					socket.connection.sendMessage(bytes, 0, bytes.length);	
+					
 				}catch (IOException e){
 					broadcast.remove(socket);
 					e.printStackTrace();
