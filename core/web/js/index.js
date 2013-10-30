@@ -35,7 +35,14 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
-	alert(data.toString())
+	
+	alert(1)
+	alert(data)
+	
+	var inflate = new Zlib.Inflate(compressData);
+	var output = inflate.decompress();
+	
+	alert(output)
 
 			if(!paused){
 			
