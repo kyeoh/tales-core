@@ -46,6 +46,7 @@ $(document).ready(function() {
 	alert(c.byteOffset)
 	alert(c.length)
 	var gunzip = new Zlib.Gunzip(c);
+	alert("----")
 	var plain = gunzip.decompress();
 	
 	alert(plain.length)
