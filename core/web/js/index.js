@@ -35,6 +35,8 @@ $(document).ready(function() {
 		};
 		
         ws.onmessage = function(data) {
+	alert(1)
+	alert(data)
 
 			if(!paused){
 			
