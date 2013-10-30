@@ -43,10 +43,10 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
-	var c = new Int8Array(data.data)
+	var c = new Uint8Array(data.data)
 	alert(c.byteOffset)
 	alert(c.length)
-	var gunzip = new Zlib.Gunzip(c.buffer);
+	var gunzip = nn(c.buffer);
 	var plain = gunzip.decompress();
 	
 	alert(plain.length)
