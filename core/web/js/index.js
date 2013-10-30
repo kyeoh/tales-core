@@ -38,7 +38,7 @@ $(document).ready(function() {
         ws.onmessage = function(data) {
 	alert(1)
 	alert(data.data)
-	alert(JSInflate.inflate(data.data));
+	alert(JSInflate.inflate(data.data.buffer));
 	var result = JSInflate.inflate(data.data);
 		alert(result)
 		alert(data.data.bytesLength)
