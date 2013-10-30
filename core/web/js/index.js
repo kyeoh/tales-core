@@ -24,7 +24,7 @@ $(document).ready(function() {
 	function start(){
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
-		var ws = $.WebSocket(location);
+		var ws = new WebSocket(location);
 	
 		ws.binaryType = 'arraybuffer';
 		ws.onopen = function() {
