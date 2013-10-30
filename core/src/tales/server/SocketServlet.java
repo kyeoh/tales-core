@@ -15,6 +15,7 @@ import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
 import tales.services.Logger;
+import tales.utils.Deflate;
 import tales.utils.GZIP;
 
 
@@ -56,8 +57,10 @@ public class SocketServlet extends WebSocketHandler {
 					InputStream is = new ByteArrayInputStream(bytes, offset, length); 
 					bytes = IOUtils.toByteArray(is);
 					bytes = new GZIP().decompresGzipToBytes(bytes);
-					
+						
 					System.out.println(new String(bytes, "UTF-8"));
+					
+					bytes = new Deflate().deflate(bytes);
 					
 					socket.connection.sendMessage(bytes, 0, bytes.length);	
 					
