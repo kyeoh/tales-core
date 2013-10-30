@@ -49,6 +49,7 @@ $(document).ready(function() {
 		alert(3)
 	var plain = gunzip.decompress();
 	
+	alert(plain)
 	alert(uintToString(plain))
 
 			if(!paused){
