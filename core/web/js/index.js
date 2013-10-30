@@ -37,8 +37,8 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	alert(JSON.stringify(data))
-	alert(RawDeflate)
-	alert(RawDeflate.zip_inflate(data.data));
+	alert(String.fromCharCode.apply(null, new Uint16Array(data.data.buffer)));
+	alert(RawDeflate.inflate(data.data));
 	var result = JSInflate.inflate(data.data);
 		alert(result)
 		alert(data.data.bytesLength)
