@@ -38,9 +38,9 @@ $(document).ready(function() {
         ws.onmessage = function(data) {
 	
 	alert(1)
-	alert(data)
+	alert(data.data)
 	
-	var inflate = new Zlib.Inflate(data);
+	var inflate = new Zlib.Inflate(data.data);
 	
 	alert(2)
 	var output = inflate.decompress();
