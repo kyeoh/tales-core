@@ -49,15 +49,22 @@ public class SocketServlet extends WebSocketHandler {
 		public void onMessage(byte[] bytes, int offset, int length) {
 
 			for(SocketController socket : broadcast){
-				
+
 				try{
-					
-					InputStream is = new ByteArrayInputStream(bytes, offset, length); 
-                    bytes = IOUtils.toByteArray(is);
-                    bytes = new GZIP().decompresGzipToBytes(bytes);
-                                        
+
+					try{
+						
+						InputStream is = new ByteArrayInputStream(bytes, offset, length); 
+						
+						bytes = IOUtils.toByteArray(is);
+						bytes = new GZIP().decompresGzipToBytes(bytes);
+						
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+
 					socket.connection.sendMessage(new String(bytes, "UTF-8"));
-					
+
 				}catch (IOException e){
 					broadcast.remove(socket);
 					e.printStackTrace();
