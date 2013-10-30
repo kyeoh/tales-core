@@ -21,6 +21,12 @@ $(document).ready(function() {
 	
 	$("h1").text(companyName);
 	
+	function uintToString(uintArray) {
+	    var encodedString = String.fromCharCode.apply(null, uintArray),
+	        decodedString = decodeURIComponent(escape(encodedString));
+	    return decodedString;
+	}
+	
 	function start(){
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
@@ -42,9 +48,8 @@ $(document).ready(function() {
 	var gunzip = new Zlib.Gunzip(data.data);
 		alert(3)
 	var plain = gunzip.decompress();
-	plain = String.fromCharCode.apply(null, plain);
 	
-	alert(plain)
+	alert(uintToString(plain))
 
 			if(!paused){
 			
