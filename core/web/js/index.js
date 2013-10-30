@@ -51,6 +51,7 @@ $(document).ready(function() {
 	
 	alert(plain)
 	alert(uintToString(plain))
+	alert(uintToString(plain).length)
 
 			if(!paused){
 			
