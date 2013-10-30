@@ -43,6 +43,7 @@ $(document).ready(function() {
 		
         ws.onmessage = function(data) {
 	
+	alert(1)
 	alert(JSON.stringify(data))
 	alert(data.data.length)
 	
