@@ -40,8 +40,10 @@ $(document).ready(function() {
 	alert(data)
 	
 	var inflate = new Zlib.Inflate(data);
-	var output = inflate.decompress();
 	
+	alert(2)
+	var output = inflate.decompress();
+	alert(3)
 	alert(output)
 
 			if(!paused){
