@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
+import tales.utils.GZIP;
+
 
 
 
@@ -46,7 +48,10 @@ public class SocketServlet extends WebSocketHandler {
 			for(SocketController socket : broadcast){
 				
 				try{
-					socket.connection.sendMessage(bytes, offset, length);	
+					
+					bytes = new GZIP().decompresGzipToBytes(bytes);
+					socket.connection.sendMessage(new String(bytes, "UTF-8"));	
+					
 				}catch (IOException e){
 					broadcast.remove(socket);
 					e.printStackTrace();
