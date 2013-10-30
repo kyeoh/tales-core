@@ -3,11 +3,14 @@ package tales.server;
 
 
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
@@ -49,7 +52,10 @@ public class SocketServlet extends WebSocketHandler {
 				
 				try{
 					
-					bytes = new GZIP().decompresGzipToBytes(bytes);
+					InputStream is = new ByteArrayInputStream(bytes); 
+                    bytes = IOUtils.toByteArray(is);
+                    bytes = new GZIP().decompresGzipToBytes(bytes);
+                    
 					socket.connection.sendMessage(new String(bytes, "UTF-8"));
 					
 				}catch (IOException e){
