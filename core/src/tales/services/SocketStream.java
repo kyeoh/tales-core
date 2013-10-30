@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import tales.config.Config;
 import tales.config.Globals;
+import tales.utils.Deflate;
 import tales.utils.GZIP;
 
 
@@ -69,8 +70,7 @@ public class SocketStream {
 
 			if(!wait){
 				init();
-				byte[] bytes = new GZIP().compresBytesToGzip(json.toString().getBytes());
-				//connection.sendMessage(json.toString());
+				byte[] bytes = new Deflate().deflate(json.toString().getBytes());
 				connection.sendMessage(bytes, 0, bytes.length);
 			}
 
