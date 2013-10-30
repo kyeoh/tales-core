@@ -39,7 +39,7 @@ $(document).ready(function() {
 	alert(1)
 	alert(data)
 	
-	var inflate = new Zlib.Inflate(compressData);
+	var inflate = new Zlib.Inflate(data);
 	var output = inflate.decompress();
 	
 	alert(output)
