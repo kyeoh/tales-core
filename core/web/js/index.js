@@ -46,11 +46,11 @@ $(document).ready(function() {
 	var c = new Uint8Array(data.data)
 	alert(c.byteOffset)
 	alert(c.length)
-	var gunzip = nn(c.buffer);
+	var gunzip = new Zlib.Gunzip(c.buffer);
 	var plain = gunzip.decompress();
 	
 	alert(plain.length)
-	alert(plain)
+	alert(uintToString(plain))
 	alert(uintToString(plain).length)
 
 			if(!paused){
