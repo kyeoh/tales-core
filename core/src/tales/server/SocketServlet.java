@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
+import tales.services.Logger;
+
 
 
 
@@ -46,6 +48,7 @@ public class SocketServlet extends WebSocketHandler {
 			for(SocketController socket : broadcast){
 				
 				try{
+					Logger.log(new Throwable(), offset + " - " + length);
 					socket.connection.sendMessage(bytes, offset, length);	
 				}catch (IOException e){
 					broadcast.remove(socket);
