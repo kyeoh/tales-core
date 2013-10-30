@@ -54,11 +54,7 @@ public class SocketServlet extends WebSocketHandler {
 				try{
 					
 					InputStream is = new ByteArrayInputStream(bytes, offset, length); 
-					bytes = IOUtils.toByteArray(is);
-					bytes = new GZIP().decompresGzipToBytes(bytes);
-					
-					System.out.println(new String(bytes, "UTF-8"));
-					
+					bytes = IOUtils.toByteArray(is);					
 					socket.connection.sendMessage(bytes, 0, bytes.length);	
 					
 				}catch (IOException e){
