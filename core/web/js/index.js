@@ -33,10 +33,8 @@ $(document).ready(function() {
 			$("body").css("background-color", "#CCC");
 			
 		};
-		alert(1)
+		
         ws.onmessage = function(data) {
-
-alert(data.data);
 
 			if(!paused){
 			
