@@ -16,7 +16,6 @@ import org.json.JSONObject;
 
 import tales.config.Config;
 import tales.config.Globals;
-import tales.utils.Deflate;
 import tales.utils.GZIP;
 
 
