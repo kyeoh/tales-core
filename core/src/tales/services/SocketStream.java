@@ -69,8 +69,7 @@ public class SocketStream {
 
 			if(!wait){
 				init();
-				byte[] bytes = new GZIP().compresBytesToGzip(json.toString().getBytes());
-				connection.sendMessage(bytes, 0, bytes.length);
+				connection.sendMessage(json.toString());
 			}
 
 		}catch(Exception e){

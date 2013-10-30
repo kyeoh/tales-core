@@ -3,18 +3,15 @@ package tales.server;
 
 
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
-import tales.utils.GZIP;
+import tales.services.Logger;
 
 
 
@@ -36,7 +33,7 @@ public class SocketServlet extends WebSocketHandler {
 
 
 
-	class SocketController implements WebSocket.OnBinaryMessage {
+	class SocketController implements WebSocket.OnTextMessage {
 
 		private Connection connection;
 
@@ -46,25 +43,12 @@ public class SocketServlet extends WebSocketHandler {
 		}
 
 		@Override
-		public void onMessage(byte[] bytes, int offset, int length) {
+		public void onMessage(String content) {
 
 			for(SocketController socket : broadcast){
-
+				
 				try{
-
-					try{
-						
-						InputStream is = new ByteArrayInputStream(bytes, offset, length); 
-						
-						bytes = IOUtils.toByteArray(is);
-						bytes = new GZIP().decompresGzipToBytes(bytes);
-						
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-
-					socket.connection.sendMessage(new String(bytes, "UTF-8"));
-
+					socket.connection.sendMessage(content);	
 				}catch (IOException e){
 					broadcast.remove(socket);
 					e.printStackTrace();
