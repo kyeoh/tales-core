@@ -25,7 +25,7 @@ $(document).ready(function() {
 	
 		var location = document.location.toString().replace('http://','ws://').replace('https://', 'wss://').replace("#", "");
 		var ws = new WebSocket(location);
-		ws.binaryType = 'arraybuffer';
+		ws.binaryType = 'blob';
 		
 		ws.onopen = function() {
 			
@@ -38,6 +38,7 @@ $(document).ready(function() {
         ws.onmessage = function(data) {
 	alert(1)
 	alert(JSON.stringify(data))
+	var result = JSInflate.inflate(data);
 		alert(data.data.byteLength)
 		alert(data.data.bytesLength)
 	
