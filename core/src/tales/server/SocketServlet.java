@@ -14,9 +14,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
-import tales.services.Logger;
-import tales.utils.GZIP;
-
 
 
 
