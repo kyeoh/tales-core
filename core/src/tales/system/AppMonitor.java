@@ -89,8 +89,7 @@ public class AppMonitor{
 
 
 				// print
-				String path = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();;
-				Logger.log(new Throwable(), path + " -freeMem: " + TalesSystem.getFreeMemory() + " -memUsed: " + TalesSystem.getMemoryUsage() +  " -serverCPUAvg: " +  cpuAverage.getAverage() + " -uptime: " + totalTime + " secs -branch: " + TalesSystem.getFolderGitBranchName(path));
+				Logger.log(new Throwable(), "-freeMem: " + TalesSystem.getFreeMemory() + " -memUsed: " + TalesSystem.getMemoryUsage() +  " -serverCPUAvg: " +  cpuAverage.getAverage() + " -uptime: " + totalTime + " secs -branch: " + TalesSystem.getFolderGitBranchName("~/tales-templates/"));
 
 
 				// loop

@@ -22,7 +22,7 @@ public class Globals {
 	public static String DB_RESTORE_TEMP_DIR             = System.getProperty("user.home") + "/tales-tmp/db-restores";
 	
 	public static String BACKUP_S3_BUCKET_NAME           = "tales-backups";
-	public static String FILES_S3_BUCKET_NAME            = "tales-files-";
+	public static String FILES_S3_BUCKET_NAME            = "tales-htmls";
 	
 	public static int GIT_SYNC_REFESH_INTERVAL           = 5000;
 	public static int DOWNLOADER_MAX_TIMEOUT_INTERVAL    = 120000;

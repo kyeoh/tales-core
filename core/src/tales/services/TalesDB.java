@@ -130,7 +130,7 @@ public class TalesDB {
 					for(final String document : metadata.getRequiredDocuments()){
 
 						if(!new TalesDB(threads, connMetadata, metadata).documentExists(document)){
-							Logger.log(new Throwable(), "-adding: " + document);
+							Logger.log(new Throwable(), "-adding requiredDocuments: " + document);
 							new TalesDB(threads, connMetadata, metadata).addDocument(document);
 						}
 
@@ -138,9 +138,9 @@ public class TalesDB {
 
 				}else if(metadata.getRequiredDocuments() == null || metadata.getRequiredDocuments().size() == 0){
 
-					if(!new TalesDB(threads, connMetadata, metadata).documentExists("/")){
-						Logger.log(new Throwable(), "-adding: /");
-						new TalesDB(threads, connMetadata, metadata).addDocument("/");
+					if(metadata.getBaseURL() != null && !new TalesDB(threads, connMetadata, metadata).documentExists(metadata.getBaseURL())){
+						Logger.log(new Throwable(), "-adding: " + metadata.getBaseURL());
+						new TalesDB(threads, connMetadata, metadata).addDocument(metadata.getBaseURL());
 					}
 
 				}

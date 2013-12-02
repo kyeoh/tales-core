@@ -3,6 +3,7 @@ package tales.scrapers;
 
 
 
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +83,7 @@ public class AttributeScraper{
 
 				// adds tasks
 				if((tasksDB.count() + taskWorker.getTasksRunning().size()) < Globals.MIN_TASKS){
-					
+
 					TalesDBHelper.waitAndFinish(templateConfig);
 
 					ArrayList<Task> tasks = getTasks(loopReferenceTime, attributeName, query);
@@ -260,7 +261,8 @@ public class AttributeScraper{
 			String namespace = null;
 			if(cmd.hasOption("namespace")){
 				namespace = cmd.getOptionValue("namespace");
-			}else{
+
+			}else if(template.getMetadata() != null){
 				namespace = template.getMetadata().getNamespace();
 			}
 
@@ -268,8 +270,13 @@ public class AttributeScraper{
 			// baseURL
 			String baseURL = null;
 			if(cmd.hasOption("baseURL")){
+
 				baseURL = cmd.getOptionValue("baseURL");
-				
+
+				if(namespace == null){
+					namespace = new URL(baseURL).getAuthority().replace(".", "_");
+				}
+
 			}else if(template != null && template.getMetadata() != null){
 				baseURL = template.getMetadata().getBaseURL();
 			}
@@ -288,7 +295,7 @@ public class AttributeScraper{
 				requiredDocuments = new ArrayList<String>(Arrays.asList(data.split(",")));
 
 			}else{
-				
+
 				if(template.getMetadata() != null){
 					requiredDocuments = template.getMetadata().getRequiredDocuments();	
 				}else{
@@ -302,6 +309,12 @@ public class AttributeScraper{
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 
 				public void run() {
+
+					try{
+						ProcessManager.finished();
+					}catch(Exception e1){
+						new TalesException(new Throwable(), e1);	
+					}
 
 					if(taskWorker != null){
 						taskWorker.stop();
@@ -339,9 +352,18 @@ public class AttributeScraper{
 
 
 		}catch(Exception e){
+
 			AppMonitor.stop();
+
+			try{
+				ProcessManager.finished();
+			}catch(Exception e1){
+				new TalesException(new Throwable(), e1);	
+			}
+
 			new TalesException(new Throwable(), e);	
 			System.exit(0);
+
 		}
 
 	}

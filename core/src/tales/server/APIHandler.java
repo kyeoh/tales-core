@@ -5,6 +5,7 @@ package tales.server;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import tales.config.Config;
 import tales.config.Globals;
+import tales.scrapers.ListScraper;
 import tales.services.Download;
 import tales.services.Log;
 import tales.services.Logger;
@@ -35,6 +37,11 @@ public class APIHandler extends AbstractHandler{
 
 
 
+	private ListScraper listScraper = new ListScraper();
+	
+	
+	
+	
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
 
@@ -53,6 +60,10 @@ public class APIHandler extends AbstractHandler{
 			start(request, response);
 
 
+		}else if(target.startsWith("/queue")){
+			queue(request, response);
+
+
 		}else if(target.startsWith("/new")){
 			newServer(request, response);
 
@@ -68,7 +79,7 @@ public class APIHandler extends AbstractHandler{
 		}else if(target.startsWith("/kill")){
 			kill(target.replace("/kill ", ""));
 
-			
+
 		}else if(target.startsWith("/errors")){
 			errors(response);
 
@@ -84,10 +95,10 @@ public class APIHandler extends AbstractHandler{
 		}else if(target.startsWith("/finished")){
 			finished(request, response);
 
-			
+
 		}else if(target.startsWith("/logs")){
 			getLog(request, response);
-			
+
 		}
 
 	}
@@ -127,6 +138,29 @@ public class APIHandler extends AbstractHandler{
 			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", process);
 			builder.start();
 
+
+		}catch(Exception e){
+			new TalesException(new Throwable(), e);
+		}
+
+	}
+
+
+
+
+	private void queue(HttpServletRequest request, HttpServletResponse response) {
+
+		try{
+
+			
+			String process = URLDecoder.decode(request.getParameter("process"), "UTF-8");
+			int processes = Integer.parseInt(request.getParameter("processes"));
+			
+			ArrayList<String> apiCalls = new ArrayList<String>();
+			apiCalls.add(process);
+			
+			listScraper.init(apiCalls, processes);
+			
 
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
@@ -252,7 +286,7 @@ public class APIHandler extends AbstractHandler{
 
 
 			Logger.log(new Throwable(), "KILL: killing pid: " + pid);
-			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", "kill -9 " + pid);
+			ProcessBuilder builder = new ProcessBuilder("/bin/sh", "-c", "kill " + pid);
 			builder.start();
 
 
@@ -376,12 +410,12 @@ public class APIHandler extends AbstractHandler{
 
 
 
-	
+
 	private void finished(HttpServletRequest request, HttpServletResponse response) {
 
 		try {
-			
-			
+
+
 			String tpid = request.getParameter("tpid");
 
 			// http response
@@ -396,20 +430,20 @@ public class APIHandler extends AbstractHandler{
 		} catch (Exception e) {
 			new TalesException(new Throwable(), e);
 		}
-		
+
 	}
-	
-	
-	
-	
+
+
+
+
 	private void getLog(HttpServletRequest request, HttpServletResponse response) {
 
 		try{
 
-			
+
 			int id = Integer.parseInt(request.getParameter("id"));
 			Log log = LogsDB.getLog(id);
-			
+
 			JSONObject obj = new JSONObject();
 			obj.put("id", log.getId());
 			obj.put("publicDNS", log.getPublicDNS());
@@ -423,12 +457,12 @@ public class APIHandler extends AbstractHandler{
 			response.setContentType("application/json");
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().println(obj);
-			
+
 
 		} catch (Exception e) {
 			new TalesException(new Throwable(), e);
 		}
 
 	}
-	
+
 }

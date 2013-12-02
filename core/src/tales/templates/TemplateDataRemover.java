@@ -23,6 +23,13 @@ public class TemplateDataRemover {
 
 
 	public static void remove(TemplateInterface template){
+		remove(template.getConnectionMetadata(), template.getMetadata());
+	}
+	
+	
+	
+	
+	public static void remove(TemplateConnectionInterface connectionMetadata, TemplateMetadataInterface metadata) {
 		
 		
 		Logger.log(new Throwable(), "removing data");
@@ -30,7 +37,7 @@ public class TemplateDataRemover {
 		
 		// DB
 		try{
-			TalesDB.deleteAll(template.getConnectionMetadata(), template.getMetadata());
+			TalesDB.deleteAll(connectionMetadata, metadata);
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}
@@ -38,7 +45,7 @@ public class TemplateDataRemover {
 
 		// tasks
 		try{
-			TasksDB.deleteTaskTablesFromDomain(template.getConnectionMetadata(), template.getMetadata());
+			TasksDB.deleteTaskTablesFromDomain(connectionMetadata, metadata);
 		}catch(Exception e){
 			new TalesException(new Throwable(), e);
 		}

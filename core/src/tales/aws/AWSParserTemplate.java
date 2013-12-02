@@ -20,15 +20,15 @@ public abstract class AWSParserTemplate extends TemplateAbstract{
 	@Override
 	public void run(){	
 
-		String url = getDownloadURL(this.getMetadata(), this.getTask());
+		String url = this.getTask().getDocumentName();
 
 		try {	
 
 			S3 s3 = new S3();
 
-			if(s3.fileExists(this.getMetadata(), url)){
+			if(s3.fileExists(url)){
 
-				byte[] bytes = s3.getFile(this.getMetadata(), url);
+				byte[] bytes = s3.getFile(url);
 				bytes = new GZIP().decompresGzipToBytes(bytes);
 
 				process(this.getTalesDB(), this.getTask(), url, bytes);

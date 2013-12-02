@@ -102,22 +102,6 @@ public abstract class TemplateAbstract implements TemplateInterface, Runnable{
 
 
 
-	public String getDownloadURL(TemplateMetadataInterface metadata, Task task){
-
-		String baseURL = metadata.getBaseURL();
-		if(baseURL == null){
-			baseURL = "";
-		}
-
-		String url = baseURL + task.getDocumentName();
-
-		return url;
-
-	}
-
-
-
-
 	@Override
 	public abstract void run();
 

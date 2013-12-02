@@ -27,6 +27,8 @@ public class DBUtils {
 
 	public static void checkDatabase(String host, int port, String username, String password, String dbName) throws Exception{
 
+		dbName = dbName.toLowerCase();
+		
 		try {
 
 
@@ -61,7 +63,8 @@ public class DBUtils {
 
 	private static boolean databaseExists(Connection conn, String dbName) throws TalesException{
 
-
+		dbName = dbName.toLowerCase();
+		
 		boolean exists          = false;
 		Statement statement     = null;
 		ResultSet rs            = null;
@@ -94,6 +97,8 @@ public class DBUtils {
 
 	private static void createDatabase(Connection conn, String dbName) throws TalesException{
 
+		dbName = dbName.toLowerCase();
+		
 		try {
 
 
@@ -204,9 +209,8 @@ public class DBUtils {
 
 
 
-
-	public static ArrayList<String> getLocalTalesDBNames() throws TalesException{
-
+	public static ArrayList<String> getTalesDBNamesWithHost(String host) throws TalesException{
+		
 		try{
 
 
@@ -215,7 +219,7 @@ public class DBUtils {
 
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection("jdbc:mysql://"+
-					"localhost:"+Config.getDataDBPort()+"/"+
+					host+":"+Config.getDataDBPort()+"/"+
 					"mysql" +
 					"?user="+Config.getDataDBUsername() +
 					"&password="+Config.getDataDBPassword() +
@@ -247,14 +251,30 @@ public class DBUtils {
 		}catch(final Exception e){
 			throw new TalesException(new Throwable(), e);
 		}
-
+		
+	}
+	
+	
+	
+	
+	public static ArrayList<String> getLocalTalesDBNames() throws TalesException{
+		return getTalesDBNamesWithHost("localhost");
 	}
 
 
 
-
+	
+	public static ArrayList<String> getTalesDBNames() throws TalesException{
+		return getTalesDBNamesWithHost(Config.getDataDBHost());
+	}
+	
+	
+	
+	
 	public static final ArrayList<String> getTableNames(TemplateConnectionInterface connMetadata, String dbName) throws TalesException{
 
+		dbName = dbName.toLowerCase();
+		
 		try{
 
 
@@ -299,6 +319,8 @@ public class DBUtils {
 
 	public static int getTableCount(TemplateConnectionInterface connMetadata, String dbName, String tableName) throws TalesException{
 
+		dbName = dbName.toLowerCase();
+		
 		try{
 
 

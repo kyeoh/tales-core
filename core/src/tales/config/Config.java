@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 
 import tales.dirlistener.DirListenerObj;
 import tales.server.CloudProviderInterface;
+import tales.services.Logger;
 import tales.services.TalesException;
 import tales.system.TalesSystem;
 import tales.workers.FailoverAttempt;
@@ -76,10 +77,10 @@ public class Config{
 		load();
 		return json.getString("logDBPassword");
 	}
-	
-	
-	
-	
+
+
+
+
 	public static String getTemplatesJar() throws TalesException{
 		load();
 		return json.getString("templatesJar");
@@ -154,10 +155,10 @@ public class Config{
 				.getJSONObject("common")
 				.getInt("cacheSize");
 	}
-	
-	
-	
-	
+
+
+
+
 	public static ArrayList<FailoverAttempt> getFailoverAttemps() throws TalesException{
 		load();
 
@@ -188,7 +189,7 @@ public class Config{
 		load();
 
 		ArrayList<CloudProviderInterface> list = new ArrayList<CloudProviderInterface>();
-		
+
 		if(json.has("cloudProviders")){
 			for(int i = 0; i < json.getJSONArray("cloudProviders").size(); i++){
 
@@ -216,7 +217,7 @@ public class Config{
 		load();
 
 		ArrayList<String> list = new ArrayList<String>();
-		
+
 		if(json.has("gitSync")){
 			for(int i = 0; i < json.getJSONArray("gitSync").size(); i++){
 				list.add(json.getJSONArray("gitSync").getString(i));
@@ -233,7 +234,7 @@ public class Config{
 		load();
 
 		ArrayList<String> list = new ArrayList<String>();
-		
+
 		if(json.has("onStartCompile")){
 			for(int i = 0; i < json.getJSONArray("onStartCompile").size(); i++){
 				list.add(json.getJSONArray("onStartCompile").getString(i));
@@ -250,7 +251,7 @@ public class Config{
 		load();
 
 		ArrayList<DirListenerObj> list = new ArrayList<DirListenerObj>();
-		
+
 		if(json.has("dirListener")){
 			for(int i = 0; i < json.getJSONArray("dirListener").size(); i++){
 
@@ -276,7 +277,7 @@ public class Config{
 		load();
 
 		ArrayList<String> list = new ArrayList<String>();
-		
+
 		if(json.has("onStart")){
 			for(int i = 0; i < json.getJSONArray("onStart").size(); i++){
 				list.add(json.getJSONArray("onStart").getString(i));
@@ -292,10 +293,16 @@ public class Config{
 	private synchronized static void load(){
 
 		if(!inited){
-
+			
 			inited = true;
 			Loader loader = new Config().new Loader();
 			loader.run();
+			
+			try{
+				Logger.log(new Throwable(), "reading tales-config from " + TalesSystem.getFolderGitBranchName("~/tales-templates/") + ".json");
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 
 		}
 
@@ -309,7 +316,7 @@ public class Config{
 		public void run() {
 
 			try{
-				
+
 				File file = new File(Globals.CONFIG_FILE_DIR + "/" + TalesSystem.getFolderGitBranchName("~/tales-templates/") + ".json");
 				String data = FileUtils.readFileToString(file);
 				Config.json = (JSONObject) JSONSerializer.toJSON(data);

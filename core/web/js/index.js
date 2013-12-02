@@ -148,7 +148,7 @@ $(document).ready(function() {
 
 
 						// template log
-						if (classe != "AppMonitor" && classe != "TaskWorker" && classe.indexOf("Scraper") == -1 && json.data.indexOf("[ERROR START]") == -1){
+						if (classe != "AppMonitor" && classe != "TaskWorker" && json.data.indexOf("[ERROR START]") == -1){
 							logData[appDivName]["templateLog"] = (header + "\n" + logData[appDivName]["templateLog"]).substring(0, maxLogSize);;
 							$("#" + appDivName + " #templateLog").val(logData[appDivName]["templateLog"]);
 						}

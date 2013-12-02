@@ -208,7 +208,7 @@ public class Download {
 			}
 
 
-			if(url.contains("https://")){
+			if(url.startsWith("https://")){
 				disableSSLValidation();
 				conn = (HttpsURLConnection) new URL(url).openConnection();
 			}else{

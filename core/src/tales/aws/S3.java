@@ -13,7 +13,6 @@ import tales.services.Download;
 import tales.services.DownloadException;
 import tales.services.Logger;
 import tales.services.TalesException;
-import tales.templates.TemplateMetadataInterface;
 import tales.utils.GZIP;
 
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -36,11 +35,11 @@ public class S3 {
 
 
 
-	public void addTemplateDoc(TemplateMetadataInterface metadata, String filename, org.jsoup.nodes.Document doc) throws TalesException{
+	public void addTemplateDoc(String filename, org.jsoup.nodes.Document doc) throws TalesException{
 
 		try{
 
-			String bucketName = checkBucket(metadata);
+			String bucketName = checkBucket();
 
 			byte[] bytes = new GZIP().compresBytesToGzip(doc.html().getBytes());
 			InputStream stream = new ByteArrayInputStream(bytes);
@@ -59,11 +58,11 @@ public class S3 {
 
 
 
-	public void addBytes(TemplateMetadataInterface metadata, String filename, byte[] bytes) throws TalesException{
+	public void addBytes(String filename, byte[] bytes) throws TalesException{
 
 		try{
 
-			String bucketName = checkBucket(metadata);
+			String bucketName = checkBucket();
 
 			bytes = new GZIP().compresBytesToGzip(bytes);
 			InputStream stream = new ByteArrayInputStream(bytes);
@@ -82,11 +81,11 @@ public class S3 {
 	
 	
 	
-	public void downloadAndAddURL(TemplateMetadataInterface metadata, String filename, String url) throws DownloadException{
+	public void downloadAndAddURL(String filename, String url) throws DownloadException{
 
 		try{
 
-			String bucketName = checkBucket(metadata);
+			String bucketName = checkBucket();
 
 			byte[] uncompressBytes = new Download().getURLBytes(url).getBytes();
 			byte[] compressedBytes = new GZIP().compresBytesToGzip(uncompressBytes);
@@ -106,9 +105,9 @@ public class S3 {
 
 
 
-	public byte[] getFile(TemplateMetadataInterface metadata, String filename) throws Exception{
+	public byte[] getFile(String filename) throws Exception{
 
-		String bucketName = checkBucket(metadata);
+		String bucketName = checkBucket();
 		S3Object obj = s3.getObject(bucketName, filename);
 		return IOUtils.toByteArray(obj.getObjectContent());
 
@@ -117,9 +116,9 @@ public class S3 {
 
 
 
-	public boolean fileExists(TemplateMetadataInterface metadata, String filename) throws TalesException {
+	public boolean fileExists(String filename) throws TalesException {
 		
-		String bucketName = checkBucket(metadata);
+		String bucketName = checkBucket();
 		ObjectListing list = s3.listObjects(bucketName, filename);
 	    return list.getObjectSummaries().size() > 0;
 		
@@ -128,12 +127,13 @@ public class S3 {
 	
 	
 	
-	private synchronized static String checkBucket(TemplateMetadataInterface metadata) throws TalesException{
+	private synchronized static String checkBucket() throws TalesException{
 
 		try{
 
-			String bucketName = Globals.FILES_S3_BUCKET_NAME + metadata.getNamespace().replace("_", "-");
-
+			String bucketName = Globals.FILES_S3_BUCKET_NAME;
+			bucketName = bucketName.toLowerCase();
+			
 			if (s3 == null){
 
 				Logger.log(new Throwable(), "checking aws s3 bucket -bucketName: " + bucketName);

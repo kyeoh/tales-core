@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
-import tales.services.Logger;
-
 
 
 

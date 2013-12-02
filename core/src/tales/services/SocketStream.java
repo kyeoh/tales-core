@@ -16,7 +16,6 @@ import org.json.JSONObject;
 
 import tales.config.Config;
 import tales.config.Globals;
-import tales.utils.GZIP;
 
 
 
@@ -35,7 +34,6 @@ public class SocketStream {
 	private static synchronized void init() throws Exception{
 
 		if(connection == null){
-
 
 			URI uri = new URI("ws://" + Config.getDashbaordURL() + ":" + Config.getDashbaordPort());
 

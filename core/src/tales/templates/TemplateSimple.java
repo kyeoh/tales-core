@@ -18,7 +18,7 @@ public abstract class TemplateSimple extends TemplateAbstract{
 	@Override
 	public void run(){
 
-		String url = this.getDownloadURL(this.getMetadata(), this.getTask());
+		String url = this.getTask().getDocumentName();
 		
 		try {	
 			process(this.getTalesDB(), this.getTask(), url);	
